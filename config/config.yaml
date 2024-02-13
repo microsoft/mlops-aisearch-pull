@@ -1,0 +1,12 @@
+# Azure OpenAI configuration. 
+aoai_config:
+  aoai_api_base: ${AOAI_BASE_ENDPOINT}
+  aoai_api_type: azure
+  aoai_api_version: 2023-07-01-preview
+  aoai_api_key: ${AOAI_API_KEY}
+
+# Azure Cognitive Service config
+acs_config:
+  acs_api_base: ${ACS_BASE_ENDPOINT}
+  acs_api_version: 2023-07-01-preview
+  acs_api_key: ${ACS_API_KEY}
