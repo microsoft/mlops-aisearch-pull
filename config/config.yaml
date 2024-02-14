@@ -1,3 +1,8 @@
+# Subscription configuration.
+sub_config:
+  subscription_id: ${SUBSCRIPTION_ID}
+  resource_group_name: ${RESOURCE_GROUP_NAME}
+
 # Azure OpenAI configuration. 
 aoai_config:
   aoai_api_base: ${AOAI_BASE_ENDPOINT}

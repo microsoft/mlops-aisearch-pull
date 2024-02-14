@@ -399,3 +399,6 @@ FodyWeavers.xsd
 
 # environment variables
 .env
+
+# zip package
+*.zip
