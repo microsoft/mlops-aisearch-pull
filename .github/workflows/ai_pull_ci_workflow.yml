@@ -1,0 +1,14 @@
+---
+name: CI Workflow for AI Search Components
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    branches:
+      - 'development'
+
+jobs:
+  build-validation:
+    name: Build Validation
+    uses: ./.github/workflows/build_validation_workflow.yml
