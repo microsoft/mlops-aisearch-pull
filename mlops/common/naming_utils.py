@@ -1,5 +1,6 @@
 """This module contains a few utility methods that allows us to generate names for \
     for experiments and runs."""
+
 import subprocess
 import os
 import uuid

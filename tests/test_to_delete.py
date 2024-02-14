@@ -1,4 +1,5 @@
 """In this class we implement a unit test as an example to validate DevOps test steps."""
+
 import unittest
 
 

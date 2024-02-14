@@ -24,7 +24,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         logging.info(e)
         return func.HttpResponse("Body is not valid JSON.", status_code=400)
 
-    with open(os.path.join(DIR_PATH, REQUEST_SCHEMA_FILENAME), 'r') as f:
+    with open(os.path.join(DIR_PATH, REQUEST_SCHEMA_FILENAME), "r") as f:
         request_schema = json.load(f)
 
     try:
