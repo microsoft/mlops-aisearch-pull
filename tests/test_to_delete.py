@@ -1,4 +1,4 @@
-"""In this class we implement a unit test as an example to validate DevOps test steps"""
+"""In this class we implement a unit test as an example to validate DevOps test steps."""
 import unittest
 
 
@@ -13,5 +13,5 @@ class TestToDelete(unittest.TestCase):
     """
 
     def test_to_delete(self):
-        """Fake test"""
+        """Fake test."""
         self.assertEqual(True, True)
