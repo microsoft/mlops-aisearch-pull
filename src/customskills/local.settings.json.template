@@ -1,0 +1,18 @@
+{
+    "IsEncrypted": false,
+    "Values": {
+      "AzureWebJobsStorage": "",
+      "FUNCTIONS_WORKER_RUNTIME": "python",
+      "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
+      "AZURE_OPENAI_API_KEY":"Azure OpenAI API KEY",
+      "AZURE_OPENAI_API_VERSION":"Currently using 2023-07-01-preview",
+      "AZURE_OPENAI_EMBEDDING_DEPLOYMENT":"text-embedding-ada-002",
+      "AZURE_OPENAI_ENDPOINT":"OpenAI Endpoint",
+      "AZURE_STORAGE_ACCOUNT_CONNECTION_STRING":"Connection string for storage account which contains documents to process",
+      "AZURE_STORAGE_CONTAINER_NAME":"container where the data is stored",
+      "AZURE_SEARCH_INDEX_NAME":"index to upload data to",
+      "AZURE_SEARCH_ENDPOINT":"Azure AI Search Endpoint",
+      "AZURE_SEARCH_API_KEY":"AI Search API Key"
+
+    }
+  }
