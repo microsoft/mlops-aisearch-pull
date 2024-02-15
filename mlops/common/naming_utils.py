@@ -6,6 +6,23 @@ import os
 import uuid
 
 
+def generate_slot_name():
+    """
+    Generate a unique slot name based on the current branch to deploy azure functions.
+
+    Returns:
+        string: slot name according to the pattern
+    """
+    git_branch = os.environ.get("BUILD_SOURCEBRANCHNAME")
+
+    if git_branch is None:
+        git_branch = subprocess.check_output(
+            "git rev-parse --abbrev-ref HEAD", shell=True, universal_newlines=True
+        ).strip()
+
+    git_branch = git_branch.split("/")[-1].replace("_", "-")
+    return f"{git_branch}"
+
 def generate_experiment_name(experiment_type: str):
     """
     Generate a unique experiment name based on the current branch name as well as an input parameter.

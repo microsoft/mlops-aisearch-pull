@@ -1,11 +1,12 @@
 import requests
 import shutil
 import time
+import argparse
 
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.web import WebSiteManagementClient
 from mlops.common.config_utils import MLOpsConfig
-from mlops.common.naming_utils import generate_experiment_name
+from mlops.common.naming_utils import generate_slot_name
 
 # Define the path to the Azure function directory
 APPLICATION_JSON_CONTENT_TYPE = "application/json"
@@ -25,7 +26,7 @@ FUNCTION_URL_WITH_SLOT = (
     "https://management.azure.com/subscriptions/{subscription_id}"
     "/resourceGroups/{resource_group}"
     "/providers/Microsoft.Web/sites/{function_app_name}"
-    "/functions/{function_name}/slots/{slot}"
+    "/slots/{slot}/functions/{function_name}"
 )
 MANAGEMENT_SCOPE_URL = "https://management.azure.com/.default"
 CUSTOM_SKILLS_DIR = "src/custom_skills"
@@ -46,6 +47,27 @@ def _get_function_app_name(credential: DefaultAzureCredential, sub_config: dict)
 
     return rag_app[0].name
 
+def _create_or_update_deployment_slot(credential: DefaultAzureCredential, sub_config: dict, func_name: str, slot: str):
+    app_mgmt_client = WebSiteManagementClient(
+        credential=credential, subscription_id=sub_config["subscription_id"]
+    )
+
+    rag_app = list(
+        filter(
+            lambda n: n.resource_group == sub_config["resource_group_name"],
+            app_mgmt_client.web_apps.list(),
+        )
+    )
+
+    ops_call = app_mgmt_client.web_apps.begin_create_or_update_slot(
+        sub_config["resource_group_name"],
+        func_name,
+        slot,
+        rag_app[0])
+    while not ops_call.done():
+        print(f"Updating the slot: {slot}")
+        time.sleep(10)
+    print("Slot has been updated")
 
 def _wait_for_functions_ready(
     sub_config: dict, function_app_name: str, access_token: str, slot: str
@@ -78,6 +100,8 @@ def _wait_for_functions_ready(
             function_name=function_name
         )
 
+        print(f"Checking url: {url}")
+
         while status_code != 200:
             try:
                 response = requests.get(url=url, params=params, headers=headers)
@@ -101,6 +125,9 @@ def _wait_for_functions_ready(
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Parameter parser")
+    parser.add_argument('--ignore_slot', action='store_true', default=False, help="allows to publish to the production slot")
+    args = parser.parse_args()
 
     # initialize parameters from config.yaml
     config = MLOpsConfig()
@@ -110,7 +137,10 @@ def main():
     credential = DefaultAzureCredential()
 
     # generate a slot name  for the functions based on the branch name
-    slot_name = generate_experiment_name("skills")
+    if args.ignore_slot==False:
+        slot_name = generate_slot_name()
+    else:
+        slot_name = None
 
     # Generate access token header
     access_token = credential.get_token(MANAGEMENT_SCOPE_URL).token
@@ -136,10 +166,11 @@ def main():
     if slot_name is None:
         url = FUNCTION_APP_URL.format(function_app_name=function_app_name)
     else:
+        # _create_or_update_deployment_slot(credential, sub_config, function_app_name, slot_name)
         url = FUNCTION_APP_URL_WITH_SLOT.format(
             function_app_name=function_app_name, slot=slot_name
         )
-
+    print(f"Deploying to: {url}")
     try:
         # Send a POST request to the Azure function app to deploy the zip file
         response = requests.post(url, headers=headers, data=payload)
