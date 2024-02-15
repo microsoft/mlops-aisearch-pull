@@ -75,10 +75,10 @@ def populate_index(data):
     Returns:
         None
     """
-    INDEX_NAME = os.environ.get("AZURE_SEARCH_INDEX_NAME")
+    search_index_name = os.environ.get("AZURE_SEARCH_INDEX_NAME")
     index_search_client = SearchClient(
         os.environ.get("AZURE_SEARCH_ENDPOINT"),
-        index_name=INDEX_NAME,
+        index_name=search_index_name,
         credential=AzureKeyCredential(os.environ.get("AZURE_SEARCH_API_KEY")),
     )
 

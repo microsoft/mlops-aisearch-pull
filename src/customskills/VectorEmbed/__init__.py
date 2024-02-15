@@ -12,7 +12,7 @@ REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.js
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    """Generates vector embeddings for a list of texts."""
+    """Generate vector embeddings for a list of texts."""
 
     logging.info("Python HTTP trigger function processed a request.")
 
@@ -77,13 +77,13 @@ def generate_embeddings(documents, filename):
         api_version=os.environ.get("AZURE_OPENAI_API_VERSION"),
         azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT")
     )
-    EMBEDDING_MODEL_DEPLOYMENT = os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT")
+    embedding_model_deployment = os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT")
     embeddings = []
     ids = []
     for doc in documents:
         embedding_response = openai_client.embeddings.create(
             input=doc["page_content"],
-            model=EMBEDDING_MODEL_DEPLOYMENT
+            model=embedding_model_deployment
         )
         id = str(uuid.uuid4())
         ids.append(id)
