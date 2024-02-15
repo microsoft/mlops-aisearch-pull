@@ -1,3 +1,5 @@
+"""Deploy Custom Skills to Azure into a slot or to production."""
+
 import requests
 import shutil
 import time
@@ -48,7 +50,10 @@ def _get_function_app_name(credential: DefaultAzureCredential, sub_config: dict)
 
     return rag_app[0].name
 
-def _create_or_update_deployment_slot(credential: DefaultAzureCredential, sub_config: dict, func_name: str, slot: str):
+
+def _create_or_update_deployment_slot(
+    credential: DefaultAzureCredential, sub_config: dict, func_name: str, slot: str
+):
     app_mgmt_client = WebSiteManagementClient(
         credential=credential, subscription_id=sub_config["subscription_id"]
     )
@@ -64,11 +69,13 @@ def _create_or_update_deployment_slot(credential: DefaultAzureCredential, sub_co
         sub_config["resource_group_name"],
         func_name,
         slot,
-        Site(location=rag_app[0].location))
+        Site(location=rag_app[0].location),
+    )
     while not ops_call.done():
         print(f"Updating the slot: {slot}")
         time.sleep(10)
     print("Slot has been updated")
+
 
 def _wait_for_functions_ready(
     sub_config: dict, function_app_name: str, access_token: str, slot: str
@@ -126,8 +133,14 @@ def _wait_for_functions_ready(
 
 
 def main():
+    """Create a deployment of cognitive skills."""
     parser = argparse.ArgumentParser(description="Parameter parser")
-    parser.add_argument('--ignore_slot', action='store_true', default=False, help="allows to publish to the production slot")
+    parser.add_argument(
+        "--ignore_slot",
+        action="store_true",
+        default=False,
+        help="allows to publish to the production slot",
+    )
     args = parser.parse_args()
 
     # initialize parameters from config.yaml
@@ -138,7 +151,7 @@ def main():
     credential = DefaultAzureCredential()
 
     # generate a slot name  for the functions based on the branch name
-    if args.ignore_slot==False:
+    if args.ignore_slot is False:
         slot_name = generate_slot_name()
     else:
         slot_name = None
@@ -167,7 +180,9 @@ def main():
     if slot_name is None:
         url = FUNCTION_APP_URL.format(function_app_name=function_app_name)
     else:
-        _create_or_update_deployment_slot(credential, sub_config, function_app_name, slot_name)
+        _create_or_update_deployment_slot(
+            credential, sub_config, function_app_name, slot_name
+        )
         url = FUNCTION_APP_URL_WITH_SLOT.format(
             function_app_name=function_app_name, slot=slot_name
         )

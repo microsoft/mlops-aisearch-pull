@@ -23,6 +23,7 @@ def generate_slot_name():
     git_branch = git_branch.split("/")[-1].replace("_", "-")
     return f"{git_branch}"
 
+
 def generate_experiment_name(experiment_type: str):
     """
     Generate a unique experiment name based on the current branch name as well as an input parameter.
