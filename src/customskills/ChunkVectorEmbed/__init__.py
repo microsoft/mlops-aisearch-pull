@@ -16,8 +16,7 @@ REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.js
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    """Splits documents, creates vector embeddings, and uploads to an Azure Cognitive Search index"""
-
+    """Split documents, create vector embeddings, and upload to an Azure Cognitive Search index"""
     logging.info("Python HTTP trigger function processed a request.")
 
     request = req.get_json()
@@ -60,8 +59,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
 
 def get_request_schema():
-    """Retrieves the request schema from path"""
-
+    """Retrieve the request schema from path"""
     with open(REQUEST_SCHEMA_PATH) as f:
         schema = json.load(f)
     return schema
@@ -73,7 +71,7 @@ def chunk_pdf_file_from_azure(
         overlap_size: int = 100
 ):
     """
-    Splits a PDF file into chunks of text
+    Split a PDF file into chunks of text
 
     Args:
         file_name: The name of the PDF file in Azure Blob Storage
@@ -95,7 +93,7 @@ def chunk_pdf_file_from_azure(
 
 def generate_embeddings(documents, filename):
     """
-    Generates embeddings for a list of documents
+    Generate embeddings for a list of documents
 
     Args:
         documents: A list of Documents
@@ -108,11 +106,11 @@ def generate_embeddings(documents, filename):
         api_version=os.environ.get("AZURE_OPENAI_API_VERSION"),
         azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT")
     )
-    EMBEDDING_MODEL_DEPLOYMENT = os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT")
+    embedding_model_deployment = os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT")
     embeddings = []
     ids = []
     for doc in documents:
-        embedding_response = openai_client.embeddings.create(input=doc.page_content, model=EMBEDDING_MODEL_DEPLOYMENT)
+        embedding_response = openai_client.embeddings.create(input=doc.page_content, model=embedding_model_deployment)
         id = str(uuid.uuid4())
         ids.append(id)
         embeddings.append({
@@ -126,7 +124,7 @@ def generate_embeddings(documents, filename):
 
 def populate_index(data):
     """
-    Populates an index with data
+    Populate an index with data
 
     Args:
         data: A list of objects each containing the following fields:
@@ -138,10 +136,10 @@ def populate_index(data):
     Returns:
         None
     """
-    INDEX_NAME = os.environ.get("AZURE_SEARCH_INDEX_NAME")
+    search_index_name = os.environ.get("AZURE_SEARCH_INDEX_NAME")
     index_search_client = SearchClient(
         os.environ.get("AZURE_SEARCH_ENDPOINT"),
-        index_name=INDEX_NAME,
+        index_name=search_index_name,
         credential=AzureKeyCredential(os.environ.get("AZURE_SEARCH_API_KEY")),
     )
 

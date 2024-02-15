@@ -13,7 +13,6 @@ REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.js
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     """Generate vector embeddings for a list of texts."""
-
     logging.info("Python HTTP trigger function processed a request.")
 
     request = req.get_json()
@@ -55,8 +54,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
 
 def get_request_schema():
-    """Retrieves the request schema from path"""
-
+    """Retrieve the request schema from path"""
     with open(REQUEST_SCHEMA_PATH) as f:
         schema = json.load(f)
     return schema
@@ -64,7 +62,7 @@ def get_request_schema():
 
 def generate_embeddings(documents, filename):
     """
-    Generates embeddings for a list of documents
+    Generate embeddings for a list of documents
 
     Args:
         documents: A list of Documents

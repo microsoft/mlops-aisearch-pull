@@ -13,8 +13,7 @@ REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.js
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    """Divides document into chunks of text"""
-
+    """Divide document into chunks of text"""
     logging.info("Python HTTP trigger function processed a request.")
 
     request = req.get_json()
@@ -55,8 +54,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
 
 def get_request_schema():
-    """Retrieves the request schema from path"""
-
+    """Retrieve the request schema from path"""
     with open(REQUEST_SCHEMA_PATH) as f:
         schema = json.load(f)
     return schema
@@ -68,7 +66,7 @@ def chunk_pdf_file_from_azure(
         overlap_size: int = 100
 ):
     """
-    Splits a PDF file into chunks of text
+    Split a PDF file into chunks of text
 
     Args:
         file_name: The name of the PDF file in Azure Blob Storage
