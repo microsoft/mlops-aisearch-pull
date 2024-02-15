@@ -5,6 +5,7 @@ import argparse
 
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.web import WebSiteManagementClient
+from azure.mgmt.web.v2023_01_01.models import Site
 from mlops.common.config_utils import MLOpsConfig
 from mlops.common.naming_utils import generate_slot_name
 
@@ -63,7 +64,7 @@ def _create_or_update_deployment_slot(credential: DefaultAzureCredential, sub_co
         sub_config["resource_group_name"],
         func_name,
         slot,
-        rag_app[0])
+        Site(location=rag_app[0].location))
     while not ops_call.done():
         print(f"Updating the slot: {slot}")
         time.sleep(10)
@@ -166,7 +167,7 @@ def main():
     if slot_name is None:
         url = FUNCTION_APP_URL.format(function_app_name=function_app_name)
     else:
-        # _create_or_update_deployment_slot(credential, sub_config, function_app_name, slot_name)
+        _create_or_update_deployment_slot(credential, sub_config, function_app_name, slot_name)
         url = FUNCTION_APP_URL_WITH_SLOT.format(
             function_app_name=function_app_name, slot=slot_name
         )
