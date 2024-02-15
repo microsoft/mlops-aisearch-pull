@@ -16,6 +16,9 @@ REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.js
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Splits documents, creates vector embeddings, and uploads to an Azure Cognitive Search index
+    """
     logging.info("Python HTTP trigger function processed a request.")
 
     request = req.get_json()
@@ -58,6 +61,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
 
 def get_request_schema():
+    """
+    Retrieves the request schema from path
+    """
     with open(REQUEST_SCHEMA_PATH) as f:
         schema = json.load(f)
     return schema
