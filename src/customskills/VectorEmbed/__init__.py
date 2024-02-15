@@ -54,7 +54,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
 
 def get_request_schema():
-    """Retrieve the request schema from path"""
+    """Retrieve the request schema from path."""
     with open(REQUEST_SCHEMA_PATH) as f:
         schema = json.load(f)
     return schema
@@ -62,7 +62,7 @@ def get_request_schema():
 
 def generate_embeddings(documents, filename):
     """
-    Generate embeddings for a list of documents
+    Generate embeddings for a list of documents.
 
     Args:
         documents: A list of Documents
