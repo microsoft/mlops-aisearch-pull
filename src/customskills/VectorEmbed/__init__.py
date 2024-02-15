@@ -5,29 +5,30 @@ import json
 import jsonschema
 import uuid
 from openai import AzureOpenAI
-from langchain_community.document_loaders import AzureBlobStorageFileLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from azure.core.credentials import AzureKeyCredential
-from azure.search.documents.indexes import SearchIndexClient
-from azure.search.documents import SearchClient
 
 app = func.FunctionApp()
 
 REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.json")
 
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Main function for the VectorEmbed skill.
+    This function takes a list of documents and
+    generates vector embeddings for each document.
+    """
     logging.info("Python HTTP trigger function processed a request.")
 
     request = req.get_json()
 
     try:
-        jsonschema.validate(request, schema= get_request_schema())
+        jsonschema.validate(request, schema=get_request_schema())
     except jsonschema.exceptions.ValidationError as e:
         return func.HttpResponse("Invalid request: {0}".format(e), status_code=400)
 
     values = []
     for value in request["values"]:
-        recordId = value["recordId"]
+        record_id = value["recordId"]
         filename = value["filename"]
 
         chunks = value["data"]
@@ -35,7 +36,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         values.append(
             {
-                "recordId": recordId,
+                "recordId": record_id,
                 "identifiers": ids,
                 "data": embeddings,
                 "errors": None,
@@ -81,7 +82,10 @@ def generate_embeddings(documents, filename):
     embeddings = []
     ids = []
     for doc in documents:
-        embedding_response = openai_client.embeddings.create(input=doc["page_content"], model=EMBEDDING_MODEL_DEPLOYMENT)
+        embedding_response = openai_client.embeddings.create(
+            input=doc["page_content"],
+            model=EMBEDDING_MODEL_DEPLOYMENT
+        )
         id = str(uuid.uuid4())
         ids.append(id)
         embeddings.append({

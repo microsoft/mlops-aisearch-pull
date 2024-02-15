@@ -8,12 +8,12 @@ from openai import AzureOpenAI
 from langchain_community.document_loaders import AzureBlobStorageFileLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from azure.core.credentials import AzureKeyCredential
-from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents import SearchClient
 
 app = func.FunctionApp()
 
 REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.json")
+
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Python HTTP trigger function processed a request.")
@@ -21,13 +21,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     request = req.get_json()
 
     try:
-        jsonschema.validate(request, schema= get_request_schema())
+        jsonschema.validate(request, schema=get_request_schema())
     except jsonschema.exceptions.ValidationError as e:
         return func.HttpResponse("Invalid request: {0}".format(e), status_code=400)
 
     values = []
     for value in request["values"]:
-        recordId = value["recordId"]
+        record_id = value["recordId"]
         filename = value["data"]["filename"]
 
         chunks = chunk_pdf_file_from_azure(filename)
@@ -36,7 +36,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         values.append(
             {
-                "recordId": recordId,
+                "recordId": record_id,
                 "identifiers": ids,
                 "data": embeddings,
                 "errors": None,
@@ -62,6 +62,7 @@ def get_request_schema():
         schema = json.load(f)
     return schema
 
+
 def chunk_pdf_file_from_azure(
         file_name: str,
         chunk_size: int = 1000,
@@ -86,6 +87,7 @@ def chunk_pdf_file_from_azure(
     )
     chunks = loader.load_and_split(text_splitter=text_splitter)
     return chunks
+
 
 def generate_embeddings(documents, filename):
     """
@@ -116,6 +118,7 @@ def generate_embeddings(documents, filename):
             "contentVector": embedding_response.data[0].embedding
         })
     return embeddings, ids
+
 
 def populate_index(data):
     """
