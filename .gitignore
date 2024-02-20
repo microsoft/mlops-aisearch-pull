@@ -412,5 +412,9 @@ obj
 appsettings.json
 local.settings.json
 
+# zip package
+*.zip
+
 # Other
 .DS_Store
+

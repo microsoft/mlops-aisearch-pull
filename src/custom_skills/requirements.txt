@@ -1,0 +1,10 @@
+azure-core==1.29.5
+azure-functions==1.17.0
+azure-identity==1.15.0
+azure-storage-blob==12.19.0
+jsonschema==4.19.2
+langchain==0.0.137
+openai==1.2.3
+python-dotenv==1.0.0
+tenacity==8.2.3
+tiktoken==0.5.1

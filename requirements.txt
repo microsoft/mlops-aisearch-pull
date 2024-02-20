@@ -1,0 +1,14 @@
+python-dotenv>=0.10.3
+azure-identity>=1.15.0
+azure-core>=1.29.5
+azure-functions>=1.17.0
+azure-storage-blob>=12.19.0
+azure-mgmt-web>=7.2.0
+pyyaml
+flake8-docstrings==1.7.0
+flake8==6.1.0
+pep8-naming==0.13.3
+pytest-cov==4.1.0
+pytest-azurepipelines==1.0.5
+pytest-mock==3.12.0
+pytest==7.4.0
