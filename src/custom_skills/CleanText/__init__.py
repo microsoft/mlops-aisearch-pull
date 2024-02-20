@@ -1,11 +1,10 @@
 import azure.functions as func
 import logging
 
-app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+app = func.FunctionApp()
 
 
-@app.route(route="http_trigger")
-def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
+def main(req: func.HttpRequest) -> func.HttpResponse:
     """Print welcome message."""
     logging.info("Python HTTP trigger function processed a request.")
 
