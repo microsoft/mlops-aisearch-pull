@@ -10,6 +10,7 @@ from azure.mgmt.web import WebSiteManagementClient
 from azure.mgmt.web.v2023_01_01.models import Site
 from mlops.common.config_utils import MLOpsConfig
 from mlops.common.naming_utils import generate_slot_name
+from mlops.common.function_utils import test_chunker, test_embedder, test_uploader
 
 # Define the path to the Azure function directory
 APPLICATION_JSON_CONTENT_TYPE = "application/json"
@@ -130,6 +131,20 @@ def _wait_for_functions_ready(
                 break
             else:
                 time.sleep(10)
+
+        if not _verify_function_works(url, params, headers, function_name):
+            raise SystemExit(f"Function {function_name} is not working properly.")
+
+
+def _verify_function_works(url: str, params: dict, headers: dict, function_name: str):
+    if function_name == "Chunk":
+        return test_chunker(url, params, headers)
+    elif function_name == "VectorEmbed":
+        return test_embedder(url, params, headers)
+    elif function_name == "IndexUpload":
+        return test_uploader(url, params, headers)
+    else:
+        return True
 
 
 def main():

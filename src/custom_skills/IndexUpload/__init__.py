@@ -5,6 +5,7 @@ import json
 import jsonschema
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
+import time
 
 app = func.FunctionApp()
 
@@ -22,20 +23,40 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     except jsonschema.exceptions.ValidationError as e:
         return func.HttpResponse("Invalid request: {0}".format(e), status_code=400)
 
+    errors = []
     values = []
     for value in request["values"]:
         record_id = value["recordId"]
+        function_check = value["functionCheck"] if "functionCheck" in value else False
         data = value["data"]
         ids = value["identifiers"]
 
-        populate_index(data)
+        search_index_name = os.environ.get("AZURE_SEARCH_INDEX_NAME")
+        index_search_client = SearchClient(
+            os.environ.get("AZURE_SEARCH_ENDPOINT"),
+            index_name=search_index_name,
+            credential=AzureKeyCredential(os.environ.get("AZURE_SEARCH_API_KEY")),
+        )
+
+        populate_index(data, index_search_client)
+
+        if (function_check):
+            # Function was only called to test so we can remove
+            # the data after verifying it was uploaded
+            function_check_success = check_data(ids, index_search_client)
+            cleanup_data(ids, index_search_client)
+            if function_check_success:
+                logging.info(f"Index upload check succeeded for {len(ids)} items.")
+            else:
+                logging.error(f"Index upload check failed for {len(ids)} items.")
+                errors.append("Failed to verify data was uploaded")
 
         values.append(
             {
                 "recordId": record_id,
                 "identifiers": ids,
-                "errors": None,
-                "warnings": None,
+                "errors": errors,
+                "warnings": []
             }
         )
 
@@ -59,7 +80,7 @@ def get_request_schema():
     return schema
 
 
-def populate_index(data):
+def populate_index(data, index_search_client):
     """
     Populate an index with data.
 
@@ -73,11 +94,39 @@ def populate_index(data):
     Returns:
         None
     """
-    search_index_name = os.environ.get("AZURE_SEARCH_INDEX_NAME")
-    index_search_client = SearchClient(
-        os.environ.get("AZURE_SEARCH_ENDPOINT"),
-        index_name=search_index_name,
-        credential=AzureKeyCredential(os.environ.get("AZURE_SEARCH_API_KEY")),
-    )
-
     index_search_client.upload_documents(documents=data)
+
+
+def check_data(ids, index_search_client):
+    """
+    Check that data was uploaded to the index.
+
+    Args:
+        ids: A list of unique identifiers for the data
+
+    Returns:
+        bool: True if all the data was found in the index, False otherwise
+    """
+    time.sleep(1)
+    count = 0
+    for id in ids:
+        filter = "id eq '{0}'".format(id)
+        count += index_search_client.search(search_text="*",
+                                            filter=filter,
+                                            include_total_count=True).get_count()
+    logging.info(f"Found {count} items in the index.")
+    return count == len(ids)
+
+
+def cleanup_data(ids, index_search_client):
+    """
+    Remove data from the index.
+
+    Args:
+        ids: A list of unique identifiers for the data
+
+    Returns:
+        None
+    """
+    for id in ids:
+        index_search_client.delete_documents(documents=[{'id': id}])
