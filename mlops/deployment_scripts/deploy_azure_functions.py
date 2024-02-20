@@ -137,6 +137,7 @@ def _wait_for_functions_ready(
 
 
 def _verify_function_works(url: str, params: dict, headers: dict, function_name: str):
+    """Verify that the function is working properly based on function name."""
     if function_name == "Chunk":
         return test_chunker(url, params, headers)
     elif function_name == "VectorEmbed":
