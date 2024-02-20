@@ -1,0 +1,40 @@
+{
+    "values": [
+        {
+            "recordId": "r1",
+            "filename": "PerksPlus.pdf",
+            "data": [
+                {
+                    "page_content": "PerksPlus Health and Wellness Reimbursement Program for Contoso Electronics Employees\n\nThis document contains information generated using a language model (Azure OpenAI). The information contained in this document is only for demonstration purposes and does not reflect the opinions or beliefs of Microsoft. Microsoft makes no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability or availability with respect to the information contained in this document.\n\nAll rights reserved to Microsoft",
+                    "metadata": {
+                        "source": "/tmp/tmpjz4pw38_/data/PerksPlus.pdf"
+                    },
+                    "type": "Document"
+                },
+                {
+                    "page_content": "All rights reserved to Microsoft\n\nOverview Introducing PerksPlus - the ultimate benefits program designed to support the health and wellness of employees. With PerksPlus, employees have the opportunity to expense up to $1000 for fitness-related programs, making it easier and more affordable to maintain a healthy lifestyle. PerksPlus is not only designed to support employees' physical health, but also their mental health. Regular exercise has been shown to reduce stress, improve mood, and enhance overall well-being. With PerksPlus, employees can invest in their health and wellness, while enjoying the peace of mind that comes with knowing they are getting the support they need to lead a healthy life.\n\nWhat is Covered? PerksPlus covers a wide range of fitness activities, including but not limited to:",
+                    "metadata": {
+                        "source": "/tmp/tmpjz4pw38_/data/PerksPlus.pdf"
+                    },
+                    "type": "Document"
+                },
+                {
+                    "page_content": "Gym memberships \u2022 Personal training sessions \u2022 Yoga and Pilates classes \u2022 Fitness equipment purchases \u2022 Sports team fees \u2022 Health retreats and spas \u2022 Outdoor adventure activities (such as rock climbing, hiking, and kayaking) \u2022 Group fitness classes (such as dance, martial arts, and cycling) \u2022 Virtual fitness programs (such as online yoga and workout classes)\n\nIn addition to the wide range of fitness activities covered by PerksPlus, the program also covers a variety of lessons and experiences that promote health and wellness. Some of the lessons covered under PerksPlus include:\n\nSkiing and snowboarding lessons \u2022 Scuba diving lessons \u2022 Surfing lessons \u2022 Horseback riding lessons\n\nThese lessons provide employees with the opportunity to try new things, challenge themselves, and improve their physical skills. They are also a great way to relieve stress and have fun while staying active.",
+                    "metadata": {
+                        "source": "/tmp/tmpjz4pw38_/data/PerksPlus.pdf"
+                    },
+                    "type": "Document"
+                },
+                {
+                    "page_content": "With PerksPlus, employees can choose from a variety of fitness programs to suit their individual needs and preferences. Whether you're looking to improve your physical fitness, reduce stress, or just have some fun, PerksPlus has you covered.\n\nWhat is Not Covered? In addition to the wide range of activities covered by PerksPlus, there is also a list of things that are not covered under the program. These include but are not limited to:\n\nNon-fitness related expenses \u2022 Medical treatments and procedures \u2022 Travel expenses (unless related to a fitness program)\n\nFood and supplements",
+                    "metadata": {
+                        "source": "/tmp/tmpjz4pw38_/data/PerksPlus.pdf"
+                    },
+                    "type": "Document"
+                }
+            ],
+            "errors": null,
+            "warnings": null
+        }
+    ]
+}
