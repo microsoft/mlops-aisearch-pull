@@ -399,6 +399,22 @@ FodyWeavers.xsd
 
 # environment variables
 .env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Azure Functions artifacts
+bin
+obj
+appsettings.json
+local.settings.json
 
 # zip package
 *.zip
+
+# Other
+.DS_Store
+
