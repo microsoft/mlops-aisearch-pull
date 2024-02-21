@@ -1,0 +1,37 @@
+---
+name: Data Initialization Workflow
+
+on:
+  workflow_call:
+
+env:
+  PYTHON_VERSION: "3.9"
+
+jobs:
+  run-unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Load Python Dependencies
+        shell: bash
+        run: |
+          set -e
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade -r .github/requirements/data_initialization_requirements.txt
+
+      - name: Upload toy data to the toy dataset
+        uses: ./.github/actions/execute_shell_code
+        env:
+          SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+          RESOURCE_GROUP_NAME: ${{ secrets.resource_group_name }}
+          STORAGE_ACCOUNT_NAME: ${{ secrets.storage_account_name }}
+        with:
+          azure_credentials: ${{ secrets.azure_credentials }}
+          script_parameter: |
+            python -m mlops.deployment_scripts.upload_data

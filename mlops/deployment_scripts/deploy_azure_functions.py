@@ -19,7 +19,7 @@ FUNCTION_APP_URL = "https://{function_app_name}.scm.azurewebsites.net/api/zipdep
 FUNCTION_APP_URL_WITH_SLOT = (
     "https://{function_app_name}-{slot}.scm.azurewebsites.net/api/zipdeploy"
 )
-FUNCTION_NAMES = ["CleanText"]
+FUNCTION_NAMES = ["Chunk", "ChunkVectorEmbed", "IndexUpload", "VectorEmbed"]
 FUNCTION_URL = (
     "https://management.azure.com/subscriptions/{subscription_id}"
     "/resourceGroups/{resource_group}"
