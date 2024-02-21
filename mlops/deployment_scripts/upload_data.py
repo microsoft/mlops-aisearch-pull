@@ -136,9 +136,9 @@ def main():
     local_folder = data_location_details["local_folder"]
     storage_container = data_location_details["storage_container"]
 
-    _create_storage_role_assignment(
-        credential, subscription_id, resource_group_name, storage_account_name
-    )
+    # _create_storage_role_assignment(
+    #     credential, subscription_id, resource_group_name, storage_account_name
+    # )
 
     _upload_ops_files(
         credential=credential,
