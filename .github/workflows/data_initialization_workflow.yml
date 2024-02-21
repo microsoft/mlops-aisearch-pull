@@ -2,7 +2,7 @@
 name: Data Initialization Workflow
 
 on:
-  workflow_call:
+  workflow_dispatch:
 
 env:
   PYTHON_VERSION: "3.9"
