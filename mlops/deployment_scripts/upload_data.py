@@ -56,7 +56,7 @@ def _upload_ops_files(
             print("Done.")
         except Exception as e:
             print(f"Exception uploading file name {file_name}: {e}")
-            break
+            exit(-1)
 
 
 def _get_user_object_id(credential: DefaultAzureCredential):
