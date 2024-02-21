@@ -127,8 +127,8 @@ def main():
     credential = DefaultAzureCredential()
 
     storage_account_name = sub_config["storage_account_name"]
-    subscription_id = sub_config["subscription_id"]
-    resource_group_name = sub_config["resource_group_name"]
+    # subscription_id = sub_config["subscription_id"]
+    # resource_group_name = sub_config["resource_group_name"]
 
     # getting data_pr section from the config (pr is a default environment)
     data_location_details = config.get_flow_config("data")
