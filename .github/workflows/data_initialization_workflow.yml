@@ -4,8 +4,8 @@ name: Data Initialization Workflow
 on:
   workflow_call:
   pull_request:
-  branches:
-    - 'development'
+    branches:
+      - 'development'
 
 env:
   PYTHON_VERSION: "3.9"
