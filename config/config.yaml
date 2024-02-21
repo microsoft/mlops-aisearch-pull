@@ -2,6 +2,7 @@
 sub_config:
   subscription_id: ${SUBSCRIPTION_ID}
   resource_group_name: ${RESOURCE_GROUP_NAME}
+  storage_account_name: ${STORAGE_ACCOUNT_NAME}
 
 # Azure OpenAI configuration. 
 aoai_config:
@@ -15,3 +16,11 @@ acs_config:
   acs_api_base: ${ACS_BASE_ENDPOINT}
   acs_api_version: 2023-07-01-preview
   acs_api_key: ${ACS_API_KEY}
+
+data_pr:
+    local_folder: data
+    storage_container: toydataset
+
+data_dev:
+    local_folder: data
+    storage_container: fulldataset

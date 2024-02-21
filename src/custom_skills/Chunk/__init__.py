@@ -42,9 +42,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     response_body = {"values": values}
 
-    logging.info(
-        f"Python HTTP trigger function created {len(chunks)} chunks."
-    )
+    logging.info(f"Python HTTP trigger function created {len(chunks)} chunks.")
 
     response = func.HttpResponse(
         json.dumps(response_body, default=lambda obj: obj.__dict__)
@@ -61,9 +59,7 @@ def get_request_schema():
 
 
 def chunk_pdf_file_from_azure(
-        file_name: str,
-        chunk_size: int = 1000,
-        overlap_size: int = 100
+    file_name: str, chunk_size: int = 1000, overlap_size: int = 100
 ):
     """
     Split a PDF file into chunks of text.
@@ -76,7 +72,9 @@ def chunk_pdf_file_from_azure(
     Returns:
         A list of Documents, each containing a 'page_content' chunk of text
     """
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=overlap_size)
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size, chunk_overlap=overlap_size
+    )
     loader = AzureBlobStorageFileLoader(
         conn_str=os.environ.get("AZURE_STORAGE_ACCOUNT_CONNECTION_STRING"),
         container=os.environ.get("AZURE_STORAGE_CONTAINER_NAME"),

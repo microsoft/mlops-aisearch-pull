@@ -40,7 +40,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         populate_index(data, index_search_client)
 
-        if (function_check):
+        if function_check:
             # Function was only called to test so we can remove
             # the data after verifying it was uploaded
             function_check_success = check_data(ids, index_search_client)
@@ -56,15 +56,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 "recordId": record_id,
                 "identifiers": ids,
                 "errors": errors,
-                "warnings": []
+                "warnings": [],
             }
         )
 
     response_body = {"values": values}
 
-    logging.info(
-        f"Python HTTP trigger function created {len(data)} index items."
-    )
+    logging.info(f"Python HTTP trigger function created {len(data)} index items.")
 
     response = func.HttpResponse(
         json.dumps(response_body, default=lambda obj: obj.__dict__)
@@ -111,9 +109,9 @@ def check_data(ids, index_search_client):
     count = 0
     for id in ids:
         filter = "id eq '{0}'".format(id)
-        count += index_search_client.search(search_text="*",
-                                            filter=filter,
-                                            include_total_count=True).get_count()
+        count += index_search_client.search(
+            search_text="*", filter=filter, include_total_count=True
+        ).get_count()
     logging.info(f"Found {count} items in the index.")
     return count == len(ids)
 
@@ -129,4 +127,4 @@ def cleanup_data(ids, index_search_client):
         None
     """
     for id in ids:
-        index_search_client.delete_documents(documents=[{'id': id}])
+        index_search_client.delete_documents(documents=[{"id": id}])

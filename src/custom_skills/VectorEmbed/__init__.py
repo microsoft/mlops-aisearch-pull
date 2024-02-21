@@ -73,22 +73,23 @@ def generate_embeddings(documents, filename):
     openai_client = AzureOpenAI(
         api_key=os.environ.get("AZURE_OPENAI_API_KEY"),
         api_version=os.environ.get("AZURE_OPENAI_API_VERSION"),
-        azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT")
+        azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
     )
     embedding_model_deployment = os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT")
     embeddings = []
     ids = []
     for doc in documents:
         embedding_response = openai_client.embeddings.create(
-            input=doc["page_content"],
-            model=embedding_model_deployment
+            input=doc["page_content"], model=embedding_model_deployment
         )
         id = str(uuid.uuid4())
         ids.append(id)
-        embeddings.append({
-            "id": id,
-            "filename": filename,
-            "content": doc["page_content"],
-            "contentVector": embedding_response.data[0].embedding
-        })
+        embeddings.append(
+            {
+                "id": id,
+                "filename": filename,
+                "content": doc["page_content"],
+                "contentVector": embedding_response.data[0].embedding,
+            }
+        )
     return embeddings, ids

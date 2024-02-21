@@ -1,4 +1,5 @@
 """This module contains a few utility methods that allow us to verify functions work as expected."""
+
 import requests
 import json
 

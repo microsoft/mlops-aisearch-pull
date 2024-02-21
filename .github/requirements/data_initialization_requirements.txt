@@ -1,0 +1,6 @@
+python-dotenv>=0.10.3
+azure-identity>=1.15.0
+azure-core>=1.29.5
+azure-storage-blob>=12.19.0
+pyyaml
+azure-mgmt-authorization>=4.0.0
