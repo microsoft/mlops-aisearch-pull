@@ -76,7 +76,7 @@ def test_chunker(url: str, params: dict, headers: dict):
     Returns:
         The response body if successful, None otherwise
     """
-    request_file_path = "../requests/toChunker.json"
+    request_file_path = "./mlops/requests/toChunker.json"
     request_body = read_json_from_file(request_file_path)
     response = requests.post(url=url, params=params, headers=headers, json=request_body)
 
@@ -111,7 +111,7 @@ def test_embedder(url: str, params: dict, headers: dict, chunker_response=None):
         The response body if successful, None otherwise
     """
     if chunker_response is None:
-        request_file_path = "../requests/toEmbedder.json"
+        request_file_path = "./mlops/requests/toEmbedder.json"
         request_body = read_json_from_file(request_file_path)
     else:
         request_body = chunker_response
@@ -147,7 +147,7 @@ def test_uploader(url: str, params: dict, headers: dict, embedder_response=None)
         The response body if successful, None otherwise
     """
     if embedder_response is None:
-        request_file_path = "../requests/toUploader.json"
+        request_file_path = "./mlops/requests/toUploader.json"
         request_body = read_json_from_file(request_file_path)
     else:
         request_body = embedder_response
