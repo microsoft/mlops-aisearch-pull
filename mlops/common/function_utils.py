@@ -4,6 +4,60 @@ import requests
 import json
 
 
+def get_app_settings(config: dict, index_name: str):
+    """Get the function app settings."""
+    return [
+        {
+            "name": "FUNCTIONS_WORKER_RUNTIME",
+            "value": "python"
+        },
+        {
+            "name": "AzureWebJobsFeatureFlags",
+            "value": "EnableWorkerIndexing"
+        },
+        {
+            "name": "AZURE_OPENAI_API_KEY",
+            "value": config.aoai_config["aoai_api_key"]
+        },
+        {
+            "name": "AZURE_OPENAI_API_VERSION",
+            "value": config.aoai_config["aoai_api_version"]
+        },
+        {
+            "name": "AZURE_OPENAI_EMBEDDING_DEPLOYMENT",
+            "value": config.aoai_config["aoai_embedding_model_deployment"]
+        },
+        {
+            "name": "AZURE_OPENAI_ENDPOINT",
+            "value": config.aoai_config["aoai_api_base"]
+        },
+        {
+            "name": "AZURE_SEARCH_ENDPOINT",
+            "value": config.acs_config["acs_api_base"]
+        },
+        {
+            "name": "AZURE_SEARCH_API_KEY",
+            "value": config.acs_config["acs_api_key"]
+        },
+        {
+            "name": "AZURE_SEARCH_API_VERSION",
+            "value": config.acs_config["acs_api_version"]
+        },
+        {
+            "name": "AZURE_SEARCH_INDEX_NAME",
+            "value": index_name
+        },
+        {
+            "name": "AZURE_STORAGE_ACCOUNT_CONNECTION_STRING",
+            "value": config.sub_config["storage_account_connection_string"]
+        },
+        {
+            "name": "AZURE_STORAGE_CONTAINER_NAME",
+            "value": config.get_flow_config("data")["storage_container"]
+        }
+    ]
+
+
 def read_json_from_file(file_path):
     """Read a json file and return the contents as a dictionary."""
     with open(file_path, "r") as f:

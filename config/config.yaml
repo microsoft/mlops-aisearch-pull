@@ -3,13 +3,15 @@ sub_config:
   subscription_id: ${SUBSCRIPTION_ID}
   resource_group_name: ${RESOURCE_GROUP_NAME}
   storage_account_name: ${STORAGE_ACCOUNT_NAME}
+  storage_account_connection_string: ${STORAGE_ACCOUNT_CONNECTION_STRING}
 
-# Azure OpenAI configuration. 
+# Azure OpenAI configuration.
 aoai_config:
   aoai_api_base: ${AOAI_BASE_ENDPOINT}
   aoai_api_type: azure
   aoai_api_version: 2023-07-01-preview
   aoai_api_key: ${AOAI_API_KEY}
+  aoai_embedding_model_deployment: "text-embedding-ada-002"
 
 # Azure Cognitive Service config
 acs_config:
@@ -24,3 +26,7 @@ data_pr:
 data_dev:
     local_folder: data
     storage_container: fulldataset
+
+# This is temporary config until we have the logic to generate the index name.
+temp_config:
+  search_index_name: rbg0215test
