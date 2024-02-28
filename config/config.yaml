@@ -15,9 +15,14 @@ aoai_config:
 
 # Azure Cognitive Service config
 acs_config:
-  acs_api_base: ${ACS_BASE_ENDPOINT}
-  acs_api_version: 2023-07-01-preview
+  acs_service_name: $(ACS_SERVICE_NAME)
+  acs_api_base: https://${ACS_SERVICE_NAME}.search.windows.net
+  acs_api_version: 2023-10-01-Preview
   acs_api_key: ${ACS_API_KEY}
+  acs_document_index_file: mlops/acs_config/documentIndex.json
+  acs_document_data_source: mlops/acs_config/documentDataSource.json
+  acs_document_skillset_file: mlops/acs_config/documentSkillSet.json
+  acs_document_indexer_file: mlops/acs_config/documentIndexer.json
 
 data_pr:
     local_folder: data
@@ -26,7 +31,3 @@ data_pr:
 data_dev:
     local_folder: data
     storage_container: fulldataset
-
-# This is temporary config until we have the logic to generate the index name.
-temp_config:
-  search_index_name: rbg0215test

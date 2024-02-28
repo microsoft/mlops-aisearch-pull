@@ -24,6 +24,78 @@ def generate_slot_name():
     return f"{git_branch}"
 
 
+def generate_index_name():
+    """
+    Generate a unique index name based on the current branch name.
+
+    Returns:
+        string: index name according to the pattern
+    """
+    git_branch = os.environ.get("BUILD_SOURCEBRANCHNAME")
+
+    if git_branch is None:
+        git_branch = subprocess.check_output(
+            "git rev-parse --abbrev-ref HEAD", shell=True, universal_newlines=True
+        ).strip()
+
+    git_branch = git_branch.split("/")[-1].replace("_", "-")
+    return f"{git_branch}Index"
+
+
+def generate_indexer_name():
+    """
+    Generate a unique indexer name based on the current branch name.
+
+    Returns:
+        string: indexer name according to the pattern
+    """
+    git_branch = os.environ.get("BUILD_SOURCEBRANCHNAME")
+
+    if git_branch is None:
+        git_branch = subprocess.check_output(
+            "git rev-parse --abbrev-ref HEAD", shell=True, universal_newlines=True
+        ).strip()
+
+    git_branch = git_branch.split("/")[-1].replace("_", "-")
+    return f"{git_branch}Indexer"
+
+
+def generate_data_source_name():
+    """
+    Generate a unique data source connection name based on the current branch name.
+
+    Returns:
+        string: data source name according to the pattern
+    """
+    git_branch = os.environ.get("BUILD_SOURCEBRANCHNAME")
+
+    if git_branch is None:
+        git_branch = subprocess.check_output(
+            "git rev-parse --abbrev-ref HEAD", shell=True, universal_newlines=True
+        ).strip()
+
+    git_branch = git_branch.split("/")[-1].replace("_", "-")
+    return f"{git_branch}Data"
+
+
+def generate_skillset_name():
+    """
+    Generate a unique skillset name based on the current branch name.
+
+    Returns:
+        string: skillset name according to the pattern
+    """
+    git_branch = os.environ.get("BUILD_SOURCEBRANCHNAME")
+
+    if git_branch is None:
+        git_branch = subprocess.check_output(
+            "git rev-parse --abbrev-ref HEAD", shell=True, universal_newlines=True
+        ).strip()
+
+    git_branch = git_branch.split("/")[-1].replace("_", "-")
+    return f"{git_branch}Skillset"
+
+
 def generate_experiment_name(experiment_type: str):
     """
     Generate a unique experiment name based on the current branch name as well as an input parameter.

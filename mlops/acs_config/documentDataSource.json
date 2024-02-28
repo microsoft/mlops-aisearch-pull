@@ -1,0 +1,10 @@
+{
+    "name": "{name}",
+    "type": "azureblob",
+    "credentials": {
+      "connectionString": "{conn_string}"
+    },
+    "container": {
+      "name": "{container}"
+    }
+  }
