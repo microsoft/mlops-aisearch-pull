@@ -9,9 +9,13 @@ from azure.identity import DefaultAzureCredential
 from azure.mgmt.web import WebSiteManagementClient
 from azure.mgmt.web.v2023_01_01.models import Site
 from mlops.common.config_utils import MLOpsConfig
-from mlops.common.naming_utils import generate_slot_name
-from mlops.common.function_utils import (test_chunker, test_embedder,
-                                         test_uploader, get_app_settings)
+from mlops.common.naming_utils import generate_slot_name, generate_index_name
+from mlops.common.function_utils import (
+    test_chunker,
+    test_embedder,
+    test_uploader,
+    get_app_settings,
+)
 
 # Define the path to the Azure function directory
 APPLICATION_JSON_CONTENT_TYPE = "application/json"
@@ -54,8 +58,11 @@ def _get_function_app_name(credential: DefaultAzureCredential, sub_config: dict)
 
 
 def _create_or_update_deployment_slot(
-    credential: DefaultAzureCredential, sub_config: dict, func_name: str,
-    slot: str, app_settings: list
+    credential: DefaultAzureCredential,
+    sub_config: dict,
+    func_name: str,
+    slot: str,
+    app_settings: list,
 ):
     app_mgmt_client = WebSiteManagementClient(
         credential=credential, subscription_id=sub_config["subscription_id"]
@@ -68,13 +75,13 @@ def _create_or_update_deployment_slot(
         )
     )
 
-    site_config = {"appSettings": app_settings}
+    # site_config = {"appSettings": app_settings}
 
     ops_call = app_mgmt_client.web_apps.begin_create_or_update_slot(
         sub_config["resource_group_name"],
         func_name,
         slot,
-        Site(location=rag_app[0].location, site_config=site_config),
+        Site(location=rag_app[0].location),
     )
     while not ops_call.done():
         print(f"Updating the slot: {slot}")
@@ -200,9 +207,7 @@ def main():
     if slot_name is None:
         url = FUNCTION_APP_URL.format(function_app_name=function_app_name)
     else:
-        # TODO: Update index name after we have generated it
-        temp_index_name = config.temp_config["search_index_name"]
-        app_settings = get_app_settings(config, temp_index_name)
+        app_settings = get_app_settings(config, generate_index_name())
         _create_or_update_deployment_slot(
             credential, sub_config, function_app_name, slot_name, app_settings
         )

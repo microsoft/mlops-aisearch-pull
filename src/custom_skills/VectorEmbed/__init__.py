@@ -6,7 +6,6 @@ import jsonschema
 import uuid
 from openai import AzureOpenAI
 
-app = func.FunctionApp()
 
 REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.json")
 

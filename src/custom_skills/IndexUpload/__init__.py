@@ -7,7 +7,6 @@ from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 import time
 
-app = func.FunctionApp()
 
 REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.json")
 
