@@ -10,8 +10,12 @@ from azure.mgmt.web import WebSiteManagementClient
 from azure.mgmt.web.v2023_01_01.models import Site
 from mlops.common.config_utils import MLOpsConfig
 from mlops.common.naming_utils import generate_slot_name
-from mlops.common.function_utils import (test_chunker, test_embedder,
-                                         test_uploader, get_app_settings)
+from mlops.common.function_utils import (
+    test_chunker,
+    test_embedder,
+    test_uploader,
+    get_app_settings,
+)
 
 # Define the path to the Azure function directory
 APPLICATION_JSON_CONTENT_TYPE = "application/json"
@@ -54,8 +58,11 @@ def _get_function_app_name(credential: DefaultAzureCredential, sub_config: dict)
 
 
 def _create_or_update_deployment_slot(
-    credential: DefaultAzureCredential, sub_config: dict, func_name: str,
-    slot: str, app_settings: list
+    credential: DefaultAzureCredential,
+    sub_config: dict,
+    func_name: str,
+    slot: str,
+    app_settings: list,
 ):
     app_mgmt_client = WebSiteManagementClient(
         credential=credential, subscription_id=sub_config["subscription_id"]

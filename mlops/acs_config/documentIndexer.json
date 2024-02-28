@@ -1,0 +1,19 @@
+{
+    "name": "{name}",
+    "dataSourceName": "{data_source_name}",
+    "targetIndexName": "{index_name}",
+    "skillsetName": "{skillset_name}",
+    "cache": {
+      "storageConnectionString": "{conn_string}",
+      "enableReprocessing": true
+    },
+    "parameters": {
+      "batchSize": 5,
+      "dataToExtract": "contentAndMetadata",
+      "excludedFileNameExtensions": ".json"
+    },
+    "fieldMappings": [
+    ],
+    "outputFieldMappings": [
+    ]
+  }
