@@ -9,7 +9,7 @@ from azure.identity import DefaultAzureCredential
 from azure.mgmt.web import WebSiteManagementClient
 from azure.mgmt.web.v2023_01_01.models import Site
 from mlops.common.config_utils import MLOpsConfig
-from mlops.common.naming_utils import generate_slot_name
+from mlops.common.naming_utils import generate_slot_name, generate_index_name
 from mlops.common.function_utils import (
     test_chunker,
     test_embedder,
@@ -207,9 +207,7 @@ def main():
     if slot_name is None:
         url = FUNCTION_APP_URL.format(function_app_name=function_app_name)
     else:
-        # TODO: Update index name after we have generated it
-        temp_index_name = config.temp_config["search_index_name"]
-        app_settings = get_app_settings(config, temp_index_name)
+        app_settings = get_app_settings(config, generate_index_name())
         _create_or_update_deployment_slot(
             credential, sub_config, function_app_name, slot_name, app_settings
         )
