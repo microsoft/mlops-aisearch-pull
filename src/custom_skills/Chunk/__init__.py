@@ -7,8 +7,6 @@ from langchain_community.document_loaders import AzureBlobStorageFileLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
-app = func.FunctionApp()
-
 REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.json")
 
 
