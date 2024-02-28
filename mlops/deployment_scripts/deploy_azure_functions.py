@@ -75,7 +75,7 @@ def _create_or_update_deployment_slot(
         )
     )
 
-    site_config = {"appSettings": app_settings}
+    # site_config = {"appSettings": app_settings}
 
     ops_call = app_mgmt_client.web_apps.begin_create_or_update_slot(
         sub_config["resource_group_name"],
