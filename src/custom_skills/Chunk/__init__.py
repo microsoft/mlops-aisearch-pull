@@ -31,8 +31,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         values.append(
             {
                 "recordId": record_id,
-                "filename": filename,
-                "data": chunks,
+                "data": {"chunks": chunks},
                 "errors": None,
                 "warnings": None,
             }

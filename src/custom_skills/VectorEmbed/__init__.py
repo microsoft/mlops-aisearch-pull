@@ -4,8 +4,14 @@ import logging
 import json
 import jsonschema
 import uuid
+import openai
 from openai import AzureOpenAI
-
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_random_exponential,
+    retry_if_exception_type
+)
 
 REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.json")
 
@@ -24,16 +30,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     values = []
     for value in request["values"]:
         record_id = value["recordId"]
-        filename = value["filename"]
 
-        chunks = value["data"]
-        embeddings, ids = generate_embeddings(chunks, filename)
+        chunks = value["data"]["chunks"]
+        embeddings, ids = generate_embeddings(chunks)
 
         values.append(
             {
                 "recordId": record_id,
                 "identifiers": ids,
-                "data": embeddings,
+                "data": {"embeddings": embeddings},
                 "errors": None,
                 "warnings": None,
             }
@@ -59,7 +64,15 @@ def get_request_schema():
     return schema
 
 
-def generate_embeddings(documents, filename):
+def log_attempt_number(retry_state):
+    row = retry_state.args[0]
+    print(f"Rate Limit Exceeded! Retry Attempt #: {retry_state.attempt_number} | Chunk: {row}")
+
+
+@retry(retry=retry_if_exception_type(openai.error.RateLimitError),
+       wait=wait_random_exponential(min=1, max=60),
+       stop=stop_after_attempt(10), after=log_attempt_number)
+def generate_embeddings(documents):
     """
     Generate embeddings for a list of documents.
 
@@ -86,7 +99,6 @@ def generate_embeddings(documents, filename):
         embeddings.append(
             {
                 "id": id,
-                "filename": filename,
                 "content": doc["page_content"],
                 "contentVector": embedding_response.data[0].embedding,
             }
