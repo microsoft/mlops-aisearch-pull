@@ -3,7 +3,6 @@ import os
 import logging
 import json
 import jsonschema
-import uuid
 import openai
 from openai import AzureOpenAI
 from tenacity import (
@@ -31,14 +30,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     for value in request["values"]:
         record_id = value["recordId"]
 
-        chunks = value["data"]["chunks"]
-        embeddings, ids = generate_embeddings(chunks)
+        chunk = value["data"]["chunk"]
+        embedding = generate_embedding(chunk["page_content"])
 
         values.append(
             {
                 "recordId": record_id,
-                "identifiers": ids,
-                "data": {"embeddings": embeddings},
+                "data": {"embedding": embedding},
                 "errors": None,
                 "warnings": None,
             }
@@ -47,7 +45,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     response_body = {"values": values}
 
     logging.info(
-        f"Python HTTP trigger function created {len(chunks)} vector embeddings."
+        f"Python HTTP trigger function created {len(chunk)} vector embeddings."
     )
 
     response = func.HttpResponse(
@@ -69,18 +67,18 @@ def log_attempt_number(retry_state):
     print(f"Rate Limit Exceeded! Retry Attempt #: {retry_state.attempt_number} | Chunk: {row}")
 
 
-@retry(retry=retry_if_exception_type(openai.error.RateLimitError),
+@retry(retry=retry_if_exception_type(openai.RateLimitError),
        wait=wait_random_exponential(min=1, max=60),
        stop=stop_after_attempt(10), after=log_attempt_number)
-def generate_embeddings(documents):
+def generate_embedding(text):
     """
-    Generate embeddings for a list of documents.
+    Generate embeddings for text.
 
     Args:
-        documents: A list of Documents
+        text: a block of text
 
     Returns:
-        A list of Documents, each containing an 'contentVector' field
+        An object containing an 'contentVector' field
     """
     openai_client = AzureOpenAI(
         api_key=os.environ.get("AZURE_OPENAI_API_KEY"),
@@ -88,19 +86,9 @@ def generate_embeddings(documents):
         azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
     )
     embedding_model_deployment = os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT")
-    embeddings = []
-    ids = []
-    for doc in documents:
-        embedding_response = openai_client.embeddings.create(
-            input=doc["page_content"], model=embedding_model_deployment
-        )
-        id = str(uuid.uuid4())
-        ids.append(id)
-        embeddings.append(
-            {
-                "id": id,
-                "content": doc["page_content"],
-                "contentVector": embedding_response.data[0].embedding,
-            }
-        )
-    return embeddings, ids
+
+    embedding_response = openai_client.embeddings.create(
+        input=text, model=embedding_model_deployment
+    )
+
+    return embedding_response.data[0].embedding

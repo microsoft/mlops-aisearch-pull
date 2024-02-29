@@ -1,57 +1,164 @@
 {
-    "name": "document",
-    "defaultScoringProfile": "",
-    "fields": [
+  "defaultScoringProfile": null,
+  "fields": [
+    {
+      "name": "id",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "retrievable": true,
+      "sortable": true,
+      "facetable": false,
+      "key": true,
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "analyzer": "keyword",
+      "dimensions": null,
+      "vectorSearchProfile": null,
+      "synonymMaps": []
+    },
+    {
+      "name": "filename",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "retrievable": true,
+      "sortable": true,
+      "facetable": true,
+      "key": false,
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "analyzer": null,
+      "dimensions": null,
+      "vectorSearchProfile": null,
+      "synonymMaps": []
+    },
+    {
+      "name": "content",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "retrievable": true,
+      "sortable": false,
+      "facetable": true,
+      "key": false,
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "analyzer": null,
+      "dimensions": null,
+      "vectorSearchProfile": null,
+      "synonymMaps": []
+    },
+    {
+      "name": "vector",
+      "type": "Collection(Edm.Single)",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "sortable": false,
+      "facetable": false,
+      "key": false,
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "analyzer": null,
+      "dimensions": 1536,
+      "vectorSearchProfile": "myHnswProfile",
+      "synonymMaps": []
+    },
+    {
+      "name": "parent_id",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "retrievable": true,
+      "sortable": true,
+      "facetable": true,
+      "key": false,
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "analyzer": null,
+      "normalizer": null,
+      "dimensions": null,
+      "vectorSearchProfile": null,
+      "synonymMaps": []
+    }
+  ],
+  "scoringProfiles": [],
+  "corsOptions": null,
+  "suggesters": [],
+  "analyzers": [],
+  "tokenizers": [],
+  "tokenFilters": [],
+  "charFilters": [],
+  "encryptionKey": null,
+  "similarity": {
+    "@odata.type": "#Microsoft.Azure.Search.BM25Similarity",
+    "k1": null,
+    "b": null
+  },
+  "semantic": {
+    "defaultConfiguration": null,
+    "configurations": [
       {
-        "name": "document_id",
-        "type": "Edm.String",
-        "searchable": false,
-        "filterable": true,
-        "retrievable": true,
-        "sortable": true,
-        "facetable": false,
-        "key": true
+        "name": "my-semantic-config",
+        "prioritizedFields": {
+          "titleField": null,
+          "prioritizedContentFields": [
+            {
+              "fieldName": "content"
+            }
+          ],
+          "prioritizedKeywordsFields": []
+        }
+      }
+    ]
+  },
+  "vectorSearch": {
+    "algorithms": [
+      {
+        "name": "myHnsw",
+        "kind": "hnsw",
+        "hnswParameters": {
+          "metric": "cosine",
+          "m": 4,
+          "efConstruction": 400,
+          "efSearch": 500
+        },
+        "exhaustiveKnnParameters": null
       },
       {
-        "name": "content",
-        "type": "Edm.String",
-        "searchable": true,
-        "filterable": false,
-        "retrievable": true,
-        "sortable": false,
-        "facetable": false,
-        "key": false
-      },
-      {
-        "name": "filesize",
-        "type": "Edm.Int64",
-        "searchable": false,
-        "filterable": false,
-        "retrievable": true,
-        "sortable": false,
-        "facetable": false,
-        "key": false
-      },
-      {
-        "name": "filepath",
-        "type": "Edm.String",
-        "searchable": false,
-        "filterable": false,
-        "retrievable": true,
-        "sortable": false,
-        "facetable": false,
-        "key": false
+        "name": "myExhaustiveKnn",
+        "kind": "exhaustiveKnn",
+        "hnswParameters": null,
+        "exhaustiveKnnParameters": {
+          "metric": "cosine"
+        }
       }
     ],
-    "scoringProfiles": [],
-    "corsOptions": null,
-    "suggesters": [],
-    "analyzers": [],
-    "normalizers": [],
-    "tokenizers": [],
-    "tokenFilters": [],
-    "charFilters": [],
-    "encryptionKey": null,
-    "semantic": null,
-    "vectorSearch": null
+    "profiles": [
+      {
+        "name": "myHnswProfile",
+        "algorithm": "myHnsw",
+        "vectorizer": "myOpenAI"
+      },
+      {
+        "name": "myExhaustiveKnnProfile",
+        "algorithm": "myExhaustiveKnn",
+        "vectorizer": "myOpenAI"
+      }
+    ],
+    "vectorizers": [
+      {
+        "name": "myOpenAI",
+        "kind": "azureOpenAI",
+        "azureOpenAIParameters": {
+          "resourceUri": "{openai_api_endpoint}",
+          "deploymentId": "{openai_embedding_deployment_name}",
+          "apiKey": "{openao_api_key}",
+          "authIdentity": null
+        },
+        "customWebApiParameters": null
+      }
+    ]
   }
+}

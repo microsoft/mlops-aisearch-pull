@@ -1,19 +1,23 @@
 {
-    "name": "{name}",
-    "dataSourceName": "{data_source_name}",
-    "targetIndexName": "{index_name}",
-    "skillsetName": "{skillset_name}",
-    "cache": {
-      "storageConnectionString": "{conn_string}",
-      "enableReprocessing": true
-    },
-    "parameters": {
-      "batchSize": 5,
-      "dataToExtract": "contentAndMetadata",
-      "excludedFileNameExtensions": ".json"
-    },
-    "fieldMappings": [
-    ],
-    "outputFieldMappings": [
-    ]
-  }
+  "description": "Indexer to index documents and generate embeddings",
+  "dataSourceName": "{index_name}-datasource",
+  "skillsetName": "{index_name}-skillset",
+  "targetIndexName": "{index_name}",
+  "disabled": false,
+  "schedule": null,
+  "parameters": {
+    "batchSize": null,
+    "maxFailedItems": null,
+    "maxFailedItemsPerBatch": null
+  },
+  "fieldMappings": [
+    {
+      "sourceFieldName": "metadata_storage_name",
+      "targetFieldName": "filename",
+      "mappingFunction": null
+    }
+  ],
+  "outputFieldMappings": [],
+  "cache": null,
+  "encryptionKey": null
+}

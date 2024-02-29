@@ -8,14 +8,6 @@ def get_app_settings(config: dict, index_name: str):
     """Get the function app settings."""
     return [
         {
-            "name": "FUNCTIONS_WORKER_RUNTIME",
-            "value": "python"
-        },
-        {
-            "name": "AzureWebJobsFeatureFlags",
-            "value": "EnableWorkerIndexing"
-        },
-        {
             "name": "AZURE_OPENAI_API_KEY",
             "value": config.aoai_config["aoai_api_key"]
         },
@@ -64,7 +56,7 @@ def read_json_from_file(file_path):
         return json.load(f)
 
 
-def test_chunker(url: str, params: dict, headers: dict):
+def test_chunker(url: str, headers: dict):
     """
     Test the chunker function.
 
@@ -78,7 +70,7 @@ def test_chunker(url: str, params: dict, headers: dict):
     """
     request_file_path = "./mlops/requests/toChunker.json"
     request_body = read_json_from_file(request_file_path)
-    response = requests.post(url=url, params=params, headers=headers, json=request_body)
+    response = requests.post(url=url, headers=headers, json=request_body)
 
     if response.status_code == 200:
         # verify some things
@@ -96,7 +88,7 @@ def test_chunker(url: str, params: dict, headers: dict):
     return None
 
 
-def test_embedder(url: str, params: dict, headers: dict, chunker_response=None):
+def test_embedder(url: str, headers: dict, chunker_response=None):
     """
     Test the embedder function.
 
@@ -115,11 +107,11 @@ def test_embedder(url: str, params: dict, headers: dict, chunker_response=None):
         request_body = read_json_from_file(request_file_path)
     else:
         request_body = chunker_response
-    response = requests.post(url=url, params=params, headers=headers, json=request_body)
+    response = requests.post(url=url, headers=headers, json=request_body)
     if response.status_code == 200:
         # verify some things
         response_body = response.json()
-        if len(response_body["values"][0]["identifiers"]) == 4:
+        if len(response_body["values"][0]["data"]["embedding"]) == 1536:
             print("Embed test passed")
             return response_body
         else:
@@ -127,43 +119,6 @@ def test_embedder(url: str, params: dict, headers: dict, chunker_response=None):
             print("Response:", response.text)
     else:
         print("Embed Request failed with status code:", response.status_code)
-        print("Response:", response.text)
-
-    return None
-
-
-def test_uploader(url: str, params: dict, headers: dict, embedder_response=None):
-    """
-    Test the uploader function.
-
-    Args:
-        url: The url of the function
-        params: The query parameters
-        headers: The headers
-        embedder_response: The response from the embedder function
-                        - to be used if chaining validation functions
-
-    Returns:
-        The response body if successful, None otherwise
-    """
-    if embedder_response is None:
-        request_file_path = "./mlops/requests/toUploader.json"
-        request_body = read_json_from_file(request_file_path)
-    else:
-        request_body = embedder_response
-        request_body["values"][0]["functionCheck"] = True
-    response = requests.post(url=url, params=params, headers=headers, json=request_body)
-    if response.status_code == 200:
-        # verify some things
-        response_body = response.json()
-        if len(response_body["values"][0]["errors"]) == 0:
-            print("Upload test passed")
-            return response_body
-        else:
-            print("Upload test failed")
-            print("Response:", response.text)
-    else:
-        print("Upload Request failed with status code:", response.status_code)
         print("Response:", response.text)
 
     return None
