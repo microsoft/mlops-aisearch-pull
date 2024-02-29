@@ -63,6 +63,7 @@ def get_request_schema():
 
 
 def log_attempt_number(retry_state):
+    """Log retry attempt."""
     row = retry_state.args[0]
     print(f"Rate Limit Exceeded! Retry Attempt #: {retry_state.attempt_number} | Chunk: {row}")
 
