@@ -1,10 +1,16 @@
 {
-    "name": "{name}",
-    "type": "azureblob",
-    "credentials": {
-      "connectionString": "{conn_string}"
-    },
-    "container": {
-      "name": "{container}"
-    }
-  }
+  "description": null,
+  "type": "azureblob",
+  "subtype": null,
+  "credentials": {
+    "connectionString": "{connection_string}"
+  },
+  "container": {
+    "name": "{container_name}",
+    "query": null
+  },
+  "dataChangeDetectionPolicy": null,
+  "dataDeletionDetectionPolicy": null,
+  "encryptionKey": null,
+  "identity": null
+}

@@ -13,7 +13,6 @@ from mlops.common.naming_utils import generate_slot_name, generate_index_name
 from mlops.common.function_utils import (
     test_chunker,
     test_embedder,
-    test_uploader,
     get_app_settings,
 )
 
@@ -24,7 +23,7 @@ FUNCTION_APP_URL = "https://{function_app_name}.scm.azurewebsites.net/api/zipdep
 FUNCTION_APP_URL_WITH_SLOT = (
     "https://{function_app_name}-{slot}.scm.azurewebsites.net/api/zipdeploy"
 )
-FUNCTION_NAMES = ["Chunk", "IndexUpload", "VectorEmbed"]
+FUNCTION_NAMES = ["Chunk", "VectorEmbed"]
 FUNCTION_URL = (
     "https://management.azure.com/subscriptions/{subscription_id}"
     "/resourceGroups/{resource_group}"
@@ -147,14 +146,18 @@ def _wait_for_functions_ready(
             raise SystemExit(f"Function {function_name} is not working properly.")
 
 
-def _verify_function_works(url: str, params: dict, headers: dict, function_name: str):
+def _verify_function_works(function_app_name: str, slot: str, function_name: str):
     """Verify that the function is working properly based on function name."""
+    headers = {
+        "Content-Type": APPLICATION_JSON_CONTENT_TYPE,
+        "Accept": APPLICATION_JSON_CONTENT_TYPE,
+    }
+    url = f"https://{function_app_name}-{slot}.azurewebsites.net/api/{function_name}"
+
     if function_name == "Chunk":
-        return test_chunker(url, params, headers)
+        return test_chunker(url, headers)
     elif function_name == "VectorEmbed":
-        return test_embedder(url, params, headers)
-    elif function_name == "IndexUpload":
-        return test_uploader(url, params, headers)
+        return test_embedder(url, headers)
     else:
         return True
 

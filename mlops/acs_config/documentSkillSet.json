@@ -1,12 +1,85 @@
 {
-    "name": "{name}",
-    "skills": [
-
-    ],
-    "cognitiveServices": {
-
+  "description": "Skillset to chunk documents and generate embeddings",
+  "skills": [
+    {
+      "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
+      "name": "Chunk",
+      "description": "Split skill to chunk documents",
+      "uri": "{function_url_chunk}",
+      "timeout": "PT3M50S",
+      "batchSize": 1,
+      "degreeOfParallelism": 1,
+      "context": "/document",
+      "inputs": [
+        {
+          "name": "filename",
+          "source": "/document/metadata_storage_name"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "chunks",
+          "targetName": "chunks"
+        }
+      ]
     },
-    "knowledgeStore": {
-
+    {
+      "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
+      "name": "VectorEmbed",
+      "description": "Skill to generate embeddings via Azure OpenAI",
+      "context": "/document/chunks/*",
+      "uri": "{function_url_vector_embed}",
+      "timeout": "PT3M50S",
+      "batchSize": 1,
+      "degreeOfParallelism": 1,
+      "inputs": [
+        {
+          "name": "chunk",
+          "source": "/document/chunks/*"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "embedding",
+          "targetName": "embedding"
+        }
+      ],
+      "authIdentity": null
     }
-  }
+  ],
+  "cognitiveServices": null,
+  "knowledgeStore": null,
+  "indexProjections": {
+    "selectors": [
+      {
+        "targetIndexName": "{index_name}",
+        "parentKeyFieldName": "parent_id",
+        "sourceContext": "/document/chunks/*",
+        "mappings": [
+          {
+            "name": "content",
+            "source": "/document/chunks/*/page_content",
+            "sourceContext": null,
+            "inputs": []
+          },
+          {
+            "name": "vector",
+            "source": "/document/chunks/*/embedding",
+            "sourceContext": null,
+            "inputs": []
+          },
+          {
+            "name": "filename",
+            "source": "/document/metadata_storage_name",
+            "sourceContext": null,
+            "inputs": []
+          }
+        ]
+      }
+    ],
+    "parameters": {
+      "projectionMode": "skipIndexingParentDocuments"
+    }
+  },
+  "encryptionKey": null
+}
