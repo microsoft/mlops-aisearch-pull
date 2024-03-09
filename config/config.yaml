@@ -13,6 +13,10 @@ aoai_config:
   aoai_api_key: ${AOAI_API_KEY}
   aoai_embedding_model_deployment: "text-embedding-ada-002"
 
+functions_config:
+  function_names: ["Chunk", "VectorEmbed"]
+  function_app_name: aiskills-pull
+
 # Azure Cognitive Service config
 acs_config:
   acs_service_name: $(ACS_SERVICE_NAME)

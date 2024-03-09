@@ -11,26 +11,23 @@ from azure.mgmt.web.v2023_01_01.models import Site
 from mlops.common.config_utils import MLOpsConfig
 from mlops.common.naming_utils import generate_slot_name, generate_index_name
 from mlops.common.function_utils import (
-    test_chunker,
-    test_embedder,
     get_app_settings,
 )
 
 # Define the path to the Azure function directory
 APPLICATION_JSON_CONTENT_TYPE = "application/json"
 FUNCTION_API_VERSION = "2022-03-01"
-FUNCTION_APP_URL = "https://{function_app_name}.scm.azurewebsites.net/api/zipdeploy"
-FUNCTION_APP_URL_WITH_SLOT = (
+DEPLOYMENT_APP_URL = "https://{function_app_name}.scm.azurewebsites.net/api/zipdeploy"
+DEPLOYMENT_APP_URL_WITH_SLOT = (
     "https://{function_app_name}-{slot}.scm.azurewebsites.net/api/zipdeploy"
 )
-FUNCTION_NAMES = ["Chunk", "VectorEmbed"]
-FUNCTION_URL = (
+MANAGEMENT_FUNCTION_URL = (
     "https://management.azure.com/subscriptions/{subscription_id}"
     "/resourceGroups/{resource_group}"
     "/providers/Microsoft.Web/sites/{function_app_name}"
     "/functions/{function_name}"
 )
-FUNCTION_URL_WITH_SLOT = (
+MANAGEMENT_FUNCTION_URL_WITH_SLOT = (
     "https://management.azure.com/subscriptions/{subscription_id}"
     "/resourceGroups/{resource_group}"
     "/providers/Microsoft.Web/sites/{function_app_name}"
@@ -40,47 +37,25 @@ MANAGEMENT_SCOPE_URL = "https://management.azure.com/.default"
 CUSTOM_SKILLS_DIR = "src/custom_skills"
 
 
-def _get_function_app_name(credential: DefaultAzureCredential, sub_config: dict):
-    # Get the function app name
-    app_mgmt_client = WebSiteManagementClient(
-        credential=credential, subscription_id=sub_config["subscription_id"]
-    )
-    # The function app uses a GUID function so the name is unknown before hand. There is only one function app in the RG
-    rag_app = list(
-        filter(
-            lambda n: n.resource_group == sub_config["resource_group_name"],
-            app_mgmt_client.web_apps.list(),
-        )
-    )
-
-    return rag_app[0].name
-
-
 def _create_or_update_deployment_slot(
     credential: DefaultAzureCredential,
-    sub_config: dict,
+    subsription_id: str,
+    resource_group_name: str,
     func_name: str,
     slot: str,
-    app_settings: list,
 ):
     app_mgmt_client = WebSiteManagementClient(
-        credential=credential, subscription_id=sub_config["subscription_id"]
+        credential=credential, subscription_id=subsription_id
     )
 
-    rag_app = list(
-        filter(
-            lambda n: n.resource_group == sub_config["resource_group_name"],
-            app_mgmt_client.web_apps.list(),
-        )
-    )
-
-    # site_config = {"appSettings": app_settings}
+    # look at existing app for a location
+    rag_app = app_mgmt_client.web_apps.get(resource_group_name, func_name)
 
     ops_call = app_mgmt_client.web_apps.begin_create_or_update_slot(
-        sub_config["resource_group_name"],
+        resource_group_name,
         func_name,
         slot,
-        Site(location=rag_app[0].location),
+        Site(location=rag_app.location),
     )
     while not ops_call.done():
         print(f"Updating the slot: {slot}")
@@ -89,8 +64,14 @@ def _create_or_update_deployment_slot(
 
 
 def _wait_for_functions_ready(
-    sub_config: dict, function_app_name: str, access_token: str, slot: str
+    credential: DefaultAzureCredential,
+    subscription_id: str,
+    resource_group: str,
+    function_app_name: str,
+    function_names: list,
+    slot: str
 ):
+    access_token = credential.get_token(MANAGEMENT_SCOPE_URL).token
     params = {"api-version": FUNCTION_API_VERSION}
     headers = {
         "Content-Type": APPLICATION_JSON_CONTENT_TYPE,
@@ -98,18 +79,18 @@ def _wait_for_functions_ready(
         "Authorization": "Bearer {access_token}".format(access_token=access_token),
     }
 
-    for function_name in FUNCTION_NAMES:
+    for function_name in function_names:
         if slot is None:
-            url = FUNCTION_URL.format(
-                subscription_id=sub_config["subscription_id"],
-                resource_group=sub_config["resource_group_name"],
+            url = MANAGEMENT_FUNCTION_URL.format(
+                subscription_id=subscription_id,
+                resource_group=resource_group,
                 function_app_name=function_app_name,
                 function_name=function_name,
             )
         else:
-            url = FUNCTION_URL_WITH_SLOT.format(
-                subscription_id=sub_config["subscription_id"],
-                resource_group=sub_config["resource_group_name"],
+            url = MANAGEMENT_FUNCTION_URL_WITH_SLOT.format(
+                subscription_id=subscription_id,
+                resource_group=resource_group,
                 function_app_name=function_app_name,
                 function_name=function_name,
                 slot=slot,
@@ -142,49 +123,19 @@ def _wait_for_functions_ready(
             else:
                 time.sleep(10)
 
-        if not _verify_function_works(url, params, headers, function_name):
-            raise SystemExit(f"Function {function_name} is not working properly.")
 
-
-def _verify_function_works(function_app_name: str, slot: str, function_name: str):
-    """Verify that the function is working properly based on function name."""
-    headers = {
-        "Content-Type": APPLICATION_JSON_CONTENT_TYPE,
-        "Accept": APPLICATION_JSON_CONTENT_TYPE,
-    }
-    url = f"https://{function_app_name}-{slot}.azurewebsites.net/api/{function_name}"
-
-    if function_name == "Chunk":
-        return test_chunker(url, headers)
-    elif function_name == "VectorEmbed":
-        return test_embedder(url, headers)
-    else:
-        return True
-
-
-def main():
-    """Create a deployment of cognitive skills."""
-    parser = argparse.ArgumentParser(description="Parameter parser")
-    parser.add_argument(
-        "--ignore_slot",
-        action="store_true",
-        default=False,
-        help="allows to publish to the production slot",
+def _deploy_functions(
+        credential: DefaultAzureCredential,
+        deployment_url: str,
+        subscription_id: str,
+        resource_group_name: str,
+        func_name: str,
+        slot_name: str,
+        app_settings: dict
+):
+    app_mgmt_client = WebSiteManagementClient(
+        credential=credential, subscription_id=subscription_id
     )
-    args = parser.parse_args()
-
-    # initialize parameters from config.yaml
-    config = MLOpsConfig()
-    # subscription config section in yaml
-    sub_config = config.sub_config
-
-    credential = DefaultAzureCredential()
-
-    # generate a slot name  for the functions based on the branch name
-    if args.ignore_slot is False:
-        slot_name = generate_slot_name()
-    else:
-        slot_name = None
 
     # Generate access token header
     access_token = credential.get_token(MANAGEMENT_SCOPE_URL).token
@@ -204,45 +155,113 @@ def main():
     with open(zip_filename, "rb") as f:
         payload = f.read()
 
-    # URL for Azure Function App ZIP file deployments
-    function_app_name = _get_function_app_name(credential, sub_config)
 
-    if slot_name is None:
-        url = FUNCTION_APP_URL.format(function_app_name=function_app_name)
-    else:
-        app_settings = get_app_settings(config, generate_index_name())
-        _create_or_update_deployment_slot(
-            credential, sub_config, function_app_name, slot_name, app_settings
-        )
-        url = FUNCTION_APP_URL_WITH_SLOT.format(
-            function_app_name=function_app_name, slot=slot_name
-        )
-    print(f"Deploying to: {url}")
+    # TODO: Implement as async with no waiting
     try:
         # Send a POST request to the Azure function app to deploy the zip file
-        response = requests.post(url, headers=headers, data=payload)
+        requests.post(deployment_url, headers=headers, data=payload)
     except requests.exceptions.RequestException as e:
-        print(e)
-        raise SystemExit(e)
+        print("Request has been sent, but no response yet.")
+        # raise SystemExit(e)
 
-    if response.status_code not in [200, 202]:
-        print(
-            "Deployment to {function_app_name} was not successful.".format(
-                function_app_name=function_app_name
-            )
-        )
-        raise SystemExit("Deployment failed")
+    print("Looking for an active deployment.")
+    # look at existing app for a location
+    deployment_slots = app_mgmt_client.web_apps.list_deployments_slot(
+        resource_group_name, func_name, slot_name)
+    
+    current_slot = deployment_slots.next()
+    id = current_slot.id.split("/")[-1]
 
-    _wait_for_functions_ready(
-        sub_config,
-        function_app_name=function_app_name,
-        access_token=access_token,
-        slot=slot_name,
+    print(f"Deployment id: {id}")
+    status = current_slot.status
+
+    while status!=4:
+        current_slot = app_mgmt_client.web_apps.get_deployment_slot(resource_group_name, func_name, id, slot_name)
+        status = current_slot.status
+        if status == 1:
+            print("Deployment is in progress")
+        elif status!=4:
+            raise SystemExit(f"Unknown deployment status {status}")
+        time.sleep(10)
+
+    print("Updating Application settings.")
+    existing_app_settings = app_mgmt_client.web_apps.list_application_settings_slot(
+        resource_group_name,
+        func_name,
+        slot_name
     )
 
-    # response.text is empty when successful, create our own success message on 200 or 202
-    if (response.status_code == 200) or (response.status_code == 202):
-        print(f"Deployment to {function_app_name} successful.")
+    existing_app_settings.properties.update(app_settings)
+
+    app_mgmt_client.web_apps.update_application_settings_slot(
+        resource_group_name,
+        func_name,
+        slot_name,
+        existing_app_settings
+    )
+
+    print("Restarting the application.")
+    app_mgmt_client.web_apps.restart_slot(resource_group_name, func_name, slot_name)
+
+
+def main():
+    """Create a deployment of cognitive skills."""
+
+    # We need to pass ignore_slot to deploy into the default one
+    # this option is needed for CI Build
+    parser = argparse.ArgumentParser(description="Parameter parser")
+    parser.add_argument(
+        "--ignore_slot",
+        action="store_true",
+        default=False,
+        help="allows to publish to the production slot",
+    )
+    args = parser.parse_args()
+
+    # initialize parameters from config.yaml
+    config = MLOpsConfig()
+
+    # subscription config section in yaml
+    subscription_id=config.sub_config["subscription_id"]
+    resource_group=config.sub_config["resource_group_name"]
+
+    # functions_config contains a section with function settings
+    function_app_name = config.functions_config["function_app_name"]
+
+    credential = DefaultAzureCredential()
+
+    # generate a slot name  for the functions based on the branch name
+    if args.ignore_slot is False:
+        slot_name = generate_slot_name()
+    else:
+        slot_name = None
+
+    # deploying or updating the slot
+    if slot_name is None:
+        deployment_url = DEPLOYMENT_APP_URL.format(function_app_name=function_app_name)
+    else:
+        app_settings = get_app_settings(config, generate_index_name())
+        print("Creating a deployment slot.")
+        _create_or_update_deployment_slot(
+            credential, subscription_id, resource_group, function_app_name, slot_name
+        )
+        deployment_url = DEPLOYMENT_APP_URL_WITH_SLOT.format(
+            function_app_name=function_app_name, slot=slot_name
+        )
+
+    print(f"Deploying to: {deployment_url}")
+
+    _deploy_functions(
+        credential, deployment_url, subscription_id, resource_group, function_app_name, slot_name, app_settings)
+    
+    _wait_for_functions_ready(
+        credential,
+        subscription_id,
+        resource_group,
+        function_app_name=function_app_name,
+        function_names=config.functions_config["function_names"],
+        slot=slot_name,
+    )
 
 
 if __name__ == "__main__":
