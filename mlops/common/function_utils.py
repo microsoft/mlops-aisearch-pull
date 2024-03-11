@@ -3,7 +3,6 @@
 
 def get_app_settings(config: dict, index_name: str):
     """Get the function app settings."""
-
     settings_dict = {}
     settings_dict["AZURE_OPENAI_API_KEY"] = config.aoai_config["aoai_api_key"]
     settings_dict["AZURE_OPENAI_API_VERSION"] = config.aoai_config["aoai_api_version"]

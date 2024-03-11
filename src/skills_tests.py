@@ -1,4 +1,4 @@
-"""Implement tests for existing custom skills"""
+"""Implement tests for existing custom skills."""
 import requests
 import json
 

@@ -155,12 +155,11 @@ def _deploy_functions(
     with open(zip_filename, "rb") as f:
         payload = f.read()
 
-
     # TODO: Implement as async with no waiting
     try:
         # Send a POST request to the Azure function app to deploy the zip file
         requests.post(deployment_url, headers=headers, data=payload)
-    except requests.exceptions.RequestException as e:
+    except requests.exceptions.RequestException:
         print("Request has been sent, but no response yet.")
         # raise SystemExit(e)
 
@@ -168,19 +167,19 @@ def _deploy_functions(
     # look at existing app for a location
     deployment_slots = app_mgmt_client.web_apps.list_deployments_slot(
         resource_group_name, func_name, slot_name)
-    
+
     current_slot = deployment_slots.next()
     id = current_slot.id.split("/")[-1]
 
     print(f"Deployment id: {id}")
     status = current_slot.status
 
-    while status!=4:
+    while status != 4:
         current_slot = app_mgmt_client.web_apps.get_deployment_slot(resource_group_name, func_name, id, slot_name)
         status = current_slot.status
         if status == 1:
             print("Deployment is in progress")
-        elif status!=4:
+        elif status != 4:
             raise SystemExit(f"Unknown deployment status {status}")
         time.sleep(10)
 
@@ -206,7 +205,6 @@ def _deploy_functions(
 
 def main():
     """Create a deployment of cognitive skills."""
-
     # We need to pass ignore_slot to deploy into the default one
     # this option is needed for CI Build
     parser = argparse.ArgumentParser(description="Parameter parser")
@@ -222,8 +220,8 @@ def main():
     config = MLOpsConfig()
 
     # subscription config section in yaml
-    subscription_id=config.sub_config["subscription_id"]
-    resource_group=config.sub_config["resource_group_name"]
+    subscription_id = config.sub_config["subscription_id"]
+    resource_group = config.sub_config["resource_group_name"]
 
     # functions_config contains a section with function settings
     function_app_name = config.functions_config["function_app_name"]
@@ -253,7 +251,7 @@ def main():
 
     _deploy_functions(
         credential, deployment_url, subscription_id, resource_group, function_app_name, slot_name, app_settings)
-    
+
     _wait_for_functions_ready(
         credential,
         subscription_id,
