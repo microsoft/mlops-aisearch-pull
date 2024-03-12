@@ -1,4 +1,9 @@
-"""Implement tests for existing custom skills."""
+"""
+Implement tests for existing custom skills.
+
+These functions are going to be a part of smoke testing step in DevOps
+(run_functions script as the main entry point).
+"""
 import requests
 import json
 

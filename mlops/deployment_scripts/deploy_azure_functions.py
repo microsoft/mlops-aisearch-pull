@@ -155,12 +155,13 @@ def _deploy_functions(
     with open(zip_filename, "rb") as f:
         payload = f.read()
 
-    # TODO: Implement as async with no waiting
+    # TODO: Implement as async with no waiting to fire and forget
+    #       in order to move to the next step with no delays.
     try:
         # Send a POST request to the Azure function app to deploy the zip file
-        requests.post(deployment_url, headers=headers, data=payload)
+        requests.post(deployment_url, headers=headers, data=payload, timeout=60)
     except requests.exceptions.RequestException:
-        print("Request has been sent, but no response yet.")
+        print("Request has been sent, but no response yet. Checking deployment status in the next step.")
         # raise SystemExit(e)
 
     print("Looking for an active deployment.")
@@ -174,6 +175,7 @@ def _deploy_functions(
     print(f"Deployment id: {id}")
     status = current_slot.status
 
+    # get_deployment_slot returns 4 in the case of success and 1 for in-progress deployment.
     while status != 4:
         current_slot = app_mgmt_client.web_apps.get_deployment_slot(resource_group_name, func_name, id, slot_name)
         status = current_slot.status

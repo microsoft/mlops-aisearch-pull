@@ -1,4 +1,9 @@
-"""This module invokes a set of functions that test just deployed custom skills."""
+"""
+This module invokes a set of functions that test just deployed custom skills.
+
+The reason to have these tests is to validate functions using small samples prior
+creating any kind of indexes and skillsets. This script is a part of DevOps pipelines.
+"""
 import argparse
 from src.skills_tests import test_chunker, test_embedder
 from mlops.common.config_utils import MLOpsConfig
@@ -8,7 +13,7 @@ from mlops.common.naming_utils import generate_slot_name
 APPLICATION_JSON_CONTENT_TYPE = "application/json"
 
 
-def _verify_function_works(function_app_name: str, slot: str, function_name: str):
+def _verify_function_works(function_app_name: str, function_name: str, slot: str | None):
     """Verify that the function is working properly based on function name."""
     headers = {
         "Content-Type": APPLICATION_JSON_CONTENT_TYPE,
@@ -54,7 +59,7 @@ def main():
     function_names = config.functions_config["function_names"]
 
     for f_name in function_names:
-        _verify_function_works(function_app_name, slot_name, f_name)
+        _verify_function_works(function_app_name, f_name, slot_name)
 
 
 if __name__ == "__main__":
