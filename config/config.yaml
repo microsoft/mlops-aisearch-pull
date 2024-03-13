@@ -19,7 +19,7 @@ functions_config:
 
 # Azure Cognitive Service config
 acs_config:
-  acs_service_name: $(ACS_SERVICE_NAME)
+  acs_service_name: ${ACS_SERVICE_NAME}
   acs_api_base: https://${ACS_SERVICE_NAME}.search.windows.net
   acs_api_version: 2023-10-01-Preview
   acs_api_key: ${ACS_API_KEY}

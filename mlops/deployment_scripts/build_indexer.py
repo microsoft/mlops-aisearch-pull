@@ -7,7 +7,8 @@ import requests
 import time
 import argparse
 
-from azure.identity import DefaultAzureCredential, AzureKeyCredential
+from azure.identity import DefaultAzureCredential
+from azure.core.credentials import AzureKeyCredential
 from azure.mgmt.search import SearchManagementClient
 from azure.mgmt.storage import StorageManagementClient
 from azure.search.documents.indexes import SearchIndexerClient
@@ -30,6 +31,7 @@ MANAGEMENT_SCOPE_URL = "https://management.azure.com/.default"
 
 
 def _create_or_update_search_index(
+    aoai_config: dict,
     search_service_name: str,
     index_name: str,
     file_name: str,
@@ -50,6 +52,10 @@ def _create_or_update_search_index(
     }
     with open(file_name) as index_file:
         index_def = index_file.read()
+
+    index_def = index_def.replace("{openai_api_endpoint}", aoai_config["aoai_api_base"])
+    index_def = index_def.replace("{openai_embedding_deployment_name}", aoai_config["aoai_embedding_model_deployment"])
+    index_def = index_def.replace("{openai_api_key}", aoai_config["aoai_api_key"])
 
     response = requests.put(
         url=index_url, data=index_def, params=params, headers=headers
@@ -83,12 +89,11 @@ def _get_storage_conn_string(
 def _generate_data_source_connection(
     connection_name: str, file_name: str, conn_string: str, container: str
 ):
-
     with open(file_name) as data_source_file:
         data_source_def = data_source_file.read()
 
     data_source_def = data_source_def.replace("{conn_string}", conn_string)
-    data_source_def = data_source_def.replace("{container}", container)
+    data_source_def = data_source_def.replace("{container_name}", container)
     data_source_def = data_source_def.replace("{name}", connection_name)
     data_source_connection = SearchIndexerDataSourceConnection.deserialize(
         data_source_def, APPLICATION_JSON_CONTENT_TYPE
@@ -178,6 +183,7 @@ def main():
     # subscription config section in yaml
     sub_config = config.sub_config
     acs_config = config.acs_config
+    aoai_config = config.aoai_config
 
     index_name = generate_index_name()
     indexer_name = generate_indexer_name()
@@ -195,6 +201,7 @@ def main():
 
     # Create the full document index
     _create_or_update_search_index(
+        aoai_config,
         search_service_name=acs_config["acs_service_name"],
         index_name=index_name,
         file_name=acs_config["acs_document_index_file"],
@@ -221,7 +228,7 @@ def main():
 
     # Create the full document Data Source for the Indexer
     document_data_source_connection = _generate_data_source_connection(
-        datasource_name(),
+        generate_data_source_name(),
         file_name=acs_config["acs_document_data_source"],
         conn_string=conn_string,
         container=storage_container,
