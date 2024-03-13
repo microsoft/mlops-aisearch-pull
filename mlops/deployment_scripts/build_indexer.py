@@ -119,6 +119,7 @@ def _generate_skillset(
         skillset_def = skillset_file.read()
 
     skillset_def = skillset_def.replace("{name}", name)
+    print(f'skillset_def is {skillset_def}')
     skillset = SearchIndexerSkillset.deserialize(
         skillset_def, APPLICATION_JSON_CONTENT_TYPE
     )

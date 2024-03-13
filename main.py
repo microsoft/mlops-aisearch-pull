@@ -1,6 +1,10 @@
 from dotenv import load_dotenv
 load_dotenv()
 from mlops.deployment_scripts.build_indexer import main as build_indexer_main
+from mlops.deployment_scripts.run_functions import main as run_functions_main
+from mlops.deployment_scripts.deploy_azure_functions import main as deploy_azure_functions_main
+
 
 if __name__ == "__main__":
-    build_indexer_main()
+    # deploy_azure_functions_main()
+    run_functions_main()

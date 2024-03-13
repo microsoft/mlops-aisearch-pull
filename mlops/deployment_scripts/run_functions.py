@@ -8,21 +8,47 @@ import argparse
 from src.skills_tests import test_chunker, test_embedder
 from mlops.common.config_utils import MLOpsConfig
 from mlops.common.naming_utils import generate_slot_name
-
+from azure.identity import DefaultAzureCredential
+from azure.mgmt.web import WebSiteManagementClient
 
 APPLICATION_JSON_CONTENT_TYPE = "application/json"
 
+def get_function_key(
+    credential: DefaultAzureCredential, subscription_id: str, resource_group_name: str,
+    function_app_name: str, function_name: str, slot: str | None) -> str:
+    """Get the function key."""
+    # This is a temporary solution to get the function key
+    # This should be replaced with a proper way to get the function key
+    # for the given function
+    app_mgmt_client = WebSiteManagementClient(
+        credential=credential, subscription_id=subscription_id
+    )
+    # get the function key
+    # res = app_mgmt_client
+    print(f'function name is {function_name}')
+    if slot is None:
+        function_key  = app_mgmt_client.web_apps.list_function_keys(resource_group_name, function_app_name, function_name)
+    else:
+        function_key  = app_mgmt_client.web_apps.list_function_keys_slot(resource_group_name, function_app_name, function_name, slot)
+    print(f"Function keys: {function_key}")
+    # functin key
+    result = function_key.additional_properties["default"]
+    print(f'final result is {result}')
+    # exit(0)
+    return result
 
-def _verify_function_works(function_app_name: str, function_name: str, slot: str | None):
+def _verify_function_works(credentials: DefaultAzureCredential, subscription_id: str, resource_group_name:str,
+                            function_app_name: str, function_name: str, slot: str | None):
     """Verify that the function is working properly based on function name."""
     headers = {
         "Content-Type": APPLICATION_JSON_CONTENT_TYPE,
         "Accept": APPLICATION_JSON_CONTENT_TYPE,
     }
+    function_key = get_function_key(credentials, subscription_id, resource_group_name, function_app_name, function_name, slot)
     if slot is None:
-        url = f"https://{function_app_name}.azurewebsites.net/api/{function_name}"
+        url = f"https://{function_app_name}.azurewebsites.net/api/{function_name}?code={function_key}"
     else:
-        url = f"https://{function_app_name}-{slot}.azurewebsites.net/api/{function_name}"
+        url = f"https://{function_app_name}-{slot}.azurewebsites.net/api/{function_name}?code={function_key}"
 
     if function_name == "Chunk":
         return test_chunker(url, headers)
@@ -48,8 +74,15 @@ def main():
     # initialize parameters from config.yaml
     config = MLOpsConfig()
 
+     # subscription config section in yaml
+    subscription_id = config.sub_config["subscription_id"]
+    resource_group = config.sub_config["resource_group_name"]
+
     # functions_config contains a section with function settings
     function_app_name = config.functions_config["function_app_name"]
+
+    credential = DefaultAzureCredential()
+    # functions_config contains a section with function settings
 
     # generate a slot name  for the functions based on the branch name
     if args.ignore_slot is False:
@@ -59,7 +92,8 @@ def main():
     function_names = config.functions_config["function_names"]
 
     for f_name in function_names:
-        _verify_function_works(function_app_name, f_name, slot_name)
+        _verify_function_works(credential, subscription_id, resource_group, function_app_name, f_name, slot_name)
+        # _verify_function_works(function_app_name, f_name, slot_name)
 
 
 if __name__ == "__main__":
