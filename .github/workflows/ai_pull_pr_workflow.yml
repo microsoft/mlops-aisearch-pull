@@ -2,11 +2,10 @@
 name: PR Workflow for AI Search Components
 
 on:
-  workflow_dispatch:
-  workflow_call:
   pull_request:
     branches:
       - 'development'
+  workflow_call:
 
 jobs:
   build-validation:
