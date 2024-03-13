@@ -6,8 +6,9 @@ This module is the primary endpoint for experiments with AI Search service
 import requests
 import time
 import argparse
-from azure.core.credentials import AzureKeyCredential
+
 from azure.identity import DefaultAzureCredential
+from azure.core.credentials import AzureKeyCredential
 from azure.mgmt.search import SearchManagementClient
 from azure.mgmt.storage import StorageManagementClient
 from azure.search.documents.indexes import SearchIndexerClient
@@ -30,7 +31,7 @@ MANAGEMENT_SCOPE_URL = "https://management.azure.com/.default"
 
 
 def _create_or_update_search_index(
-     aoai_config: dict,
+    aoai_config: dict,
     search_service_name: str,
     index_name: str,
     file_name: str,
@@ -93,12 +94,11 @@ def _get_storage_conn_string(
 def _generate_data_source_connection(
     connection_name: str, file_name: str, conn_string: str, container: str
 ):
-
     with open(file_name) as data_source_file:
         data_source_def = data_source_file.read()
 
     data_source_def = data_source_def.replace("{conn_string}", conn_string)
-    data_source_def = data_source_def.replace("{container}", container)
+    data_source_def = data_source_def.replace("{container_name}", container)
     data_source_def = data_source_def.replace("{name}", connection_name)
     data_source_connection = SearchIndexerDataSourceConnection.deserialize(
         data_source_def, APPLICATION_JSON_CONTENT_TYPE
@@ -233,7 +233,7 @@ def main():
 
     # Create the full document Data Source for the Indexer
     document_data_source_connection = _generate_data_source_connection(
-        datasource_name,
+        generate_data_source_name(),
         file_name=acs_config["acs_document_data_source"],
         conn_string=conn_string,
         container=storage_container,

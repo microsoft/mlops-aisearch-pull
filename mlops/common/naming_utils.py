@@ -39,7 +39,7 @@ def generate_index_name():
         ).strip()
 
     git_branch = git_branch.split("/")[-1].replace("_", "-")
-    return f"{git_branch}-index"
+    return f"{git_branch.lower()}-index"
 
 
 def generate_indexer_name():
@@ -75,7 +75,7 @@ def generate_data_source_name():
         ).strip()
 
     git_branch = git_branch.split("/")[-1].replace("_", "-")
-    return f"{git_branch}-data"
+    return f"{git_branch.lower()}-data"
 
 
 def generate_skillset_name():
