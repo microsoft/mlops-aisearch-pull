@@ -30,6 +30,7 @@ MANAGEMENT_SCOPE_URL = "https://management.azure.com/.default"
 
 
 def _create_or_update_search_index(
+     aoai_config: dict,
     search_service_name: str,
     index_name: str,
     file_name: str,
@@ -41,6 +42,7 @@ def _create_or_update_search_index(
     index_url = (
         f"https://{search_service_name}.search.windows.net/indexes('{index_name}')"
     )
+    print(f'index name is {index_name}')
     params = {"api-version": api_version, "allowIndexDowntime": "true"}
     headers = {
         "Content-Type": APPLICATION_JSON_CONTENT_TYPE,
@@ -51,6 +53,14 @@ def _create_or_update_search_index(
     with open(file_name) as index_file:
         index_def = index_file.read()
 
+    index_def = index_def.replace("{openai_api_endpoint}", aoai_config["aoai_api_base"])
+    index_def = index_def.replace("{openai_embedding_deployment_name}", aoai_config["aoai_embedding_model_deployment"])
+    index_def = index_def.replace("{openai_api_key}", aoai_config["aoai_api_key"])
+
+    print(f'index_def is {index_def}')
+    print(f'index_url is {index_url}')
+    print(f'params is {params}')
+    print(f'headers is {headers}')
     response = requests.put(
         url=index_url, data=index_def, params=params, headers=headers
     )
@@ -178,6 +188,7 @@ def main():
     # subscription config section in yaml
     sub_config = config.sub_config
     acs_config = config.acs_config
+    aoai_config = config.aoai_config
 
     index_name = generate_index_name()
     indexer_name = generate_indexer_name()
@@ -195,6 +206,7 @@ def main():
 
     # Create the full document index
     _create_or_update_search_index(
+        aoai_config,
         search_service_name=acs_config["acs_service_name"],
         index_name=index_name,
         file_name=acs_config["acs_document_index_file"],
@@ -221,7 +233,7 @@ def main():
 
     # Create the full document Data Source for the Indexer
     document_data_source_connection = _generate_data_source_connection(
-        datasource_name(),
+        datasource_name,
         file_name=acs_config["acs_document_data_source"],
         conn_string=conn_string,
         container=storage_container,

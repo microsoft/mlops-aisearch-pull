@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 from mlops.deployment_scripts.build_indexer import main as build_indexer_main
 
 if __name__ == "__main__":

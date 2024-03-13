@@ -21,6 +21,8 @@ class MLOpsConfig:
         load_dotenv()
         with open(config_path, "r", encoding="utf-8") as stream:
             self._raw_config = yaml.safe_load(os.path.expandvars(stream.read()))
+        print(f"Loaded config from {config_path}")
+        print(f'raw config: {self._raw_config}')
 
     def __getattr__(self, __name: str) -> Any:
         """Get values for top level keys in configuration."""
