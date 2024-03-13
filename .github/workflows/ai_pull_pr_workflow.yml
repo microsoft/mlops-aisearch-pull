@@ -28,9 +28,9 @@ jobs:
     
       - name: Execute Deployment
         uses: ./.github/actions/execute_shell_code
+        env:
+            BUILD_SOURCEBRANCHNAME: ${GITHUB_REF#refs/heads/}
         with:
             azure_credentials: ${{ secrets.azure_credentials }}
-            env:
-                BUILD_SOURCEBRANCHNAME: ${GITHUB_REF#refs/heads/}
             script_parameter: |
                 python -m mlops.deployment_scripts.deploy_azure_functions
