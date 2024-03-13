@@ -29,7 +29,7 @@ jobs:
       - name: Execute Deployment
         uses: ./.github/actions/execute_shell_code
         env:
-            BUILD_SOURCEBRANCHNAME: ${GITHUB_REF#refs/heads/}
+            BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
         with:
             azure_credentials: ${{ secrets.azure_credentials }}
             script_parameter: |
