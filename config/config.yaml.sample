@@ -1,0 +1,37 @@
+# Subscription configuration.
+sub_config:
+  subscription_id: ${SUBSCRIPTION_ID}
+  resource_group_name: ${RESOURCE_GROUP_NAME}
+  storage_account_name: ${STORAGE_ACCOUNT_NAME}
+  storage_account_connection_string: ${STORAGE_ACCOUNT_CONNECTION_STRING}
+
+# Azure OpenAI configuration.
+aoai_config:
+  aoai_api_base: ${AOAI_BASE_ENDPOINT}
+  aoai_api_type: azure
+  aoai_api_version: 2023-07-01-preview
+  aoai_api_key: ${AOAI_API_KEY}
+  aoai_embedding_model_deployment: "text-embedding-ada-002"
+
+functions_config:
+  function_names: ["Chunk", "VectorEmbed"]
+  function_app_name: aiskills-pull
+
+# Azure Cognitive Service config
+acs_config:
+  acs_service_name: $(ACS_SERVICE_NAME)
+  acs_api_base: https://${ACS_SERVICE_NAME}.search.windows.net
+  acs_api_version: 2023-10-01-Preview
+  acs_api_key: ${ACS_API_KEY}
+  acs_document_index_file: mlops/acs_config/documentIndex.json
+  acs_document_data_source: mlops/acs_config/documentDataSource.json
+  acs_document_skillset_file: mlops/acs_config/documentSkillSet.json
+  acs_document_indexer_file: mlops/acs_config/documentIndexer.json
+
+data_pr:
+    local_folder: data
+    storage_container: toydataset
+
+data_dev:
+    local_folder: data
+    storage_container: fulldataset

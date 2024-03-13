@@ -13,3 +13,8 @@ pytest-azurepipelines==1.0.5
 pytest-mock==3.12.0
 pytest==7.4.0
 azure-mgmt-authorization>=4.0.0
+python-dotenv>=0.10.3
+azure-mgmt-search==9.1.0
+azure-mgmt-storage==21.1.0
+azure-search-documents==11.4.0
+

@@ -418,3 +418,5 @@ local.settings.json
 # Other
 .DS_Store
 
+config/config.yaml
+config.yaml

@@ -6,8 +6,8 @@ This module is the primary endpoint for experiments with AI Search service
 import requests
 import time
 import argparse
-
-from azure.identity import DefaultAzureCredential, AzureKeyCredential
+from azure.core.credentials import AzureKeyCredential
+from azure.identity import DefaultAzureCredential
 from azure.mgmt.search import SearchManagementClient
 from azure.mgmt.storage import StorageManagementClient
 from azure.search.documents.indexes import SearchIndexerClient
@@ -16,8 +16,8 @@ from azure.search.documents.indexes.models import (
     SearchIndexerDataSourceConnection,
     SearchIndexerSkillset,
 )
-from mlops.common.config_utils import MLOpsConfig
-from mlops.common.naming_utils import (
+from ..common.config_utils import MLOpsConfig
+from ..common.naming_utils import (
     generate_index_name,
     generate_indexer_name,
     generate_data_source_name,
