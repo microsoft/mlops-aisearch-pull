@@ -69,7 +69,7 @@ def _wait_for_functions_ready(
     resource_group: str,
     function_app_name: str,
     function_names: list,
-    slot: str
+    slot: str,
 ):
     access_token = credential.get_token(MANAGEMENT_SCOPE_URL).token
     params = {"api-version": FUNCTION_API_VERSION}
@@ -125,12 +125,12 @@ def _wait_for_functions_ready(
 
 
 def _deploy_functions(
-        credential: DefaultAzureCredential,
-        deployment_url: str,
-        subscription_id: str,
-        resource_group_name: str,
-        func_name: str,
-        app_settings: dict
+    credential: DefaultAzureCredential,
+    deployment_url: str,
+    subscription_id: str,
+    resource_group_name: str,
+    func_name: str,
+    app_settings: dict,
 ):
     app_mgmt_client = WebSiteManagementClient(
         credential=credential, subscription_id=subscription_id
@@ -159,13 +159,16 @@ def _deploy_functions(
         # Send a POST request to the Azure function app to deploy the zip file
         requests.post(deployment_url, headers=headers, data=payload, timeout=60)
     except requests.exceptions.RequestException:
-        print("Request has been sent, but no response yet. Checking deployment status in the next step.")
+        print(
+            "Request has been sent, but no response yet. Checking deployment status in the next step."
+        )
         # raise SystemExit(e)
 
     print("Looking for an active deployment.")
     # look at existing app for a location
     deployment_slots = app_mgmt_client.web_apps.list_deployments(
-            resource_group_name, func_name)
+        resource_group_name, func_name
+    )
 
     current_slot = deployment_slots.next()
     id = current_slot.id.split("/")[-1]
@@ -176,7 +179,9 @@ def _deploy_functions(
     # get_deployment_slot returns 4 in the case of success and 1 for in-progress deployment.
     while status != 4:
         # current_slot = app_mgmt_client.web_apps.get_deployment_slot(resource_group_name, func_name, id, slot_name)
-        current_slot = app_mgmt_client.web_apps.get_deployment(resource_group_name, func_name, id)
+        current_slot = app_mgmt_client.web_apps.get_deployment(
+            resource_group_name, func_name, id
+        )
         status = current_slot.status
         if status == 1:
             print("Deployment is in progress")
@@ -204,9 +209,7 @@ def _deploy_functions(
     #     existing_app_settings
     # )
     app_mgmt_client.web_apps.update_application_settings(
-        resource_group_name,
-        func_name,
-        existing_app_settings
+        resource_group_name, func_name, existing_app_settings
     )
 
     print("Restarting the application.")
@@ -215,13 +218,13 @@ def _deploy_functions(
 
 
 def _deploy_functions_withslot(
-        credential: DefaultAzureCredential,
-        deployment_url: str,
-        subscription_id: str,
-        resource_group_name: str,
-        func_name: str,
-        slot_name: str ,
-        app_settings: dict
+    credential: DefaultAzureCredential,
+    deployment_url: str,
+    subscription_id: str,
+    resource_group_name: str,
+    func_name: str,
+    slot_name: str,
+    app_settings: dict,
 ):
     app_mgmt_client = WebSiteManagementClient(
         credential=credential, subscription_id=subscription_id
@@ -233,7 +236,7 @@ def _deploy_functions_withslot(
         "Content-Type": "application/zip",
         "Authorization": "Bearer {access_token}".format(access_token=access_token),
     }
-    print(f'slot name is {slot_name}')
+    print(f"slot name is {slot_name}")
     # Create a zip file of the Custom Skills directory
     zip_filename = shutil.make_archive(
         base_name="__customskills",
@@ -251,13 +254,16 @@ def _deploy_functions_withslot(
         # Send a POST request to the Azure function app to deploy the zip file
         requests.post(deployment_url, headers=headers, data=payload, timeout=60)
     except requests.exceptions.RequestException:
-        print("Request has been sent, but no response yet. Checking deployment status in the next step.")
+        print(
+            "Request has been sent, but no response yet. Checking deployment status in the next step."
+        )
         # raise SystemExit(e)
 
     print("Looking for an active deployment.")
     # look at existing app for a location
     deployment_slots = app_mgmt_client.web_apps.list_deployments_slot(
-            resource_group_name, func_name, slot_name)
+        resource_group_name, func_name, slot_name
+    )
     current_slot = deployment_slots.next()
     id = current_slot.id.split("/")[-1]
 
@@ -266,7 +272,9 @@ def _deploy_functions_withslot(
 
     # get_deployment_slot returns 4 in the case of success and 1 for in-progress deployment.
     while status != 4:
-        current_slot = app_mgmt_client.web_apps.get_deployment_slot(resource_group_name, func_name, id, slot_name)
+        current_slot = app_mgmt_client.web_apps.get_deployment_slot(
+            resource_group_name, func_name, id, slot_name
+        )
         status = current_slot.status
         if status == 1:
             print("Deployment is in progress")
@@ -276,18 +284,13 @@ def _deploy_functions_withslot(
 
     print("Updating Application settings.")
     existing_app_settings = app_mgmt_client.web_apps.list_application_settings_slot(
-        resource_group_name,
-        func_name,
-        slot_name
+        resource_group_name, func_name, slot_name
     )
 
     existing_app_settings.properties.update(app_settings)
 
     app_mgmt_client.web_apps.update_application_settings_slot(
-        resource_group_name,
-        func_name,
-        slot_name,
-        existing_app_settings
+        resource_group_name, func_name, slot_name, existing_app_settings
     )
 
     print("Restarting the application.")
@@ -342,11 +345,22 @@ def main():
 
     if slot_name is None:
         _deploy_functions(
-            credential, deployment_url, subscription_id, resource_group, function_app_name, app_settings
+            credential,
+            deployment_url,
+            subscription_id,
+            resource_group,
+            function_app_name,
+            app_settings,
         )
     else:
         _deploy_functions_withslot(
-            credential, deployment_url, subscription_id, resource_group, function_app_name, slot_name, app_settings
+            credential,
+            deployment_url,
+            subscription_id,
+            resource_group,
+            function_app_name,
+            slot_name,
+            app_settings,
         )
 
     _wait_for_functions_ready(
