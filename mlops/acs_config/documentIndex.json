@@ -154,7 +154,7 @@
         "azureOpenAIParameters": {
           "resourceUri": "{openai_api_endpoint}",
           "deploymentId": "{openai_embedding_deployment_name}",
-          "apiKey": "{openao_api_key}",
+          "apiKey": "{openai_api_key}",
           "authIdentity": null
         },
         "customWebApiParameters": null
