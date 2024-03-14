@@ -58,10 +58,6 @@ def _create_or_update_search_index(
     index_def = index_def.replace("{openai_embedding_deployment_name}", aoai_config["aoai_embedding_model_deployment"])
     index_def = index_def.replace("{openai_api_key}", aoai_config["aoai_api_key"])
 
-    print(f'index_def is {index_def}')
-    print(f'index_url is {index_url}')
-    print(f'params is {params}')
-    print(f'headers is {headers}')
     response = requests.put(
         url=index_url, data=index_def, params=params, headers=headers
     )

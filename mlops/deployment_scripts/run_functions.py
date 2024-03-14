@@ -24,17 +24,11 @@ def get_function_key(
         credential=credential, subscription_id=subscription_id
     )
     # get the function key
-    # res = app_mgmt_client
-    print(f'function name is {function_name}')
     if slot is None:
         function_key  = app_mgmt_client.web_apps.list_function_keys(resource_group_name, function_app_name, function_name)
     else:
         function_key  = app_mgmt_client.web_apps.list_function_keys_slot(resource_group_name, function_app_name, function_name, slot)
-    print(f"Function keys: {function_key}")
-    # functin key
     result = function_key.additional_properties["default"]
-    print(f'final result is {result}')
-    # exit(0)
     return result
 
 def _verify_function_works(credentials: DefaultAzureCredential, subscription_id: str, resource_group_name:str,
@@ -93,7 +87,6 @@ def main():
 
     for f_name in function_names:
         _verify_function_works(credential, subscription_id, resource_group, function_app_name, f_name, slot_name)
-        # _verify_function_works(function_app_name, f_name, slot_name)
 
 
 if __name__ == "__main__":

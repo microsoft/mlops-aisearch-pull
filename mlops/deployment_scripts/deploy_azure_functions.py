@@ -348,8 +348,6 @@ def main():
         _deploy_functions_withslot(
             credential, deployment_url, subscription_id, resource_group, function_app_name, slot_name, app_settings
         )
-    # _deploy_functions(
-    #     credential, deployment_url, subscription_id, resource_group, function_app_name, slot_name, app_settings)
 
     _wait_for_functions_ready(
         credential,
