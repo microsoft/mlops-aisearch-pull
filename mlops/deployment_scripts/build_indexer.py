@@ -3,6 +3,7 @@ This module contains functions to create index, indexer, skillset and datasource
 
 This module is the primary endpoint for experiments with AI Search service
 """
+
 import requests
 import time
 import argparse
@@ -17,8 +18,8 @@ from azure.search.documents.indexes.models import (
     SearchIndexerDataSourceConnection,
     SearchIndexerSkillset,
 )
-from mlops.common.config_utils import MLOpsConfig
-from mlops.common.naming_utils import (
+from ..common.config_utils import MLOpsConfig
+from ..common.naming_utils import (
     generate_index_name,
     generate_indexer_name,
     generate_data_source_name,
@@ -43,6 +44,7 @@ def _create_or_update_search_index(
     index_url = (
         f"https://{search_service_name}.search.windows.net/indexes('{index_name}')"
     )
+    print(f"index name is {index_name}")
     params = {"api-version": api_version, "allowIndexDowntime": "true"}
     headers = {
         "Content-Type": APPLICATION_JSON_CONTENT_TYPE,
@@ -54,7 +56,10 @@ def _create_or_update_search_index(
         index_def = index_file.read()
 
     index_def = index_def.replace("{openai_api_endpoint}", aoai_config["aoai_api_base"])
-    index_def = index_def.replace("{openai_embedding_deployment_name}", aoai_config["aoai_embedding_model_deployment"])
+    index_def = index_def.replace(
+        "{openai_embedding_deployment_name}",
+        aoai_config["aoai_embedding_model_deployment"],
+    )
     index_def = index_def.replace("{openai_api_key}", aoai_config["aoai_api_key"])
 
     response = requests.put(
@@ -114,6 +119,7 @@ def _generate_skillset(
         skillset_def = skillset_file.read()
 
     skillset_def = skillset_def.replace("{name}", name)
+    print(f"skillset_def is {skillset_def}")
     skillset = SearchIndexerSkillset.deserialize(
         skillset_def, APPLICATION_JSON_CONTENT_TYPE
     )
