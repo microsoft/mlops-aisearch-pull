@@ -1,11 +1,12 @@
 {
+  "name": "{name}",
   "description": "Skillset to chunk documents and generate embeddings",
   "skills": [
     {
       "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
       "name": "Chunk",
       "description": "Split skill to chunk documents",
-      "uri": "{function_url_chunk}",
+      "uri": "{Chunk_url}",
       "timeout": "PT3M50S",
       "batchSize": 1,
       "degreeOfParallelism": 1,
@@ -28,7 +29,7 @@
       "name": "VectorEmbed",
       "description": "Skill to generate embeddings via Azure OpenAI",
       "context": "/document/chunks/*",
-      "uri": "{function_url_vector_embed}",
+      "uri": "{VectorEmbed_url}",
       "timeout": "PT3M50S",
       "batchSize": 1,
       "degreeOfParallelism": 1,

@@ -1,7 +1,8 @@
 {
+  "name": "{name}",
   "description": "Indexer to index documents and generate embeddings",
-  "dataSourceName": "{index_name}-datasource",
-  "skillsetName": "{index_name}-skillset",
+  "dataSourceName": "{data_source_name}",
+  "skillsetName": "{skillset_name}",
   "targetIndexName": "{index_name}",
   "disabled": false,
   "schedule": null,

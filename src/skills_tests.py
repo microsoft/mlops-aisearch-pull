@@ -33,15 +33,17 @@ def test_chunker(url: str, headers: dict):
     if response.status_code == 200:
         # verify some things
         response_body = response.json()
-        if len(response_body["values"][0]["data"]) == 4:
+        if len(response_body["values"][0]["data"]["chunks"]) == 4:
             print("Chunk test passed")
             return response_body
         else:
             print("Chunk test failed")
             print("Response:", response.text)
+            raise SystemExit("Chunk test failed")
     else:
         print("Chunk Request failed with status code:", response.status_code)
         print("Response:", response.text)
+        raise SystemExit("Chunk test failed")
 
     return None
 
@@ -75,8 +77,10 @@ def test_embedder(url: str, headers: dict, chunker_response=None):
         else:
             print("Embed test failed")
             print("Response:", response.text)
+            raise SystemExit("Embed test failed")
     else:
         print("Embed Request failed with status code:", response.status_code)
         print("Response:", response.text)
+        raise SystemExit("Embed test failed")
 
     return None

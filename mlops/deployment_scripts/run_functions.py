@@ -9,38 +9,10 @@ import argparse
 from src.skills_tests import test_chunker, test_embedder
 from mlops.common.config_utils import MLOpsConfig
 from mlops.common.naming_utils import generate_slot_name
+from mlops.common.function_utils import get_function_key
 from azure.identity import DefaultAzureCredential
-from azure.mgmt.web import WebSiteManagementClient
 
 APPLICATION_JSON_CONTENT_TYPE = "application/json"
-
-
-def get_function_key(
-    credential: DefaultAzureCredential,
-    subscription_id: str,
-    resource_group_name: str,
-    function_app_name: str,
-    function_name: str,
-    slot: str | None,
-) -> str:
-    """Get the function key."""
-    # This is a temporary solution to get the function key
-    # This should be replaced with a proper way to get the function key
-    # for the given function
-    app_mgmt_client = WebSiteManagementClient(
-        credential=credential, subscription_id=subscription_id
-    )
-    # get the function key
-    if slot is None:
-        function_key = app_mgmt_client.web_apps.list_function_keys(
-            resource_group_name, function_app_name, function_name
-        )
-    else:
-        function_key = app_mgmt_client.web_apps.list_function_keys_slot(
-            resource_group_name, function_app_name, function_name, slot
-        )
-    result = function_key.additional_properties["default"]
-    return result
 
 
 def _verify_function_works(

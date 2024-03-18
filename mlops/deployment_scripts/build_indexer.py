@@ -24,7 +24,9 @@ from ..common.naming_utils import (
     generate_indexer_name,
     generate_data_source_name,
     generate_skillset_name,
+    generate_slot_name
 )
+from mlops.common.function_utils import get_function_key
 
 
 APPLICATION_JSON_CONTENT_TYPE = "application/json"
@@ -112,6 +114,13 @@ def _generate_data_source_connection(
 def _generate_skillset(
     name: str,
     file_name: str,
+    credentials,
+    subscription_id: str,
+    resource_group_name: str,
+    index_name: str,
+    function_app_name: str,
+    function_names: list,
+    slot: str
 ) -> SearchIndexerSkillset:
 
     # Get the config
@@ -119,7 +128,22 @@ def _generate_skillset(
         skillset_def = skillset_file.read()
 
     skillset_def = skillset_def.replace("{name}", name)
-    print(f"skillset_def is {skillset_def}")
+    skillset_def = skillset_def.replace("{index_name}", index_name)
+    for func_name in function_names:
+        function_key = get_function_key(
+            credentials,
+            subscription_id,
+            resource_group_name,
+            function_app_name,
+            func_name,
+            slot,
+        )
+        if slot is None:
+            url = f"https://{function_app_name}.azurewebsites.net/api/{func_name}?code={function_key}"
+        else:
+            url = f"https://{function_app_name}-{slot}.azurewebsites.net/api/{func_name}?code={function_key}"
+
+        skillset_def = skillset_def.replace(f"{{{func_name}_url}}", url)
     skillset = SearchIndexerSkillset.deserialize(
         skillset_def, APPLICATION_JSON_CONTENT_TYPE
     )
@@ -133,13 +157,11 @@ def _generate_indexer(
     data_source_name: str,
     index_name: str,
     skillset_name: str,
-    conn_string: str,
 ) -> SearchIndexer:
 
     with open(file_name) as indexer_file:
         indexer_def = indexer_file.read()
 
-    indexer_def = indexer_def.replace("{conn_string}", conn_string)
     indexer_def = indexer_def.replace("{name}", name)
     indexer_def = indexer_def.replace("{data_source_name}", data_source_name)
     indexer_def = indexer_def.replace("{index_name}", index_name)
@@ -181,6 +203,12 @@ def main():
         default="pr",
         help="stage to find parameters: pr, dev",
     )
+    parser.add_argument(
+        "--ignore_slot",
+        action="store_true",
+        default=False,
+        help="allows to use functions from production slot",
+    )
     args = parser.parse_args()
 
     # initialize parameters from config.yaml
@@ -190,6 +218,7 @@ def main():
     sub_config = config.sub_config
     acs_config = config.acs_config
     aoai_config = config.aoai_config
+    func_config = config.functions_config
 
     index_name = generate_index_name()
     indexer_name = generate_indexer_name()
@@ -243,12 +272,26 @@ def main():
         data_source_connection=document_data_source_connection
     )
 
+    # generate a slot name  for the functions based on the branch name
+    if args.ignore_slot is False:
+        slot_name = generate_slot_name()
+    else:
+        slot_name = None
+
     # Create full document Skillset
     document_skillset = _generate_skillset(
-        skillset_name, acs_config["acs_document_skillset_file"]
+        skillset_name,
+        acs_config["acs_document_skillset_file"],
+        credential,
+        sub_config["subscription_id"],
+        sub_config["resource_group_name"],
+        index_name,
+        func_config["function_app_name"],
+        func_config["function_names"],
+        slot_name
     )
     search_indexer_client.create_or_update_skillset(skillset=document_skillset)
-
+    
     # Create the full document Indexer
     document_indexer = _generate_indexer(
         indexer_name,
@@ -256,7 +299,6 @@ def main():
         datasource_name,
         index_name,
         skillset_name,
-        conn_string,
     )
     search_indexer_client.create_or_update_indexer(indexer=document_indexer)
 
