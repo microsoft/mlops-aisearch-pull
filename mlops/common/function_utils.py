@@ -32,9 +32,6 @@ def get_function_key(
     slot: str | None,
 ) -> str:
     """Get the function key."""
-    # This is a temporary solution to get the function key
-    # This should be replaced with a proper way to get the function key
-    # for the given function
     app_mgmt_client = WebSiteManagementClient(
         credential=credential, subscription_id=subscription_id
     )
