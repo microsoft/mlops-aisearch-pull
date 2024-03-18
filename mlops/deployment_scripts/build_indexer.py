@@ -291,7 +291,7 @@ def main():
         slot_name
     )
     search_indexer_client.create_or_update_skillset(skillset=document_skillset)
-    
+
     # Create the full document Indexer
     document_indexer = _generate_indexer(
         indexer_name,

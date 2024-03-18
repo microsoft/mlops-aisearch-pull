@@ -22,6 +22,7 @@ def get_app_settings(config: dict, index_name: str):
     settings_dict["SCM_DO_BUILD_DURING_DEPLOYMENT"] = "true"
     return settings_dict
 
+
 def get_function_key(
     credential: DefaultAzureCredential,
     subscription_id: str,
