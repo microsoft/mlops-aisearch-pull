@@ -44,3 +44,12 @@ jobs:
             azure_credentials: ${{ secrets.azure_credentials }}
             script_parameter: |
                 python -m mlops.deployment_scripts.run_functions --ignore_slot
+
+      - name: Validate Azure Functions Deployment
+        uses: ./.github/actions/execute_shell_code
+        env:
+            BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
+        with:
+            azure_credentials: ${{ secrets.azure_credentials }}
+            script_parameter: |
+                python -m mlops.deployment_scripts.build_indexer --ignore_slot
