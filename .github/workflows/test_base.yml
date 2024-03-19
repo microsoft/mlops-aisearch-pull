@@ -12,13 +12,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Get the merged branch name
-        id: vars
-        run: |
-          echo "PR_BRANCH_NAME=$(jq --raw-output .pull_request.head.ref $GITHUB_EVENT_PATH)" >> $GITHUB_ENV
-        env:
-          GITHUB_EVENT_PATH: ${{ github.event_path }}
+      # - name: Get the merged branch name
+      #   id: vars
+      #   run: |
+      #     echo "PR_BRANCH_NAME=$(jq --raw-output .pull_request.head.ref $GITHUB_EVENT_PATH)" >> $GITHUB_ENV
+      #   env:
+      #     GITHUB_EVENT_PATH: ${{ github.event_path }}
 
       - name: Use the branch name
         run: |
-          echo "The merged branch name is $PR_BRANCH_NAME"
+          export LATESTLOG=$(git log -1 --pretty=%B)
+          export SOURCEBRANCH=$(echo $LATESTLOG | awk -F '\\\\n' '{print $1}' |  awk -F '/' '{print $2}' | awk '{print $1}')
+          echo "The merged branch name is $SOURCEBRANCH"
