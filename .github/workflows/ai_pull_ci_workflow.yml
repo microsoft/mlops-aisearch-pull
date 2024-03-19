@@ -55,21 +55,17 @@ jobs:
                 python -u -m mlops.deployment_scripts.build_indexer --ignore_slot
 
       - name: Get merged branch name
+        id: get_branch_name
         run: |
-          # Get the last merge commit
-          MERGE_COMMIT=$(git log -1 --merges --format='%H')
-
-          # Get the branch name that was merged into development
-          MERGED_BRANCH=$(git show -s --pretty=%P $MERGE_COMMIT | cut -d ' ' -f 2 | xargs git branch --contains | grep -v 'development$' | tr -d ' *')
-
-          # Print the merged branch name
-          echo "Merged branch: $MERGED_BRANCH"
-          echo "MERGED_BRANCH=$MERGED_BRANCH" >> $GITHUB_ENV
+          export LATESTLOG=$(git log -1 --pretty=%B)
+          export SOURCEBRANCH=$(echo "$LATESTLOG" | head -n 1 | cut -d'/' -f2-)
+          echo "The merged branch  name is $SOURCEBRANCH"
+          echo "::set-output name=sourcebranch::$SOURCEBRANCH"
 
       - name: Cleanup PR Branch
         uses: ./.github/actions/execute_shell_code
         env:
-            BUILD_SOURCEBRANCHNAME: $MERGED_BRANCH
+            BUILD_SOURCEBRANCHNAME: ${{ steps.get_branch_name.outputs.sourcebranch }}
         with:
             azure_credentials: ${{ secrets.azure_credentials }}
             script_parameter: |
