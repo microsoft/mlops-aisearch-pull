@@ -54,10 +54,22 @@ jobs:
             script_parameter: |
                 python -u -m mlops.deployment_scripts.build_indexer --ignore_slot
 
+      - name: Get merged branch name
+        run: |
+          # Get the last merge commit
+          MERGE_COMMIT=$(git log -1 --merges --format='%H')
+
+          # Get the branch name that was merged into development
+          MERGED_BRANCH=$(git show -s --pretty=%P $MERGE_COMMIT | cut -d ' ' -f 2 | xargs git branch --contains | grep -v 'development$' | tr -d ' *')
+
+          # Print the merged branch name
+          echo "Merged branch: $MERGED_BRANCH"
+          echo "MERGED_BRANCH=$MERGED_BRANCH" >> $GITHUB_ENV
+
       - name: Cleanup PR Brnach
         uses: ./.github/actions/execute_shell_code
         env:
-            BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
+            BUILD_SOURCEBRANCHNAME: $MERGED_BRANCH
         with:
             azure_credentials: ${{ secrets.azure_credentials }}
             script_parameter: |
