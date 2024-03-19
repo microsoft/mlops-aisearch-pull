@@ -49,7 +49,7 @@ def test_chunker(url: str, headers: dict):
                 raise SystemExit("Chunk test failed")
         else:
             print(f"The request failed, and it will be resubmitted for {retry} times.")
-            
+
     print("Chunk Request failed with status code:", response.status_code)
     print("Response:", response.text)
     raise SystemExit("Chunk test failed")
