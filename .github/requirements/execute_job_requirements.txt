@@ -8,3 +8,4 @@ pyyaml
 azure-mgmt-authorization>=4.0.0
 azure-mgmt-search==9.1.0
 azure-mgmt-storage==21.1.0
+azure-search-documents==11.3.0

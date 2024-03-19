@@ -45,7 +45,7 @@ jobs:
             script_parameter: |
                 python -m mlops.deployment_scripts.run_functions --ignore_slot
 
-      - name: Validate Azure Functions Deployment
+      - name: Deploy Indexer
         uses: ./.github/actions/execute_shell_code
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}

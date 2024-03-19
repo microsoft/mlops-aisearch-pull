@@ -14,7 +14,6 @@ from azure.mgmt.search import SearchManagementClient
 from azure.mgmt.storage import StorageManagementClient
 from azure.search.documents.indexes import SearchIndexerClient
 from azure.search.documents.indexes.models import (
-    SearchIndexer,
     SearchIndexerDataSourceConnection,
     SearchIndexerSkillset,
 )
@@ -27,6 +26,7 @@ from ..common.naming_utils import (
     generate_slot_name
 )
 from mlops.common.function_utils import get_function_key
+from mlops.common.ai_search_utils import generate_indexer
 
 
 APPLICATION_JSON_CONTENT_TYPE = "application/json"
@@ -151,27 +151,6 @@ def _generate_skillset(
     return skillset
 
 
-def _generate_indexer(
-    name: str,
-    file_name: str,
-    data_source_name: str,
-    index_name: str,
-    skillset_name: str,
-) -> SearchIndexer:
-
-    with open(file_name) as indexer_file:
-        indexer_def = indexer_file.read()
-
-    indexer_def = indexer_def.replace("{name}", name)
-    indexer_def = indexer_def.replace("{data_source_name}", data_source_name)
-    indexer_def = indexer_def.replace("{index_name}", index_name)
-    indexer_def = indexer_def.replace("{skillset_name}", skillset_name)
-
-    indexer = SearchIndexer.deserialize(indexer_def, APPLICATION_JSON_CONTENT_TYPE)
-
-    return indexer
-
-
 def _wait_for_document_indexer(indexer_client: SearchIndexerClient, indexer_name: str):
     status = "Indexer {document_indexer_name} not started yet".format(
         document_indexer_name=indexer_name
@@ -293,12 +272,14 @@ def main():
     search_indexer_client.create_or_update_skillset(skillset=document_skillset)
 
     # Create the full document Indexer
-    document_indexer = _generate_indexer(
-        indexer_name,
+    document_indexer = generate_indexer(
         acs_config["acs_document_indexer_file"],
-        datasource_name,
-        index_name,
-        skillset_name,
+        {
+            "name": indexer_name,
+            "data_source_name": datasource_name,
+            "index_name": index_name,
+            "skillset_name": skillset_name
+        }
     )
     search_indexer_client.create_or_update_indexer(indexer=document_indexer)
 
