@@ -22,7 +22,8 @@
       "extensions": [
         "ms-azuretools.vscode-azurefunctions",
         "ms-azuretools.vscode-docker",
-        "ms-python.python"
+        "ms-python.python",
+        "streetsidesoftware.code-spell-checker"
       ]
     }
   }
