@@ -34,7 +34,7 @@ jobs:
         with:
             azure_credentials: ${{ secrets.azure_credentials }}
             script_parameter: |
-                python -m -u mlops.deployment_scripts.deploy_azure_functions --ignore_slot
+                python -u -m mlops.deployment_scripts.deploy_azure_functions --ignore_slot
 
       - name: Validate Azure Functions Deployment
         uses: ./.github/actions/execute_shell_code
@@ -43,7 +43,7 @@ jobs:
         with:
             azure_credentials: ${{ secrets.azure_credentials }}
             script_parameter: |
-                python -m -u mlops.deployment_scripts.run_functions --ignore_slot
+                python -u -m mlops.deployment_scripts.run_functions --ignore_slot
 
       - name: Deploy Indexer
         uses: ./.github/actions/execute_shell_code
@@ -52,4 +52,4 @@ jobs:
         with:
             azure_credentials: ${{ secrets.azure_credentials }}
             script_parameter: |
-                python -m -u mlops.deployment_scripts.build_indexer --ignore_slot
+                python -u -m mlops.deployment_scripts.build_indexer --ignore_slot
