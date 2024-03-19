@@ -26,7 +26,7 @@ jobs:
           convert: upper
       - name: Configure Job Agent
         uses: ./.github/actions/configure_job_agent
-    
+
       - name: Execute Azure Functions Deployment
         uses: ./.github/actions/execute_shell_code
         env:
@@ -53,3 +53,12 @@ jobs:
             azure_credentials: ${{ secrets.azure_credentials }}
             script_parameter: |
                 python -u -m mlops.deployment_scripts.build_indexer --ignore_slot
+
+      - name: Cleanup PR Brnach
+        uses: ./.github/actions/execute_shell_code
+        env:
+            BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
+        with:
+            azure_credentials: ${{ secrets.azure_credentials }}
+            script_parameter: |
+                python -u -m mlops.deployment_scripts.cleanup_pr
