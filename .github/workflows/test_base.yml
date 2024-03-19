@@ -23,4 +23,4 @@ jobs:
         run: |
           export LATESTLOG=$(git log -1 --pretty=%B)
           export SOURCEBRANCH=$(echo $LATESTLOG | awk -F '\\\\n' '{print $1}' |  awk -F '/' '{print $2}' | awk '{print $1}')
-          echo "The merged branch name is $SOURCEBRANCH"
+          echo "The merged branch  name is $SOURCEBRANCH"
