@@ -35,7 +35,7 @@ jobs:
         with:
           azure_credentials: ${{ secrets.azure_credentials }}
           script_parameter: |
-            python -m mlops.deployment_scripts.upload_data
+            python -u -m mlops.deployment_scripts.upload_data
 
       - name: Upload full data to the full dataset
         uses: ./.github/actions/execute_shell_code
@@ -46,4 +46,4 @@ jobs:
         with:
           azure_credentials: ${{ secrets.azure_credentials }}
           script_parameter: |
-            python -m mlops.deployment_scripts.upload_data --stage dev
+            python -u -m mlops.deployment_scripts.upload_data --stage dev

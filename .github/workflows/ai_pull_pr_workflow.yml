@@ -26,11 +26,29 @@ jobs:
       - name: Configure Job Agent
         uses: ./.github/actions/configure_job_agent
     
-      - name: Execute Deployment
+      - name: Execute Azure Functions Deployment
         uses: ./.github/actions/execute_shell_code
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
         with:
             azure_credentials: ${{ secrets.azure_credentials }}
             script_parameter: |
-                python -m mlops.deployment_scripts.deploy_azure_functions
+                python -u -m mlops.deployment_scripts.deploy_azure_functions
+
+      - name: Validate Azure Functions Deployment
+        uses: ./.github/actions/execute_shell_code
+        env:
+            BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
+        with:
+            azure_credentials: ${{ secrets.azure_credentials }}
+            script_parameter: |
+                python -u -m mlops.deployment_scripts.run_functions
+
+      - name: Deploy Indexer
+        uses: ./.github/actions/execute_shell_code
+        env:
+            BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
+        with:
+            azure_credentials: ${{ secrets.azure_credentials }}
+            script_parameter: |
+                python -u -m mlops.deployment_scripts.build_indexer

@@ -24,28 +24,35 @@ def test_chunker(url: str, headers: dict):
         headers: The headers
 
     Returns:
-        The response body if successful, None otherwise
+        The response body if successful, raise SystemExit exception otherwise
     """
-    request_file_path = "src/requests/toChunker.json"
-    request_body = read_json_from_file(request_file_path)
-    response = requests.post(url=url, headers=headers, json=request_body)
+    retry = 3
+    status_code = -1
 
-    if response.status_code == 200:
-        # verify some things
-        response_body = response.json()
-        if len(response_body["values"][0]["data"]["chunks"]) == 4:
-            print("Chunk test passed")
-            return response_body
+    while status_code != 200 and retry > 0:
+        request_file_path = "src/requests/toChunker.json"
+        request_body = read_json_from_file(request_file_path)
+        response = requests.post(url=url, headers=headers, json=request_body)
+        status_code = response.status_code
+
+        retry = retry - 1
+
+        if status_code == 200:
+            # verify some things
+            response_body = response.json()
+            if len(response_body["values"][0]["data"]["chunks"]) == 4:
+                print("Chunk test passed")
+                return response_body
+            else:
+                print("Chunk test failed")
+                print("Response:", response.text)
+                raise SystemExit("Chunk test failed")
         else:
-            print("Chunk test failed")
-            print("Response:", response.text)
-            raise SystemExit("Chunk test failed")
-    else:
-        print("Chunk Request failed with status code:", response.status_code)
-        print("Response:", response.text)
-        raise SystemExit("Chunk test failed")
+            print(f"The request failed, and it will be resubmitted for {retry} times.")
 
-    return None
+    print("Chunk Request failed with status code:", response.status_code)
+    print("Response:", response.text)
+    raise SystemExit("Chunk test failed")
 
 
 def test_embedder(url: str, headers: dict, chunker_response=None):
@@ -60,27 +67,34 @@ def test_embedder(url: str, headers: dict, chunker_response=None):
                         - to be used if chaining validation functions
 
     Returns:
-        The response body if successful, None otherwise
+        The response body if successful, raise SystemExit exception otherwise
     """
-    if chunker_response is None:
-        request_file_path = "src/requests/toEmbedder.json"
-        request_body = read_json_from_file(request_file_path)
-    else:
-        request_body = chunker_response
-    response = requests.post(url=url, headers=headers, json=request_body)
-    if response.status_code == 200:
-        # verify some things
-        response_body = response.json()
-        if len(response_body["values"][0]["data"]["embedding"]) == 1536:
-            print("Embed test passed")
-            return response_body
-        else:
-            print("Embed test failed")
-            print("Response:", response.text)
-            raise SystemExit("Embed test failed")
-    else:
-        print("Embed Request failed with status code:", response.status_code)
-        print("Response:", response.text)
-        raise SystemExit("Embed test failed")
+    retry = 3
+    status_code = -1
 
-    return None
+    while status_code != 200 and retry > 0:
+        if chunker_response is None:
+            request_file_path = "src/requests/toEmbedder.json"
+            request_body = read_json_from_file(request_file_path)
+        else:
+            request_body = chunker_response
+        response = requests.post(url=url, headers=headers, json=request_body)
+        status_code = response.status_code
+        retry = retry - 1
+
+        if status_code == 200:
+            # verify some things
+            response_body = response.json()
+            if len(response_body["values"][0]["data"]["embedding"]) == 1536:
+                print("Embed test passed")
+                return response_body
+            else:
+                print("Embed test failed")
+                print("Response:", response.text)
+                raise SystemExit("Embed test failed")
+        else:
+            print(f"The request failed, and it will be resubmitted for {retry} times.")
+
+    print("Embed Request failed with status code:", response.status_code)
+    print("Response:", response.text)
+    raise SystemExit("Embed test failed")
