@@ -22,7 +22,7 @@ def generate_indexer(
     with open(file_name) as indexer_file:
         indexer_def = indexer_file.read()
 
-    for key in values_to_assign.keys:
+    for key in values_to_assign.keys():
         indexer_def = indexer_def.replace(f"{{{key}}}", values_to_assign[key])
 
     indexer = SearchIndexer.deserialize(indexer_def, APPLICATION_JSON_CONTENT_TYPE)
