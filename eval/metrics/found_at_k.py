@@ -1,10 +1,7 @@
-from typing import List, Dict
+from typing import Dict
 
 
-async def found_at_k(
-    data: Dict,
-    k: int = 3
-) -> float:
+async def found_at_k(data: Dict, k: int = 3) -> float:
     """
     Calculates whether the ground truth document was found within first K results of
     the search.
@@ -26,7 +23,7 @@ async def found_at_k(
     # If no ground truth provided
     if ground_truth_url is None or len(ground_truth_url) == 0:
         return 0
-    
+
     # If search results are empty
     if len(search_results) == 0:
         return 0
