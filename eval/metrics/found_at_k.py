@@ -19,7 +19,6 @@ async def found_at_k(data: Dict, k: int = 3) -> float:
     Returns:
         int: Found @ K
     """
-
     search_results = data.get("answer")
     ground_truth_url = data.get("truth")["url"]
 

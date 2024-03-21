@@ -1,4 +1,4 @@
-""""Example script to run search evaluation using Generative SDK."""
+"""Example script to run search evaluation using Generative SDK."""
 import os
 import argparse
 import nest_asyncio
