@@ -1,13 +1,14 @@
 """
-This module contains the definition of found @ K metric. This metric calculates
-whether the ground truth document was found within first K results of the search.
+This module contains the definition of found @ K metric.
+This metric calculates whether the ground truth document was found
+within first K results of the search.
 """
 
 from typing import Dict
 
 
 async def found_at_k(data: Dict, k: int = 3) -> float:
-    """Calculates whether the ground truth document was found within first K results of
+    """Calculate whether the ground truth document was found within first K results of
     the search.
 
     Args:

@@ -40,6 +40,15 @@ SEARCH_KEY = os.environ.get("AZURE_SEARCH_KEY")
 
 # Define search function (can depend on your index/search type)
 def search(search_client: SearchClient, question: str, **kwargs) -> Dict:
+    """Perform search for the given question using the given search client
+
+    Args:
+        search_client (SearchClient): search client
+        question (str): search query
+
+    Returns:
+        Dict: search results
+    """
     query_vector = VectorizableTextQuery(
         text=question, k_nearest_neighbors=1, fields="vector", exhaustive=True
     )
@@ -63,6 +72,13 @@ def search(search_client: SearchClient, question: str, **kwargs) -> Dict:
 
 
 def log_metrics(tracking_uri: str, eval_id: str, output_path: str):
+    """Log aggregated metrics at the run level into the AI Studio.
+
+    Args:
+        tracking_uri (str): MLFlow tracking uri
+        eval_id (str): evaluation run id
+        output_path (str): file path, containing the path to the evaluation result
+    """
     # Display metrics as a data frame
     eval_df = pd.read_json(os.path.join(output_path, "eval_results.jsonl"), lines=True)
 
@@ -86,6 +102,18 @@ def run_evaluation(
     data_path: str,
     output_path: str = "./",
 ):
+    """Run search evaluation
+
+    Args:
+        ai_client (AIClient): AI Studio client
+        search_client (SearchClient): AI Search client
+        eval_name (str): Name of the evaluation run
+        data_path (str): Path to the data
+        output_path (str, optional): Path to save the result to. Defaults to "./".
+
+    Returns:
+        EvaluationResult: evaluation result
+    """
     # Instantiate required parameters
     target = partial(search, search_client=search_client)
 
@@ -107,6 +135,13 @@ def run_evaluation(
 
 
 def main(eval_name: str, data_path: str, output_path: str = "./"):
+    """Run evaluation and log results into the AI Studio
+
+    Args:
+        eval_name (str): Name of the evaluation run
+        data_path (str): Path to the data
+        output_path (str, optional): Path to save the result to. Defaults to "./".
+    """
     # Create credential
     credential = AzureKeyCredential(SEARCH_KEY)
 
