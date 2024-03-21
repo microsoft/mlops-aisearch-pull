@@ -1,5 +1,4 @@
-"""
-This module contains the definition of found @ K metric.
+"""This module contains the definition of found @ K metric.
 This metric calculates whether the ground truth document was found
 within first K results of the search.
 """

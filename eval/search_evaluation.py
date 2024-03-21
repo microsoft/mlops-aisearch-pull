@@ -1,3 +1,5 @@
+""""Example script to run search evaluation using Generative SDK.
+"""
 import os
 import argparse
 import nest_asyncio
@@ -40,7 +42,7 @@ SEARCH_KEY = os.environ.get("AZURE_SEARCH_KEY")
 
 # Define search function (can depend on your index/search type)
 def search(search_client: SearchClient, question: str, **kwargs) -> Dict:
-    """Perform search for the given question using the given search client
+    """Perform search for the given question using the given search client.
 
     Args:
         search_client (SearchClient): search client
@@ -102,7 +104,7 @@ def run_evaluation(
     data_path: str,
     output_path: str = "./",
 ):
-    """Run search evaluation
+    """Run search evaluation.
 
     Args:
         ai_client (AIClient): AI Studio client
@@ -135,7 +137,7 @@ def run_evaluation(
 
 
 def main(eval_name: str, data_path: str, output_path: str = "./"):
-    """Run evaluation and log results into the AI Studio
+    """Run evaluation and log results into the AI Studio.
 
     Args:
         eval_name (str): Name of the evaluation run
