@@ -15,14 +15,14 @@ from tenacity import (
 REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.json")
 
 
-def main(req: func.HttpRequest) -> func.HttpResponse:
+def function_vector_embed(req: func.HttpRequest) -> func.HttpResponse:
     """Generate vector embeddings for a list of texts."""
     logging.info("Python HTTP trigger function processed a request.")
 
     request = req.get_json()
 
     try:
-        jsonschema.validate(request, schema=get_request_schema())
+        jsonschema.validate(request, schema=_get_request_schema())
     except jsonschema.exceptions.ValidationError as e:
         return func.HttpResponse("Invalid request: {0}".format(e), status_code=400)
 
@@ -31,7 +31,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         record_id = value["recordId"]
 
         chunk = value["data"]["chunk"]
-        embedding = generate_embedding(chunk["page_content"])
+        embedding = _generate_embedding(chunk["page_content"])
 
         values.append(
             {
@@ -55,14 +55,14 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     return response
 
 
-def get_request_schema():
+def _get_request_schema():
     """Retrieve the request schema from path."""
     with open(REQUEST_SCHEMA_PATH) as f:
         schema = json.load(f)
     return schema
 
 
-def log_attempt_number(retry_state):
+def _log_attempt_number(retry_state):
     """Log retry attempt."""
     row = retry_state.args[0]
     print(f"Rate Limit Exceeded! Retry Attempt #: {retry_state.attempt_number} | Chunk: {row}")
@@ -70,8 +70,8 @@ def log_attempt_number(retry_state):
 
 @retry(retry=retry_if_exception_type(openai.RateLimitError),
        wait=wait_random_exponential(min=1, max=60),
-       stop=stop_after_attempt(10), after=log_attempt_number)
-def generate_embedding(text):
+       stop=stop_after_attempt(10), after=_log_attempt_number)
+def _generate_embedding(text):
     """
     Generate embeddings for text.
 

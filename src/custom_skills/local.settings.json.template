@@ -10,7 +10,6 @@
       "AZURE_OPENAI_ENDPOINT":"OpenAI Endpoint",
       "AZURE_STORAGE_ACCOUNT_CONNECTION_STRING":"Connection string for storage account which contains documents to process",
       "AZURE_STORAGE_CONTAINER_NAME":"container where the data is stored",
-      "AZURE_SEARCH_INDEX_NAME":"index to upload data to",
       "AZURE_SEARCH_ENDPOINT":"Azure AI Search Endpoint",
       "AZURE_SEARCH_API_KEY":"AI Search API Key"
 

@@ -72,6 +72,31 @@ def _create_or_update_search_index(
         raise Exception(response.content)
 
 
+def _create_or_update_skillset(skillset: dict,
+                               skillset_name: str,
+                               search_service_name: str,
+                               search_admin_key: str,
+                               api_version: str) -> None:
+    # Using the rest API because the SDK doesn't support indexProjections
+    skillset_url = (
+        f"https://{search_service_name}.search.windows.net/skillsets/{skillset_name}"
+    )
+    params = {"api-version": api_version}
+    headers = {
+        "Content-Type": APPLICATION_JSON_CONTENT_TYPE,
+        "Accept": APPLICATION_JSON_CONTENT_TYPE,
+        "Prefer": "true",
+        "api-key": search_admin_key,
+    }
+
+    response = requests.put(
+        url=skillset_url, data=skillset, params=params, headers=headers
+    )
+
+    if response.status_code not in [200, 201, 204]:
+        raise Exception(response.content)
+
+
 def _get_storage_conn_string(
     credential: DefaultAzureCredential,
     subscription_id: str,
@@ -121,7 +146,7 @@ def _generate_skillset(
     function_app_name: str,
     function_names: list,
     slot: str
-) -> SearchIndexerSkillset:
+) -> object:
 
     # Get the config
     with open(file_name) as skillset_file:
@@ -144,11 +169,8 @@ def _generate_skillset(
             url = f"https://{function_app_name}-{slot}.azurewebsites.net/api/{func_name}?code={function_key}"
 
         skillset_def = skillset_def.replace(f"{{{func_name}_url}}", url)
-    skillset = SearchIndexerSkillset.deserialize(
-        skillset_def, APPLICATION_JSON_CONTENT_TYPE
-    )
 
-    return skillset
+    return skillset_def
 
 
 def _wait_for_document_indexer(indexer_client: SearchIndexerClient, indexer_name: str):
@@ -269,8 +291,14 @@ def main():
         func_config["function_names"],
         slot_name
     )
-    search_indexer_client.create_or_update_skillset(skillset=document_skillset)
 
+    _create_or_update_skillset(
+        document_skillset,
+        skillset_name,
+        search_service_name=acs_config["acs_service_name"],
+        search_admin_key=search_admin_key,
+        api_version=acs_config["acs_api_version"]
+    )
     # Create the full document Indexer
     document_indexer = generate_indexer(
         acs_config["acs_document_indexer_file"],

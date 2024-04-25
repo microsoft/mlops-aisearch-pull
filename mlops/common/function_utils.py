@@ -14,7 +14,6 @@ def get_app_settings(config: dict, index_name: str):
 
     settings_dict["AZURE_SEARCH_API_KEY"] = config.acs_config["acs_api_key"]
     settings_dict["AZURE_SEARCH_API_VERSION"] = config.acs_config["acs_api_version"]
-    settings_dict["AZURE_SEARCH_INDEX_NAME"] = index_name
     settings_dict["AZURE_STORAGE_ACCOUNT_CONNECTION_STRING"] = config.sub_config["storage_account_connection_string"]
     settings_dict["AZURE_STORAGE_CONTAINER_NAME"] = config.get_flow_config("data")["storage_container"]
 
