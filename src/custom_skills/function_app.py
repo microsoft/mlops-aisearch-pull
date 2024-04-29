@@ -1,3 +1,4 @@
+"""Azure Function App for custom skills."""
 import azure.functions as func
 import logging
 from Chunk import function_chunk
