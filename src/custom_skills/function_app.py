@@ -5,16 +5,22 @@ from VectorEmbed import function_vector_embed
 
 app = func.FunctionApp()
 
+
 @app.route("Health", auth_level=func.AuthLevel.ANONYMOUS)
-def HealthCheck(req: func.HttpRequest) -> func.HttpResponse:
+def health_check(req: func.HttpRequest) -> func.HttpResponse:
+    """Check health of the function."""
     version = 1
     logging.info(f"Health check version {version}")
     return func.HttpResponse(f"This function executed successfully with version {version}.", status_code=200)
 
+
 @app.route("Chunk", auth_level=func.AuthLevel.ANONYMOUS)
-def Chunk(req: func.HttpRequest) -> func.HttpResponse:
+def chunk(req: func.HttpRequest) -> func.HttpResponse:
+    """Divide document into chunks of text."""
     return function_chunk(req)
 
+
 @app.route("VectorEmbed", auth_level=func.AuthLevel.ANONYMOUS)
-def VectorEmbed(req: func.HttpRequest) -> func.HttpResponse:
+def vector_embed(req: func.HttpRequest) -> func.HttpResponse:
+    """Convert text to vector embedding."""
     return function_vector_embed(req)

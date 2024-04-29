@@ -14,8 +14,7 @@ from azure.mgmt.search import SearchManagementClient
 from azure.mgmt.storage import StorageManagementClient
 from azure.search.documents.indexes import SearchIndexerClient
 from azure.search.documents.indexes.models import (
-    SearchIndexerDataSourceConnection,
-    SearchIndexerSkillset,
+    SearchIndexerDataSourceConnection
 )
 from ..common.config_utils import MLOpsConfig
 from ..common.naming_utils import (

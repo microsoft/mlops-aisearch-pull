@@ -11,6 +11,7 @@ from azure.storage.blob import BlobServiceClient
 
 REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.json")
 
+
 def function_chunk(req: func.HttpRequest) -> func.HttpResponse:
     """Divide document into chunks of text."""
     logging.info("Python HTTP trigger function processed a request.")
@@ -70,7 +71,6 @@ def _chunk_pdf_file_from_azure2(
     Returns:
         A list of Documents, each containing a 'page_content' chunk of text
     """
-
     conn_string = os.environ.get("AZURE_STORAGE_ACCOUNT_CONNECTION_STRING")
     container = os.environ.get("AZURE_STORAGE_CONTAINER_NAME")
     blob_service_client = BlobServiceClient.from_connection_string(conn_string)
