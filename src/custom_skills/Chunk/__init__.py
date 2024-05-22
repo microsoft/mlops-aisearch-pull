@@ -3,21 +3,23 @@ import os
 import logging
 import json
 import jsonschema
-from langchain_community.document_loaders import AzureBlobStorageFileLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.document_loaders import PyPDFLoader
+
+from azure.storage.blob import BlobServiceClient
 
 
 REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.json")
 
 
-def main(req: func.HttpRequest) -> func.HttpResponse:
+def function_chunk(req: func.HttpRequest) -> func.HttpResponse:
     """Divide document into chunks of text."""
     logging.info("Python HTTP trigger function processed a request.")
 
     request = req.get_json()
 
     try:
-        jsonschema.validate(request, schema=get_request_schema())
+        jsonschema.validate(request, schema=_get_request_schema())
     except jsonschema.exceptions.ValidationError as e:
         return func.HttpResponse("Invalid request: {0}".format(e), status_code=400)
 
@@ -26,7 +28,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         record_id = value["recordId"]
         filename = value["data"]["filename"]
 
-        chunks = chunk_pdf_file_from_azure(filename)
+        chunks = _chunk_pdf_file_from_azure2(filename)
 
         values.append(
             {
@@ -48,14 +50,14 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     return response
 
 
-def get_request_schema():
+def _get_request_schema():
     """Retrieve the request schema from path."""
     with open(REQUEST_SCHEMA_PATH) as f:
         schema = json.load(f)
     return schema
 
 
-def chunk_pdf_file_from_azure(
+def _chunk_pdf_file_from_azure2(
     file_name: str, chunk_size: int = 1000, overlap_size: int = 100
 ):
     """
@@ -69,13 +71,22 @@ def chunk_pdf_file_from_azure(
     Returns:
         A list of Documents, each containing a 'page_content' chunk of text
     """
+    conn_string = os.environ.get("AZURE_STORAGE_ACCOUNT_CONNECTION_STRING")
+    container = os.environ.get("AZURE_STORAGE_CONTAINER_NAME")
+    blob_service_client = BlobServiceClient.from_connection_string(conn_string)
+    container_client = blob_service_client.get_container_client(container)
+
+    blob_client = container_client.get_blob_client(blob=file_name)
+    with open(f"/tmp/{file_name}", "wb") as file:
+        file.write(blob_client.download_blob().readall())
+
+    loader = PyPDFLoader(f"/tmp/{file_name}")
+    pages = loader.load()
+
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size, chunk_overlap=overlap_size
     )
-    loader = AzureBlobStorageFileLoader(
-        conn_str=os.environ.get("AZURE_STORAGE_ACCOUNT_CONNECTION_STRING"),
-        container=os.environ.get("AZURE_STORAGE_CONTAINER_NAME"),
-        blob_name=file_name,
-    )
-    chunks = loader.load_and_split(text_splitter=text_splitter)
+
+    chunks = text_splitter.split_documents(pages)
+
     return chunks

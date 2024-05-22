@@ -62,7 +62,7 @@
       "searchAnalyzer": null,
       "analyzer": null,
       "dimensions": 1536,
-      "vectorSearchProfile": "myHnswProfile",
+      "vectorSearchProfile": "my-vector-config-profile",
       "synonymMaps": []
     },
     {
@@ -116,7 +116,7 @@
   "vectorSearch": {
     "algorithms": [
       {
-        "name": "myHnsw",
+        "name": "my-vector-config",
         "kind": "hnsw",
         "hnswParameters": {
           "metric": "cosine",
@@ -125,39 +125,12 @@
           "efSearch": 500
         },
         "exhaustiveKnnParameters": null
-      },
-      {
-        "name": "myExhaustiveKnn",
-        "kind": "exhaustiveKnn",
-        "hnswParameters": null,
-        "exhaustiveKnnParameters": {
-          "metric": "cosine"
-        }
       }
     ],
     "profiles": [
       {
-        "name": "myHnswProfile",
-        "algorithm": "myHnsw",
-        "vectorizer": "myOpenAI"
-      },
-      {
-        "name": "myExhaustiveKnnProfile",
-        "algorithm": "myExhaustiveKnn",
-        "vectorizer": "myOpenAI"
-      }
-    ],
-    "vectorizers": [
-      {
-        "name": "myOpenAI",
-        "kind": "azureOpenAI",
-        "azureOpenAIParameters": {
-          "resourceUri": "{openai_api_endpoint}",
-          "deploymentId": "{openai_embedding_deployment_name}",
-          "apiKey": "{openai_api_key}",
-          "authIdentity": null
-        },
-        "customWebApiParameters": null
+        "name": "my-vector-config-profile",
+        "algorithm": "my-vector-config"
       }
     ]
   }

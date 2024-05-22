@@ -40,7 +40,7 @@ def test_chunker(url: str, headers: dict):
         if status_code == 200:
             # verify some things
             response_body = response.json()
-            if len(response_body["values"][0]["data"]["chunks"]) == 4:
+            if len(response_body["values"][0]["data"]["chunks"]) == 6:
                 print("Chunk test passed")
                 return response_body
             else:
