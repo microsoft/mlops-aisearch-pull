@@ -43,7 +43,7 @@ def _verify_function_works(
 
     if function_name == "Chunk":
         return test_chunker(url, headers)
-    elif function_name == "VectorEmbed":
+    elif function_name == "Vector_Embed":
         return test_embedder(url, headers)
     else:
         return True
