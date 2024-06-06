@@ -39,6 +39,7 @@ def delete_function_app_slot(config: MLOpsConfig):
 
 
 def delete_indexer_entity(config: MLOpsConfig, entity_name: str, entity_type: str):
+    """Delete indexer entity."""
     # Get the variables
     endpoint = config.acs_config["acs_api_base"]
     api_version = config.acs_config["acs_api_version"]
