@@ -29,7 +29,7 @@
       "name": "VectorEmbed",
       "description": "Skill to generate embeddings via Azure OpenAI",
       "context": "/document/chunks/*",
-      "uri": "{VectorEmbed_url}",
+      "uri": "{Vector_Embed_url}",
       "timeout": "PT3M50S",
       "batchSize": 1,
       "degreeOfParallelism": 1,

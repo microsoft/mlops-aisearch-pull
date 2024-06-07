@@ -14,7 +14,7 @@ aoai_config:
   aoai_embedding_model_deployment: "text-embedding-ada-002"
 
 functions_config:
-  function_names: ["Chunk", "VectorEmbed"]
+  function_names: ["Chunk", "Vector_Embed"]
   function_app_name: aiskills-pull
 
 # Azure Cognitive Service config

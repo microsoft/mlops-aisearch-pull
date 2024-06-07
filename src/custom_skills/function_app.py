@@ -21,7 +21,7 @@ def chunk(req: func.HttpRequest) -> func.HttpResponse:
     return function_chunk(req)
 
 
-@app.route("VectorEmbed", auth_level=func.AuthLevel.ANONYMOUS)
+@app.route("Vector_Embed", auth_level=func.AuthLevel.ANONYMOUS)
 def vector_embed(req: func.HttpRequest) -> func.HttpResponse:
     """Convert text to vector embedding."""
     return function_vector_embed(req)
