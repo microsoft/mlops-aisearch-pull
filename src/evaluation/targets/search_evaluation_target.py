@@ -57,10 +57,7 @@ class SearchEvaluationTarget(EvaluationTarget):
 
         Args:
             query (str): search query
-            company (str): company name
-            top (int, optional): number of top results to fetch. Defaults to 3.
-            search_type (str, optional): type of the search. Can be "hybrid" or "vector".
-                Defaults to "hybrid".
+            top (int, optional): number of top results to fetch. Defaults to 3
         """
         query_vector = VectorizableTextQuery(
             text=query, k_nearest_neighbors=1, fields="content_vector", exhaustive=True
