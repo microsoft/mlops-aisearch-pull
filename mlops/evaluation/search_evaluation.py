@@ -1,3 +1,5 @@
+"""Runs evaluation for Azure AI Search."""
+
 import os
 
 import argparse
@@ -16,8 +18,7 @@ from mlops.common.naming_utils import generate_experiment_name
 
 
 def main(index_name: str, semantic_config: str, data_path: str):
-    """
-    Runs evaluation for the given search index
+    """Run evaluation for the given search index.
 
     Args:
         index_name (str): search index name
@@ -26,18 +27,18 @@ def main(index_name: str, semantic_config: str, data_path: str):
     """
     experiment_name = generate_experiment_name(index_name)
 
-    SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
-    RESOURCE_GROUP = os.environ.get("AZURE_RESOURCE_GROUP")
-    PROJECT_NAME = os.environ.get("AI_STUDIO_PROJECT_NAME")
+    subscription_id = os.environ.get("AZURE_SUBSCRIPTION_ID")
+    resource_group = os.environ.get("AZURE_RESOURCE_GROUP")
+    project_name = os.environ.get("AI_STUDIO_PROJECT_NAME")
 
-    AZURE_SEARCH_SERVICE_ENDPOINT = os.environ.get("AZURE_SEARCH_SERVICE_ENDPOINT")
-    AZURE_SEARCH_SERVICE_KEY = os.environ.get("AZURE_SEARCH_API_KEY")
+    azure_search_endpoint = os.environ.get("AZURE_SEARCH_SERVICE_ENDPOINT")
+    azure_search_key = os.environ.get("AZURE_SEARCH_API_KEY")
 
     target = SearchEvaluationTarget(
         index_name,
         semantic_config,
-        AZURE_SEARCH_SERVICE_ENDPOINT,
-        AZURE_SEARCH_SERVICE_KEY,
+        azure_search_endpoint,
+        azure_search_key,
     )
 
     # Define a dictionary of evaluators and their aliases
@@ -72,9 +73,9 @@ def main(index_name: str, semantic_config: str, data_path: str):
         evaluators=evaluators,
         evaluator_config=evaluators_config,
         azure_ai_project={
-            "subscription_id": SUBSCRIPTION_ID,
-            "resource_group_name": RESOURCE_GROUP,
-            "project_name": PROJECT_NAME,
+            "subscription_id": subscription_id,
+            "resource_group_name": resource_group,
+            "project_name": project_name,
         },
     )
     print(results["studio_url"])
