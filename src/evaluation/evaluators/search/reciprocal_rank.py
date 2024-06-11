@@ -1,3 +1,5 @@
+"""Calculate reciprocal rank metric for search evaluation."""
+
 from typing import Dict, List
 
 from .evaluator import Evaluator
@@ -6,9 +8,9 @@ from src.evaluation.evaluators.search.preprocessing import _preprocess_data
 
 class ReciprocalRankEvaluator(Evaluator):
     """
-    An evaluator to calculate the reciprocal rank of the search response. The reciprocal rank of a response
-    is the multiplicative inverse of the rank of the first correct answer.
+    An evaluator to calculate the reciprocal rank of the search response.
 
+    The reciprocal rank of a response is the multiplicative inverse of the rank of the first correct answer.
     """
 
     def __init__(self):
@@ -30,8 +32,9 @@ class ReciprocalRankEvaluator(Evaluator):
 
     def evaluate(self, search_result: List[Dict], ground_truth: List[Dict]) -> float:
         """
-        Calculate the reciprocal rank of the search response. The reciprocal rank of a response
-        is the multiplicative inverse of the rank of the first correct answer.
+        Calculate the reciprocal rank of the search response.
+
+        The reciprocal rank of a response is the multiplicative inverse of the rank of the first correct answer.
 
         Args:
             search_result (List[Dict]): an array of search results
