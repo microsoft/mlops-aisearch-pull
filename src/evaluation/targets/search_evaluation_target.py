@@ -53,7 +53,7 @@ class SearchEvaluationTarget(EvaluationTarget):
 
     def __call__(self, query: str, top: int = 10):
         """
-        This method calls search and should be used by the evaluation framework only.
+        Implement search call, will be used by the evaluation framework only.
 
         Args:
             query (str): search query
