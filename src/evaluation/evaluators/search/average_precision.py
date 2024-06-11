@@ -1,3 +1,5 @@
+"""Calculate Average Precision metric for search evaluation."""
+
 from typing import Dict, List
 
 from .evaluator import Evaluator
@@ -6,8 +8,9 @@ from src.evaluation.evaluators.search.preprocessing import _preprocess_data
 
 class AveragePrecisionEvaluator(Evaluator):
     """
-    An evaluator to calculate average precision (AP) score, that indicates whether all ground truth documents are
-    ranked highly in the search results.
+    An evaluator to calculate average precision (AP) score.
+
+    AP score indicates whether all ground truth documents are ranked highly in the search results.
     """
 
     def __init__(self):
@@ -29,8 +32,9 @@ class AveragePrecisionEvaluator(Evaluator):
 
     def evaluate(self, search_result: List[Dict], ground_truth: List[Dict]) -> float:
         """
-        Calculate average precision (AP) score, that indicates whether all ground truth documents are
-        ranked highly in the search results.
+        Calculate average precision (AP) score.
+
+        AP score indicates whether all ground truth documents are ranked highly in the search results.
 
         Args:
             search_result (List[Dict]): an array of search results

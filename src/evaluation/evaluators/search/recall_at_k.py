@@ -1,3 +1,5 @@
+"""Calculate Recall @ K metric for search evaluation."""
+
 from typing import Dict, List
 
 from .evaluator import Evaluator
@@ -8,6 +10,7 @@ class RecallAtKEvaluator(Evaluator):
     """
     An evaluator to calculate the rate of the ground truth documents (out of all ground truth documents)
     found within first K results of the search.
+
     Recall = Number of ground truth documents retrieved / Total number of ground truth documents
     """
 
@@ -32,6 +35,7 @@ class RecallAtKEvaluator(Evaluator):
         """
         Calculate the rate of the ground truth documents (out of all ground truth documents)
         found within first K results of the search.
+
         Recall = Number of ground truth documents retrieved / Total number of ground truth documents
 
         Args:

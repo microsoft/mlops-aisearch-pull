@@ -1,3 +1,5 @@
+"""Calculate Precision @ K metric for search evaluation."""
+
 from typing import Dict, List
 
 from .evaluator import Evaluator
@@ -7,6 +9,7 @@ from src.evaluation.evaluators.search.preprocessing import _preprocess_data
 class PrecisionAtKEvaluator(Evaluator):
     """
     An evaluator to calculate how many ground truth document(s) are included in the retrieved K results.
+
     Precision = Number of ground truth documents retrieved / Total number of documents retrieved
     """
 
@@ -30,6 +33,7 @@ class PrecisionAtKEvaluator(Evaluator):
     def evaluate(self, search_result: List[Dict], ground_truth: List[Dict]) -> float:
         """
         Calculate the precision of the search within the top K results.
+
         Precision @ K shows how many ground truth document(s) are included in the retrieved K results.
         Precision = Number of ground truth documents retrieved / Total number of documents retrieved
 

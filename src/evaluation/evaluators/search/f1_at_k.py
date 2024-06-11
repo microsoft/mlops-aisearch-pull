@@ -1,3 +1,5 @@
+"""Calculate F1 @ K metric for search evaluation."""
+
 from typing import Dict, List
 
 from .evaluator import Evaluator
@@ -6,9 +8,7 @@ from .recall_at_k import RecallAtKEvaluator
 
 
 class F1AtKEvaluator(Evaluator):
-    """
-    An evaluator to calculate F1 score, a harmonic mean of precision and recall
-    """
+    """An evaluator to calculate F1 score, a harmonic mean of precision and recall."""
 
     def __init__(self, k: int = 3):
         """Initialize the object of the class."""
@@ -30,6 +30,7 @@ class F1AtKEvaluator(Evaluator):
     def evaluate(self, search_result: List[Dict], ground_truth: List[Dict]) -> float:
         """
         Calculate the F1 score of the search within the top K results.
+
         F1 score is a harmonic mean of precision and recall.
 
         Args:
