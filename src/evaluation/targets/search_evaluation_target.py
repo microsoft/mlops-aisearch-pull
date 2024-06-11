@@ -1,3 +1,5 @@
+"""Implement Evaluation Target for Azure AI Search."""
+
 from typing import Dict, List
 
 from azure.core.credentials import AzureKeyCredential
@@ -12,9 +14,7 @@ from src.evaluation.targets.evaluation_target import EvaluationTarget
 
 
 class SearchEvaluationTarget(EvaluationTarget):
-    """
-    Implementation of `EvaluationTarget` class for Search.
-    """
+    """Implementation of `EvaluationTarget` class for Search."""
 
     search_client: SearchClient
     fields_to_select: List[str] = ["url", "page_number"]
@@ -23,7 +23,7 @@ class SearchEvaluationTarget(EvaluationTarget):
         self, index_name: str, semantic_config: str, endpoint: str, key: str
     ) -> None:
         """
-        Instantiates a `SearchEvaluationTarget` object
+        Instantiate a `SearchEvaluationTarget` object.
 
         Args:
             index_name (str): name of the Azure AI Search index
@@ -37,7 +37,7 @@ class SearchEvaluationTarget(EvaluationTarget):
 
     def __select_fields(self, dictionary: Dict, fields: List[str] = None) -> Dict:
         """
-        Selects specified fields from a dictionary
+        Select specified fields from a dictionary.
 
         Args:
             dictionary (Dict): dictionary

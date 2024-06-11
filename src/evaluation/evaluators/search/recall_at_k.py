@@ -8,9 +8,10 @@ from src.evaluation.evaluators.search.preprocessing import _preprocess_data
 
 class RecallAtKEvaluator(Evaluator):
     """
-    An evaluator to calculate the rate of the ground truth documents (out of all ground truth documents)
+    An evaluator to calculate Recall @ K.
+    
+    Recall @ K shows the rate of the ground truth documents (out of all ground truth documents)
     found within first K results of the search.
-
     Recall = Number of ground truth documents retrieved / Total number of ground truth documents
     """
 
@@ -33,11 +34,12 @@ class RecallAtKEvaluator(Evaluator):
 
     def evaluate(self, search_result: List[Dict], ground_truth: List[Dict]) -> float:
         """
-        Calculate the rate of the ground truth documents (out of all ground truth documents)
+        Calculates Recall @ K.
+    
+        Recall @ K shows the rate of the ground truth documents (out of all ground truth documents)
         found within first K results of the search.
-
         Recall = Number of ground truth documents retrieved / Total number of ground truth documents
-
+    
         Args:
             search_result (List[Dict]): an array of search results
             ground_truth (List[Dict]): an array of ground truth

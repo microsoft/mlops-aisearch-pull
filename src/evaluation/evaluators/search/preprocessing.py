@@ -1,3 +1,5 @@
+"""Preprocess the data for further metrics calculation."""
+
 from typing import Dict, Tuple, List
 
 
@@ -7,7 +9,9 @@ def _preprocess_data(
     k: int = None,
 ) -> Tuple[List, List]:
     """
-    Preprocess the data for the downstream metric calculation. The following steps are included:
+    Preprocess the data for the downstream metric calculation.
+
+    The following steps are included:
     * Convert results and ground truth into a list of tuples of the following format: (url, page number)
     * Normalize all the urls
     * Select top K items (if K is provided)
