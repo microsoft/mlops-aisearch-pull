@@ -27,12 +27,12 @@ def main(index_name: str, semantic_config: str, data_path: str):
     """
     experiment_name = generate_experiment_name(index_name)
 
-    subscription_id = os.environ.get("AZURE_SUBSCRIPTION_ID")
-    resource_group = os.environ.get("AZURE_RESOURCE_GROUP")
+    subscription_id = os.environ.get("SUBSCRIPTION_ID")
+    resource_group = os.environ.get("RESOURCE_GROUP_NAME")
     project_name = os.environ.get("AI_STUDIO_PROJECT_NAME")
 
     azure_search_endpoint = os.environ.get("AZURE_SEARCH_SERVICE_ENDPOINT")
-    azure_search_key = os.environ.get("AZURE_SEARCH_API_KEY")
+    azure_search_key = os.environ.get("ACS_API_KEY")
 
     target = SearchEvaluationTarget(
         index_name,
