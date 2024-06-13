@@ -30,6 +30,10 @@ class RecallAtKEvaluator(Evaluator):
         Returns:
             Dict: Result of evaluation in the following format: `{recall_at_k: <value>}`
         """
+        # Checking if we have an error in the results
+        if len(search_result) == 0:
+            return {f"recall_at_{self.k}": 0}
+
         return {f"recall_at_{self.k}": self.evaluate(search_result, ground_truth)}
 
     def evaluate(self, search_result: List[Dict], ground_truth: List[Dict]) -> float:
