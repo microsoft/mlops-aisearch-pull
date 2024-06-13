@@ -17,7 +17,7 @@ class SearchEvaluationTarget(EvaluationTarget):
     """Implementation of `EvaluationTarget` class for Search."""
 
     search_client: SearchClient
-    fields_to_select: List[str] = ["url", "page_number"]
+    fields_to_select: List[str] = ["filename", "page_number"]
 
     def __init__(
         self, index_name: str, semantic_config: str, endpoint: str, key: str

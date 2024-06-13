@@ -13,7 +13,7 @@ def _preprocess_data(
 
     The following steps are included:
     * Convert results and ground truth into a list of tuples of the following format: (filename, page number)
-    * Normalize all the urls
+    * Normalize all the filenames
     * Select top K items (if K is provided)
 
 
@@ -33,7 +33,7 @@ def _preprocess_data(
         min_k = min(k, len(search_results))
     top_k_search_results = search_results[:min_k]
 
-    # Extract URLs from retrieved documents, lowercase page numbers and urls
+    # Extract filenames from retrieved documents, lowercase page numbers and filenamess
     top_k_search_results = [
         (sr["filename"].lower(), str(sr["page_number"])) for sr in top_k_search_results
     ]
