@@ -25,7 +25,7 @@ jobs:
           convert: upper
       - name: Configure Job Agent
         uses: ./.github/actions/configure_job_agent
-    
+
       - name: Execute Azure Functions Deployment
         uses: ./.github/actions/execute_shell_code
         env:
@@ -52,3 +52,26 @@ jobs:
             azure_credentials: ${{ secrets.azure_credentials }}
             script_parameter: |
                 python -u -m mlops.deployment_scripts.build_indexer
+  run_search_evaluation:
+    name: Run Search Evaluation
+    runs-on: ubuntu-latest
+    needs: deploy-azure-functions
+    env:
+      BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Load Python Dependencies
+        shell: bash
+        run: |
+          set -e
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade -r .github/requirements/search_evaluation_requirements.txt
+      - name: Execute search evaluation
+        shell: bash
+        run: |
+          python -u -m mlops.evaluation.search_evaluation --gt_path "./mlops/evaluation/data/search_evaluation_data.jsonl" --index_name $BUILD_SOURCEBRANCHNAME-index --semantic_config my-semantic-config
