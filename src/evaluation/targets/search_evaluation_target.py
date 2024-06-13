@@ -59,19 +59,22 @@ class SearchEvaluationTarget(EvaluationTarget):
             query (str): search query
             top (int, optional): number of top results to fetch. Defaults to 3
         """
-        query_vector = VectorizableTextQuery(
-            text=query, k_nearest_neighbors=1, fields="content_vector", exhaustive=True
-        )
+        try:
+            query_vector = VectorizableTextQuery(
+                text=query, k_nearest_neighbors=1, fields="content_vector", exhaustive=True
+            )
 
-        search_results = self.search_client.search(
-            search_text=query,
-            vector_queries=[query_vector],
-            query_type=QueryType.SEMANTIC,
-            semantic_configuration_name=self.semantic_config,
-            query_caption=QueryCaptionType.EXTRACTIVE,
-            query_answer=QueryAnswerType.EXTRACTIVE,
-            top=top,
-        )
-        result = list(search_results)
-        result_selected_fields = [self.__select_fields(res) for res in result]
+            search_results = self.search_client.search(
+                search_text=query,
+                vector_queries=[query_vector],
+                query_type=QueryType.SEMANTIC,
+                semantic_configuration_name=self.semantic_config,
+                query_caption=QueryCaptionType.EXTRACTIVE,
+                query_answer=QueryAnswerType.EXTRACTIVE,
+                top=top,
+            )
+            result = list(search_results)
+            result_selected_fields = [self.__select_fields(res) for res in result]
+        except Exception:
+            result_selected_fields = ""
         return {"search_result": result_selected_fields}
