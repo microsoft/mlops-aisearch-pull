@@ -75,6 +75,7 @@ class SearchEvaluationTarget(EvaluationTarget):
             )
             result = list(search_results)
             result_selected_fields = [self.__select_fields(res) for res in result]
-        except Exception:
-            result_selected_fields = ""
-        return {"search_result": result_selected_fields}
+            res = {"error": "", "search_result": result_selected_fields}
+        except Exception as ex:
+            res = {"error": str(ex), "search_result": []}
+        return res
