@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from promptflow.evals.evaluate import evaluate
 
 from src.evaluation.evaluators.search import (
-    RecallAtKEvaluator,
+    # RecallAtKEvaluator,
     PrecisionAtKEvaluator,
     # F1AtKEvaluator,
     # AveragePrecisionEvaluator,
@@ -47,9 +47,9 @@ def main(index_name: str, semantic_config: str, data_path: str):
 
     # Define a dictionary of evaluators and their aliases
     evaluators = {
-        "Recall@3": RecallAtKEvaluator(k=3),
-        "Recall@5": RecallAtKEvaluator(k=5),
-        "Recall@10": RecallAtKEvaluator(k=10),
+        # "Recall@3": RecallAtKEvaluator(k=3),
+        # "Recall@5": RecallAtKEvaluator(k=5),
+        # "Recall@10": RecallAtKEvaluator(k=10),
         "Precision@3": PrecisionAtKEvaluator(k=3),
         "Precision@5": PrecisionAtKEvaluator(k=5),
         "Precision@10": PrecisionAtKEvaluator(k=10),
