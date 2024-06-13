@@ -34,6 +34,10 @@ def main(index_name: str, semantic_config: str, data_path: str):
     azure_search_endpoint = f"https://{azure_search_service_name}.search.windows.net"
     azure_search_key = os.environ.get("ACS_API_KEY")
 
+    print(f"Running evaluation for index: {index_name}")
+    print(f"Azure Search Endpoint {azure_search_endpoint}")
+    print(f"Azure Search Key {azure_search_key}")
+
     target = SearchEvaluationTarget(
         index_name,
         semantic_config,
