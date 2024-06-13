@@ -74,4 +74,4 @@ jobs:
       - name: Execute search evaluation
         shell: bash
         run: |
-          python -u -m mlops.evaluation.search_evaluation --gt_path "./mlops/evaluation/data/search_evaluation_data.jsonl" --index_name $BUILD_SOURCEBRANCHNAME-index --semantic_config my-semantic-config
+          python -u -m mlops.evaluation.search_evaluation --gt_path "./mlops/evaluation/data/search_evaluation_data.jsonl" --semantic_config my-semantic-config

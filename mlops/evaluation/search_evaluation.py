@@ -92,7 +92,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--index_name",
         type=str,
-        required=True,
+        required=False,
         help="Name of the Azure AI Search index to evaluate",
     )
     parser.add_argument(
@@ -104,5 +104,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     load_dotenv()
+
+    if not args.index_name:
+        args.index_name = os.environ.get("BUILD_SOURCEBRANCHNAME")
 
     main(args.index_name, args.semantic_config, args.gt_path)
