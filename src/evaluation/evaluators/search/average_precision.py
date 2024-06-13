@@ -30,7 +30,7 @@ class AveragePrecisionEvaluator(Evaluator):
         """
         # Checking if we have an error in the results
         if len(search_result) == 0:
-            return {f"average_precision": 0}
+            return {"average_precision": 0}
 
         return {"average_precision": self.evaluate(search_result, ground_truth)}
 

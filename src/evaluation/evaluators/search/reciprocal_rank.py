@@ -30,7 +30,7 @@ class ReciprocalRankEvaluator(Evaluator):
         """
         # Checking if we have an error in the results
         if len(search_result) == 0:
-            return {f"reciprocal_rank": 0}
+            return {"reciprocal_rank": 0}
 
         return {"reciprocal_rank": self.evaluate(search_result, ground_truth)}
 
