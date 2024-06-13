@@ -14,7 +14,7 @@ from src.evaluation.evaluators.search import (
     ReciprocalRankEvaluator,
 )
 from src.evaluation.targets.search_evaluation_target import SearchEvaluationTarget
-from mlops.common.naming_utils import generate_experiment_name
+from mlops.common.naming_utils import generate_experiment_name, generate_index_name
 
 
 def main(index_name: str, semantic_config: str, data_path: str):
@@ -110,6 +110,6 @@ if __name__ == "__main__":
     load_dotenv()
 
     if not args.index_name:
-        args.index_name = os.environ.get("BUILD_SOURCEBRANCHNAME")
+        args.index_name = generate_index_name()
 
     main(args.index_name, args.semantic_config, args.gt_path)
