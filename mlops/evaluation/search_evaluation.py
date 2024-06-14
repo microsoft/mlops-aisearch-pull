@@ -17,14 +17,39 @@ from src.evaluation.targets.search_evaluation_target import SearchEvaluationTarg
 from mlops.common.naming_utils import generate_experiment_name, generate_index_name
 
 
-def main(index_name: str, semantic_config: str, data_path: str):
-    """Run evaluation for the given search index.
+def main():
+    """Run evaluation for the given search index."""
+    parser = argparse.ArgumentParser("evaluation_parameters")
+    parser.add_argument(
+        "--gt_path",
+        type=str,
+        required=True,
+        help="Path to the file containing ground truth data",
+    )
+    parser.add_argument(
+        "--index_name",
+        type=str,
+        required=False,
+        help="Name of the Azure AI Search index to evaluate",
+    )
+    parser.add_argument(
+        "--semantic_config",
+        type=str,
+        required=True,
+        help="Name of the semantic configuration to use",
+    )
+    args = parser.parse_args()
 
-    Args:
-        index_name (str): search index name
-        semantic_config (str): semantic configuration name
-        data_path (str): path to the ground truth data
-    """
+    load_dotenv()
+
+    index_name = args.index_name
+
+    if not index_name:
+        index_name = generate_index_name()
+
+    semantic_config = args.semantic_config
+    data_path = args.gt_path
+
     experiment_name = generate_experiment_name(index_name)
 
     subscription_id = os.environ.get("SUBSCRIPTION_ID")
@@ -86,30 +111,4 @@ def main(index_name: str, semantic_config: str, data_path: str):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("evaluation_parameters")
-    parser.add_argument(
-        "--gt_path",
-        type=str,
-        required=True,
-        help="Path to the file containing ground truth data",
-    )
-    parser.add_argument(
-        "--index_name",
-        type=str,
-        required=False,
-        help="Name of the Azure AI Search index to evaluate",
-    )
-    parser.add_argument(
-        "--semantic_config",
-        type=str,
-        required=True,
-        help="Name of the semantic configuration to use",
-    )
-    args = parser.parse_args()
-
-    load_dotenv()
-
-    if not args.index_name:
-        args.index_name = generate_index_name()
-
-    main(args.index_name, args.semantic_config, args.gt_path)
+    main()
