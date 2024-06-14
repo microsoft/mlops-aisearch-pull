@@ -34,6 +34,22 @@
       "synonymMaps": []
     },
     {
+      "name": "page_number",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": true,
+      "retrievable": true,
+      "sortable": true,
+      "facetable": true,
+      "key": false,
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "analyzer": null,
+      "dimensions": null,
+      "vectorSearchProfile": null,
+      "synonymMaps": []
+    },
+    {
       "name": "content",
       "type": "Edm.String",
       "searchable": true,
@@ -47,22 +63,6 @@
       "analyzer": null,
       "dimensions": null,
       "vectorSearchProfile": null,
-      "synonymMaps": []
-    },
-    {
-      "name": "vector",
-      "type": "Collection(Edm.Single)",
-      "searchable": true,
-      "filterable": false,
-      "retrievable": true,
-      "sortable": false,
-      "facetable": false,
-      "key": false,
-      "indexAnalyzer": null,
-      "searchAnalyzer": null,
-      "analyzer": null,
-      "dimensions": 1536,
-      "vectorSearchProfile": "my-vector-config-profile",
       "synonymMaps": []
     },
     {
@@ -80,6 +80,22 @@
       "normalizer": null,
       "dimensions": null,
       "vectorSearchProfile": null,
+      "synonymMaps": []
+    },
+    {
+      "name": "content_vector",
+      "type": "Collection(Edm.Single)",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "sortable": false,
+      "facetable": false,
+      "key": false,
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "analyzer": null,
+      "dimensions": 1536,
+      "vectorSearchProfile": "my-vector-config-profile",
       "synonymMaps": []
     }
   ],
@@ -130,7 +146,19 @@
     "profiles": [
       {
         "name": "my-vector-config-profile",
-        "algorithm": "my-vector-config"
+        "algorithm": "my-vector-config",
+        "vectorizer": "my-vectorizer"
+      }
+    ],
+    "vectorizers": [
+      {
+        "name": "my-vectorizer",
+        "kind": "azureOpenAI",
+        "azureOpenAIParameters": {
+          "resourceUri": "{openai_api_endpoint}",
+          "deploymentId": "{openai_embedding_model}",
+          "apiKey": "{openai_api_key}"
+        }
       }
     ]
   }

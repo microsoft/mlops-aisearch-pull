@@ -36,7 +36,7 @@ def function_vector_embed(req: func.HttpRequest) -> func.HttpResponse:
         values.append(
             {
                 "recordId": record_id,
-                "data": {"embedding": embedding},
+                "data": {"embedding": embedding, "page": chunk["metadata"]["page"]},
                 "errors": None,
                 "warnings": None,
             }

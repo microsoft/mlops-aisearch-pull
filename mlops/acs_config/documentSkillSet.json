@@ -43,6 +43,10 @@
         {
           "name": "embedding",
           "targetName": "embedding"
+        },
+        {
+          "name": "page",
+          "targetName": "page"
         }
       ],
       "authIdentity": null
@@ -64,7 +68,7 @@
             "inputs": []
           },
           {
-            "name": "vector",
+            "name": "content_vector",
             "source": "/document/chunks/*/embedding",
             "sourceContext": null,
             "inputs": []
@@ -72,6 +76,12 @@
           {
             "name": "filename",
             "source": "/document/metadata_storage_name",
+            "sourceContext": null,
+            "inputs": []
+          },
+          {
+            "name": "page_number",
+            "source": "/document/chunks/*/page",
             "sourceContext": null,
             "inputs": []
           }
