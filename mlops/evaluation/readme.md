@@ -1,10 +1,11 @@
 # Search Evaluation
 
 To run the evaluation:
+
 1. Switch to the root directory of the repo
 2. Run `python -m mlops.evaluation.search_evaluation --gt_path "./data/search_evaluation_data.jsonl"  --index_name <INDEX_NAME> --semantic_config <SEMANTIC_CONFIG_NAME>`
 
-# Metrics
+## Metrics
 
  The following metrics are used to determine how closely the search results match the anticipated results
 
@@ -22,8 +23,16 @@ To run the evaluation:
     - Formula:
         `F1 @ K` = 2 * ((Precision @ K Value)) * ((Recall @ K Value)) / ((Precision @ K Value)) + ((Recall @ K Value))
 
-- __Average Precision__: TO ADD
+- __Average Precision__: A measure of how well all ground truth documents are ranked in the retrieved results. This metric evaluates the precision at each position in the ranked list, averaged across all queries. For example, if there are 3 queries, each with different numbers of relevant documents, MAP will take the precision at each relevant document for all queries, average them, and then average these values across all queries.
+    - Formula:
+        `AVERAGE PRECISION` = 
+        
+        ![AVERAGE PRECISION FORMULA](../images/Mean_Average_Precision.png "Average Precision Formula")
 
 - __Reciprocal Rank__: The multiplicative inverse of the first relevant search result. For example, if, in a search that yields 10 search results, the first relevant result was the fourth result in the list, the reciprocal rank would be 1/4 or 0.25.
     - Formula:
         `RECIPROCAL_RANK`: 1 / (Order of the First Relevant Result in list)
+
+## Notes
+
+- The search evaluator expects the search index (and the ground truth/sources in the evaluation data) to have fields called `filename` and `page_number`.  If your index uses different fields, you might want to make changes to `/src/evaluation/evaluators/search/preprocessing.py` and `/src/evaluation/targets/search_evaluation_target.py`

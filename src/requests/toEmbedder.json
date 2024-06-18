@@ -6,7 +6,8 @@
         "chunk": {
           "page_content": "PerksPlus Health and Wellness Reimbursement Program for Contoso Electronics Employees\n\nThis document contains information generated using a language model (Azure OpenAI). The information contained in this document is only for demonstration purposes and does not reflect the opinions or beliefs of Microsoft. Microsoft makes no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability or availability with respect to the information contained in this document.\n\nAll rights reserved to Microsoft",
           "metadata": {
-            "source": "/tmp/tmp1_bu5os8/toydataset/PerksPlus.pdf"
+            "source": "/tmp/tmp1_bu5os8/toydataset/PerksPlus.pdf",
+            "page": 1
           },
           "type": "Document"
         }

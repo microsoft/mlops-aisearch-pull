@@ -7,14 +7,14 @@ from dotenv import load_dotenv
 from promptflow.evals.evaluate import evaluate
 
 from src.evaluation.evaluators.search import (
-    RecallAtKEvaluator,
+    # RecallAtKEvaluator,
     PrecisionAtKEvaluator,
-    F1AtKEvaluator,
-    AveragePrecisionEvaluator,
-    ReciprocalRankEvaluator,
+    # F1AtKEvaluator,
+    # AveragePrecisionEvaluator,
+    # ReciprocalRankEvaluator,
 )
 from src.evaluation.targets.search_evaluation_target import SearchEvaluationTarget
-from mlops.common.naming_utils import generate_experiment_name
+from mlops.common.naming_utils import generate_experiment_name, generate_index_name
 
 
 def main(index_name: str, semantic_config: str, data_path: str):
@@ -27,12 +27,16 @@ def main(index_name: str, semantic_config: str, data_path: str):
     """
     experiment_name = generate_experiment_name(index_name)
 
-    subscription_id = os.environ.get("AZURE_SUBSCRIPTION_ID")
-    resource_group = os.environ.get("AZURE_RESOURCE_GROUP")
+    subscription_id = os.environ.get("SUBSCRIPTION_ID")
+    resource_group = os.environ.get("RESOURCE_GROUP_NAME")
     project_name = os.environ.get("AI_STUDIO_PROJECT_NAME")
+    azure_search_service_name = os.environ.get("ACS_SERVICE_NAME")
+    azure_search_endpoint = f"https://{azure_search_service_name}.search.windows.net"
+    azure_search_key = os.environ.get("ACS_API_KEY")
 
-    azure_search_endpoint = os.environ.get("AZURE_SEARCH_SERVICE_ENDPOINT")
-    azure_search_key = os.environ.get("AZURE_SEARCH_API_KEY")
+    print(f"Running evaluation for index: {index_name}")
+    print(f"Azure Search Endpoint {azure_search_endpoint}")
+    print(f"Azure Search Key {azure_search_key}")
 
     target = SearchEvaluationTarget(
         index_name,
@@ -43,17 +47,17 @@ def main(index_name: str, semantic_config: str, data_path: str):
 
     # Define a dictionary of evaluators and their aliases
     evaluators = {
-        "Recall@3": RecallAtKEvaluator(k=3),
-        "Recall@5": RecallAtKEvaluator(k=5),
-        "Recall@10": RecallAtKEvaluator(k=10),
+        # "Recall@3": RecallAtKEvaluator(k=3),
+        # "Recall@5": RecallAtKEvaluator(k=5),
+        # "Recall@10": RecallAtKEvaluator(k=10),
         "Precision@3": PrecisionAtKEvaluator(k=3),
         "Precision@5": PrecisionAtKEvaluator(k=5),
         "Precision@10": PrecisionAtKEvaluator(k=10),
-        "F1-score@3": F1AtKEvaluator(k=3),
-        "F1-score@5": F1AtKEvaluator(k=5),
-        "F1-score@10": F1AtKEvaluator(k=10),
-        "AveragePrecision": AveragePrecisionEvaluator(),
-        "ReciprocalRank": ReciprocalRankEvaluator(),
+        # "F1-score@3": F1AtKEvaluator(k=3),
+        # "F1-score@5": F1AtKEvaluator(k=5),
+        # "F1-score@10": F1AtKEvaluator(k=10),
+        # "AveragePrecision": AveragePrecisionEvaluator(),
+        # "ReciprocalRank": ReciprocalRankEvaluator(),
     }
 
     # Setup evaluator inputs (__call__ function arguments)
@@ -92,7 +96,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--index_name",
         type=str,
-        required=True,
+        required=False,
         help="Name of the Azure AI Search index to evaluate",
     )
     parser.add_argument(
@@ -104,5 +108,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     load_dotenv()
+
+    if not args.index_name:
+        args.index_name = generate_index_name()
 
     main(args.index_name, args.semantic_config, args.gt_path)
