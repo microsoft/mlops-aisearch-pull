@@ -9,9 +9,9 @@ from promptflow.evals.evaluate import evaluate
 from src.evaluation.evaluators.search import (
     RecallAtKEvaluator,
     PrecisionAtKEvaluator,
-    # F1AtKEvaluator,
-    # AveragePrecisionEvaluator,
-    # ReciprocalRankEvaluator,
+    F1AtKEvaluator,
+    AveragePrecisionEvaluator,
+    ReciprocalRankEvaluator,
 )
 from src.evaluation.targets.search_evaluation_target import SearchEvaluationTarget
 from mlops.common.naming_utils import generate_experiment_name, generate_index_name
@@ -52,9 +52,9 @@ def main():
 
     experiment_name = generate_experiment_name(index_name)
 
-    subscription_id = os.environ.get("SUBSCRIPTION_ID")
-    resource_group = os.environ.get("RESOURCE_GROUP_NAME")
-    project_name = os.environ.get("AI_STUDIO_PROJECT_NAME")
+    # subscription_id = os.environ.get("SUBSCRIPTION_ID")
+    # resource_group = os.environ.get("RESOURCE_GROUP_NAME")
+    # project_name = os.environ.get("AI_STUDIO_PROJECT_NAME")
     azure_search_service_name = os.environ.get("ACS_SERVICE_NAME")
     azure_search_endpoint = f"https://{azure_search_service_name}.search.windows.net"
     azure_search_key = os.environ.get("ACS_API_KEY")
@@ -78,11 +78,11 @@ def main():
         "Precision@3": PrecisionAtKEvaluator(k=3),
         "Precision@5": PrecisionAtKEvaluator(k=5),
         "Precision@10": PrecisionAtKEvaluator(k=10),
-        # "F1-score@3": F1AtKEvaluator(k=3),
-        # "F1-score@5": F1AtKEvaluator(k=5),
-        # "F1-score@10": F1AtKEvaluator(k=10),
-        # "AveragePrecision": AveragePrecisionEvaluator(),
-        # "ReciprocalRank": ReciprocalRankEvaluator(),
+        "F1-score@3": F1AtKEvaluator(k=3),
+        "F1-score@5": F1AtKEvaluator(k=5),
+        "F1-score@10": F1AtKEvaluator(k=10),
+        "AveragePrecision": AveragePrecisionEvaluator(),
+        "ReciprocalRank": ReciprocalRankEvaluator(),
     }
 
     # Setup evaluator inputs (__call__ function arguments)
@@ -101,11 +101,11 @@ def main():
         target=target,
         evaluators=evaluators,
         evaluator_config=evaluators_config,
-        azure_ai_project={
-            "subscription_id": subscription_id,
-            "resource_group_name": resource_group,
-            "project_name": project_name,
-        },
+        # azure_ai_project={
+        #     "subscription_id": subscription_id,
+        #     "resource_group_name": resource_group,
+        #     "project_name": project_name,
+        # },
     )
     print(results["studio_url"])
 
