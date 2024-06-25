@@ -25,9 +25,16 @@ To run the evaluation:
 
 - __Average Precision__: A measure of how well all ground truth documents are ranked in the retrieved results. This metric evaluates the precision at each position in the ranked list, averaged across all queries. For example, if there are 3 queries, each with different numbers of relevant documents, MAP will take the precision at each relevant document for all queries, average them, and then average these values across all queries.
     - Formula:
-        `AVERAGE PRECISION` = 
-        
-        ![AVERAGE PRECISION FORMULA](../images/Mean_Average_Precision.png "Average Precision Formula")
+
+        ![AVERAGE PRECISION FORMULA](../images/Mean_Average_Precision.png "Average Precision Formula:  MAP = (1 / Q) * sum(q=1 to Q) [(1 / gt_q) * sum(k=1 to n_q) P(k) * rel(k)]")
+
+        Where:
+
+        - `Q` is the total number of queries
+        - `gt`<sub>q</sub> is the number of ground-truth documents for the `q-th` query
+        - `n`<sub>q</sub> is the number of retrived documents for the `q-th` query
+        - `P(k)` is the precision at k in the list of retrieved documents
+        - `rel(k)` is an indicator function equaling 1 if the item at rank k is a relevant document, 0 otherwise.
 
 - __Reciprocal Rank__: The multiplicative inverse of the first relevant search result. For example, if, in a search that yields 10 search results, the first relevant result was the fourth result in the list, the reciprocal rank would be 1/4 or 0.25.
     - Formula:
