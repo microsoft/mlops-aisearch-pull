@@ -4,7 +4,9 @@ import logging
 import json
 import jsonschema
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.document_loaders import PyPDFLoader
+# from langchain.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
+
 
 from azure.storage.blob import BlobServiceClient
 
