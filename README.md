@@ -74,7 +74,7 @@ python -m mlops.deployment_scripts.build_indexer
 This will perform search evaluation and upload the result to the AI Studio project specified. For more information about evaluation, see the [search evaluation readme](/mlops/evaluation/readme.md).
 
 ```sh
-python -m mlops.evaluation.search_evaluation --gt_path "./data/search_evaluation_data.jsonl"  --index_name <INDEX_NAME> --semantic_config <SEMANTIC_CONFIG_NAME>`
+python -m mlops.evaluation.search_evaluation --gt_path "./mlops/evaluation/data/search_evaluation_data.jsonl" --semantic_config my-semantic-config`
 ```
 
 ### Cleanup Deployment
