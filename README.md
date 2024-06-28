@@ -1,6 +1,6 @@
 # MLOps Template for Azure AI Search: Pull approach
 
-This repository demonstrates how to implement a Machine Learning Development and Operations (MLOps) process for [Azure AI Search](https://learn.microsoft.com/en-us/azure/search/) applications that use a [pull mode](https://learn.microsoft.com/en-us/azure/search/search-what-is-data-import#pulling-data-into-an-index) to indexing data. It creates an indexer with two custom skills and that pull pdf documents from a blob storage, chunks them, creates embeddings for the chunks and then uploads the chunks into an index. Finally, it performs search evaluation for a collection of data and uploads the results to an [AI Studio](https://learn.microsoft.com/en-us/azure/ai-studio/) project so that evaluations can be compared across multiple runs to continue improving the custom skills.
+This repository demonstrates how to implement a Machine Learning Development and Operations (MLOps) process for [Azure AI Search](https://learn.microsoft.com/en-us/azure/search/) applications that use a [pull model](https://learn.microsoft.com/en-us/azure/search/search-what-is-data-import#pulling-data-into-an-index) to index data. It creates an indexer with two custom skills that pull pdf documents from a blob storage container, chunks them, creates embeddings for the chunks and then adds the chunks into an index. Finally, it performs search evaluation for a collection of data and uploads the results to an [AI Studio](https://learn.microsoft.com/en-us/azure/ai-studio/) project so that evaluations can be compared across multiple runs to continue improving the custom skills.
 
 ## Technical Requirements
 
@@ -15,12 +15,12 @@ This repository demonstrates how to implement a Machine Learning Development and
 
 Below are some key folders within the project:
 
-- **src/custom_skills**: Contains the function app which has the chunking and embedding functions used by the indexer
+- **src/custom_skills**: Contains the function app which has the chunking and embedding skillset functions used by the indexer
 - **mlops**: Contains the scripts for implmenting MLOPs flows
 - **config**: Configuration for the MLOPs scripts
 - **data**: Sample data for testing the indexer
 - **.github**: GitHub workflows that can be used to run an MLOPs pipeline
-- **.devcontainer**: Contains a development container that can help you work with the repo and develop azure functions
+- **.devcontainer**: Contains a development container that can help you work with the repo and develop Azure functions
 
 Additionally, the root folder contains some important files:
 
@@ -34,7 +34,7 @@ The deployment scripts and github workflows use the git branch name to create a 
 
 ### Configuration
 
-- Created a `.env` file based on `.env.sample` and populate the appropriate values.
+- Create an `.env` file based on `.env.sample` and populate the appropriate values.
 - Modify `config/config.yaml` to meet any changes that have been made within the project.
 
 ### Upload test data
