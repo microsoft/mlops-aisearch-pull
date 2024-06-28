@@ -52,9 +52,9 @@ def main():
 
     experiment_name = generate_experiment_name(index_name)
 
-    # subscription_id = os.environ.get("SUBSCRIPTION_ID")
-    # resource_group = os.environ.get("RESOURCE_GROUP_NAME")
-    # project_name = os.environ.get("AI_STUDIO_PROJECT_NAME")
+    subscription_id = os.environ.get("SUBSCRIPTION_ID")
+    resource_group = os.environ.get("RESOURCE_GROUP_NAME")
+    project_name = os.environ.get("AI_STUDIO_PROJECT_NAME")
     azure_search_service_name = os.environ.get("ACS_SERVICE_NAME")
     azure_search_endpoint = f"https://{azure_search_service_name}.search.windows.net"
     azure_search_key = os.environ.get("ACS_API_KEY")
