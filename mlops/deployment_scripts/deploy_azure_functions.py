@@ -153,8 +153,6 @@ def _deploy_functions(
     with open(zip_filename, "rb") as f:
         payload = f.read()
 
-    # TODO: Implement as async with no waiting to fire and forget
-    #       in order to move to the next step with no delays.
     try:
         # Send a POST request to the Azure function app to deploy the zip file
         requests.post(deployment_url, headers=headers, data=payload, timeout=60)
@@ -162,7 +160,6 @@ def _deploy_functions(
         print(
             "Request has been sent, but no response yet. Checking deployment status in the next step."
         )
-        # raise SystemExit(e)
 
     print("Looking for an active deployment.")
     # look at existing app for a location
@@ -178,7 +175,6 @@ def _deploy_functions(
 
     # get_deployment_slot returns 4 in the case of success and 1 for in-progress deployment.
     while status != 4:
-        # current_slot = app_mgmt_client.web_apps.get_deployment_slot(resource_group_name, func_name, id, slot_name)
         current_slot = app_mgmt_client.web_apps.get_deployment(
             resource_group_name, func_name, id
         )
@@ -190,11 +186,7 @@ def _deploy_functions(
         time.sleep(10)
 
     print("Updating Application settings.")
-    # existing_app_settings = app_mgmt_client.web_apps.list_application_settings_slot(
-    #     resource_group_name,
-    #     func_name,
-    #     slot_name
-    # )
+
     existing_app_settings = app_mgmt_client.web_apps.list_application_settings(
         resource_group_name,
         func_name,
@@ -202,19 +194,12 @@ def _deploy_functions(
 
     existing_app_settings.properties.update(app_settings)
 
-    # app_mgmt_client.web_apps.update_application_settings_slot(
-    #     resource_group_name,
-    #     func_name,
-    #     slot_name,
-    #     existing_app_settings
-    # )
     app_mgmt_client.web_apps.update_application_settings(
         resource_group_name, func_name, existing_app_settings
     )
 
     print("Restarting the application.")
     app_mgmt_client.web_apps.restart(resource_group_name, func_name)
-    # app_mgmt_client.web_apps.restart_slot(resource_group_name, func_name, slot_name)
 
 
 def _deploy_functions_withslot(
@@ -248,8 +233,6 @@ def _deploy_functions_withslot(
     with open(zip_filename, "rb") as f:
         payload = f.read()
 
-    # TODO: Implement as async with no waiting to fire and forget
-    #       in order to move to the next step with no delays.
     try:
         # Send a POST request to the Azure function app to deploy the zip file
         requests.post(deployment_url, headers=headers, data=payload, timeout=60)
@@ -299,7 +282,7 @@ def _deploy_functions_withslot(
 
 def main():
     """Create a deployment of cognitive skills."""
-    # We need to pass ignore_slot to deploy into the default one
+    # We need to pass ignore_slot to deploy into the default function app
     # this option is needed for CI Build
     parser = argparse.ArgumentParser(description="Parameter parser")
     parser.add_argument(
