@@ -101,11 +101,12 @@ def main():
         target=target,
         evaluators=evaluators,
         evaluator_config=evaluators_config,
-        # azure_ai_project={
-        #     "subscription_id": subscription_id,
-        #     "resource_group_name": resource_group,
-        #     "project_name": project_name,
-        # },
+        azure_ai_project={
+            "subscription_id": subscription_id,
+            "resource_group_name": resource_group,
+            "project_name": project_name,
+        },
+        _use_thread_pool=False
     )
     print(results["studio_url"])
 
