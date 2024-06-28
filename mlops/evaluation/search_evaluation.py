@@ -5,14 +5,11 @@ import os
 import argparse
 from dotenv import load_dotenv
 from promptflow.evals.evaluate import evaluate
-
-from src.evaluation.evaluators.search import (
-    # RecallAtKEvaluator,
-    PrecisionAtKEvaluator,
-    # F1AtKEvaluator,
-    # AveragePrecisionEvaluator,
-    # ReciprocalRankEvaluator,
-)
+from src.evaluation.evaluators.search.reciprocal_rank import ReciprocalRankEvaluator
+from src.evaluation.evaluators.search.recall_at_k import RecallAtKEvaluator
+from src.evaluation.evaluators.search.precision_at_k import PrecisionAtKEvaluator
+from src.evaluation.evaluators.search.f1_at_k import F1AtKEvaluator
+from src.evaluation.evaluators.search.average_precision import AveragePrecisionEvaluator
 from src.evaluation.targets.search_evaluation_target import SearchEvaluationTarget
 from mlops.common.naming_utils import generate_experiment_name, generate_index_name
 
@@ -47,17 +44,17 @@ def main(index_name: str, semantic_config: str, data_path: str):
 
     # Define a dictionary of evaluators and their aliases
     evaluators = {
-        # "Recall@3": RecallAtKEvaluator(k=3),
-        # "Recall@5": RecallAtKEvaluator(k=5),
-        # "Recall@10": RecallAtKEvaluator(k=10),
+        "Recall@3": RecallAtKEvaluator(k=3),
+        "Recall@5": RecallAtKEvaluator(k=5),
+        "Recall@10": RecallAtKEvaluator(k=10),
         "Precision@3": PrecisionAtKEvaluator(k=3),
         "Precision@5": PrecisionAtKEvaluator(k=5),
         "Precision@10": PrecisionAtKEvaluator(k=10),
-        # "F1-score@3": F1AtKEvaluator(k=3),
-        # "F1-score@5": F1AtKEvaluator(k=5),
-        # "F1-score@10": F1AtKEvaluator(k=10),
-        # "AveragePrecision": AveragePrecisionEvaluator(),
-        # "ReciprocalRank": ReciprocalRankEvaluator(),
+        "F1-score@3": F1AtKEvaluator(k=3),
+        "F1-score@5": F1AtKEvaluator(k=5),
+        "F1-score@10": F1AtKEvaluator(k=10),
+        "AveragePrecision": AveragePrecisionEvaluator(),
+        "ReciprocalRank": ReciprocalRankEvaluator(),
     }
 
     # Setup evaluator inputs (__call__ function arguments)
