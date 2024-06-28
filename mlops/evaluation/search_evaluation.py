@@ -33,7 +33,7 @@ def main(index_name: str, semantic_config: str, data_path: str):
 
     print(f"Running evaluation for index: {index_name}")
     print(f"Azure Search Endpoint {azure_search_endpoint}")
-    print(f"Azure Search Key {azure_search_key}")
+    # print(f"Azure Search Key {azure_search_key}")
 
     target = SearchEvaluationTarget(
         index_name,
@@ -78,6 +78,7 @@ def main(index_name: str, semantic_config: str, data_path: str):
             "resource_group_name": resource_group,
             "project_name": project_name,
         },
+        _use_thread_pool=False
     )
     print(results["studio_url"])
 
