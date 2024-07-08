@@ -2,9 +2,9 @@
 
 from typing import Dict, List
 
-from .evaluator import Evaluator
-from .precision_at_k import PrecisionAtKEvaluator
-from .recall_at_k import RecallAtKEvaluator
+from src.evaluation.evaluators.search.evaluator import Evaluator
+from src.evaluation.evaluators.search.precision_at_k import PrecisionAtKEvaluator
+from src.evaluation.evaluators.search.recall_at_k import RecallAtKEvaluator
 
 
 class F1AtKEvaluator(Evaluator):

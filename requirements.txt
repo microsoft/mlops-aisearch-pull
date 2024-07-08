@@ -17,3 +17,5 @@ python-dotenv>=0.10.3
 azure-mgmt-search==9.1.0
 azure-mgmt-storage==21.1.0
 azure-search-documents==11.6.0b4
+promptflow==1.12.0
+promptflow-evals==0.3.0

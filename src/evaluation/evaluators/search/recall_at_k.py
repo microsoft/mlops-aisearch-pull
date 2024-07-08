@@ -2,7 +2,7 @@
 
 from typing import Dict, List
 
-from .evaluator import Evaluator
+from src.evaluation.evaluators.search.evaluator import Evaluator
 from src.evaluation.evaluators.search.preprocessing import _preprocess_data
 
 

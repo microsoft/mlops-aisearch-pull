@@ -194,7 +194,7 @@ def _wait_for_document_indexer(indexer_client: SearchIndexerClient, indexer_name
 
 
 def main():
-    """Create an experiment based on the configuration parameters and branch name."""
+    """Create an indexer based on the configuration parameters and branch name."""
     credential = DefaultAzureCredential()
 
     """Upload data to a desired blob container."""
