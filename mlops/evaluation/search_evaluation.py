@@ -77,9 +77,7 @@ def main(index_name: str, semantic_config: str, data_path: str):
             "subscription_id": subscription_id,
             "resource_group_name": resource_group,
             "project_name": project_name,
-        },
-        # PF has a leak as for now. This should be deleted once PF got a fix.
-        _use_thread_pool=False
+        }
     )
     print(results["studio_url"])
 
