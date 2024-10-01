@@ -4,7 +4,7 @@ import os
 
 import argparse
 from dotenv import load_dotenv
-from promptflow.evals.evaluate import evaluate
+from azure.ai.evaluation import evaluate
 from src.evaluation.evaluators.search.reciprocal_rank import ReciprocalRankEvaluator
 from src.evaluation.evaluators.search.recall_at_k import RecallAtKEvaluator
 from src.evaluation.evaluators.search.precision_at_k import PrecisionAtKEvaluator

@@ -1,2 +1,1 @@
-promptflow==1.12.0
-promptflow-evals==0.3.0
+azure-ai-evaluation
