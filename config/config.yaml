@@ -3,7 +3,6 @@ sub_config:
   subscription_id: ${SUBSCRIPTION_ID}
   resource_group_name: ${RESOURCE_GROUP_NAME}
   storage_account_name: ${STORAGE_ACCOUNT_NAME}
-  storage_account_connection_string: ${STORAGE_ACCOUNT_CONNECTION_STRING}
 
 # Azure OpenAI configuration.
 aoai_config:

@@ -105,7 +105,6 @@ Some variables and secrets should be provided to execute the github workflows (p
 - acs_api_key
 - aoai_base_endpoint
 - aoai_api_key
-- storage_account_connection_string
 - ai_studio_project_name
 
 ## Related Projects

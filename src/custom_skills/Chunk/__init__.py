@@ -3,6 +3,7 @@ import os
 import logging
 import json
 import jsonschema
+from azure.identity import DefaultAzureCredential
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader
 
@@ -71,9 +72,15 @@ def _chunk_pdf_file_from_azure2(
     Returns:
         A list of Documents, each containing a 'page_content' chunk of text
     """
-    conn_string = os.environ.get("AZURE_STORAGE_ACCOUNT_CONNECTION_STRING")
+    account_name = os.environ.get("AZURE_STORAGE_ACCOUNT_NAME")
     container = os.environ.get("AZURE_STORAGE_CONTAINER_NAME")
-    blob_service_client = BlobServiceClient.from_connection_string(conn_string)
+
+    credential = DefaultAzureCredential()
+
+    blob_service_client = BlobServiceClient(
+        account_url=f"https://{account_name}.blob.core.windows.net",
+        credential=credential)
+
     container_client = blob_service_client.get_container_client(container)
 
     blob_client = container_client.get_blob_client(blob=file_name)
