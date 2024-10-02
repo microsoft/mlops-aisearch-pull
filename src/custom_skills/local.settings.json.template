@@ -12,6 +12,7 @@
       "AZURE_STORAGE_CONTAINER_NAME":"container where the data is stored",
       "AZURE_SEARCH_ENDPOINT":"Azure AI Search Endpoint",
       "AZURE_SEARCH_API_KEY":"AI Search API Key"
+      "MANAGED_IDENTITY_CLIENT_ID": "a user defined managed identity to interact with Blob"
 
     }
   }

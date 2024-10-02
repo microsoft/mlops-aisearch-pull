@@ -17,6 +17,8 @@ def get_app_settings(config: dict, index_name: str):
     settings_dict["AZURE_STORAGE_ACCOUNT_NAME"] = config.sub_config["storage_account_name"]
     settings_dict["AZURE_STORAGE_CONTAINER_NAME"] = config.get_flow_config("data")["storage_container"]
 
+    settings_dict["MANAGED_IDENTITY_CLIENT_ID"] = config.sub_config["managed_identity_client_id"]
+
     settings_dict["ENABLE_ORYX_BUILD"] = "true"
     settings_dict["SCM_DO_BUILD_DURING_DEPLOYMENT"] = "true"
     return settings_dict

@@ -74,8 +74,9 @@ def _chunk_pdf_file_from_azure2(
     """
     account_name = os.environ.get("AZURE_STORAGE_ACCOUNT_NAME")
     container = os.environ.get("AZURE_STORAGE_CONTAINER_NAME")
+    managed_identity_client_id = os.environ.get("MANAGED_IDENTITY_CLIENT_ID")
 
-    credential = DefaultAzureCredential()
+    credential = DefaultAzureCredential(managed_identity_client_id=managed_identity_client_id)
 
     blob_service_client = BlobServiceClient(
         account_url=f"https://{account_name}.blob.core.windows.net",
