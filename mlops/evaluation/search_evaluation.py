@@ -60,11 +60,10 @@ def main(index_name: str, semantic_config: str, data_path: str):
 
     # Setup evaluator inputs (__call__ function arguments)
     evaluators_config = {
-        key: {
-            "search_result": "${target.search_result}",
+        "default": {
+            "search_result": "${outputs.search_result}",
             "ground_truth": "${data.sources}",
         }
-        for key in evaluators.keys()
     }
 
     # Run evaluations

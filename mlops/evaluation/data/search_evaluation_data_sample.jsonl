@@ -1,2 +1,2 @@
-{"query": "question 1?", "sources": [{"filename": "Benefit_Options.pdf", "page_number": "2"}]}
-{"query": "question 2?", "sources": [{"filename": "PerksPlus.pdf", "page_number": "3"}]}
+{"query": "question 1?", "ground_truth": [{"filename": "Benefit_Options.pdf", "page_number": "2"}]}
+{"query": "question 2?", "ground_truth": [{"filename": "PerksPlus.pdf", "page_number": "3"}]}
