@@ -13,7 +13,8 @@ from azure.core.credentials import AzureKeyCredential
 from azure.mgmt.search import SearchManagementClient
 from azure.search.documents.indexes import SearchIndexerClient
 from azure.search.documents.indexes.models import (
-    SearchIndexerDataSourceConnection
+    SearchIndexerDataSourceConnection,
+    SearchIndexerDataUserAssignedIdentity
 )
 from ..common.config_utils import MLOpsConfig
 from ..common.naming_utils import (
@@ -135,6 +136,9 @@ def _generate_data_source_connection(
     )
     # I don't know why this is necessary, the connection string is in the credentials, it's not happy without it
     data_source_connection.connection_string = conn_string
+    data_source_connection.identity = SearchIndexerDataUserAssignedIdentity(
+        resource_id=user_identity_resource
+    )
 
     return data_source_connection
 
