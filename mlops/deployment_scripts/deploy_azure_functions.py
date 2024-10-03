@@ -55,7 +55,7 @@ def _create_or_update_deployment_slot(
         resource_group_name,
         func_name,
         slot,
-        Site(location=rag_app.location),
+        Site(location=rag_app.location, identity=rag_app.identity),
     )
     while not ops_call.done():
         print(f"Updating the slot: {slot}")
