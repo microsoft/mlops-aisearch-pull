@@ -4,6 +4,7 @@ sub_config:
   resource_group_name: ${RESOURCE_GROUP_NAME}
   storage_account_name: ${STORAGE_ACCOUNT_NAME}
   managed_identity_client_id: ${MANAGED_IDENTITY_CLIENT_ID}
+  managed_identity_name: ${MANAGED_IDENTITY_NAME}
 
 # Azure OpenAI configuration.
 aoai_config:
