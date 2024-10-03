@@ -268,7 +268,7 @@ def main():
         generate_data_source_name(),
         file_name=acs_config["acs_document_data_source"],
         conn_string=conn_string,
-        user_identity_resource = _get_identity_resource(
+        user_identity_resource=_get_identity_resource(
             sub_config["subscription_id"],
             sub_config["resource_group_name"],
             sub_config["managed_identity_name"],
