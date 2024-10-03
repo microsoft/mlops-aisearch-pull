@@ -4,7 +4,7 @@ import os
 
 import argparse
 from dotenv import load_dotenv
-from promptflow.evals.evaluate import evaluate
+from azure.ai.evaluation import evaluate
 from src.evaluation.evaluators.search.reciprocal_rank import ReciprocalRankEvaluator
 from src.evaluation.evaluators.search.recall_at_k import RecallAtKEvaluator
 from src.evaluation.evaluators.search.precision_at_k import PrecisionAtKEvaluator
@@ -77,9 +77,7 @@ def main(index_name: str, semantic_config: str, data_path: str):
             "subscription_id": subscription_id,
             "resource_group_name": resource_group,
             "project_name": project_name,
-        },
-        # PF has a leak as for now. This should be deleted once PF got a fix.
-        _use_thread_pool=False
+        }
     )
     print(results["studio_url"])
 

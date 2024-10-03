@@ -1,4 +1,4 @@
-"""Implement base Evaluator class for the Promptflow-Eval SDK."""
+"""Implement base Evaluator class."""
 
 from abc import ABC, abstractmethod
 
