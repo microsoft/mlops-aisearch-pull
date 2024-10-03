@@ -122,6 +122,7 @@ def _get_identity_resource(
 def _generate_data_source_connection(
     connection_name: str, file_name: str, conn_string: str, user_identity_resource: str, container: str
 ):
+    print(user_identity_resource)
     with open(file_name) as data_source_file:
         data_source_def = data_source_file.read()
 
