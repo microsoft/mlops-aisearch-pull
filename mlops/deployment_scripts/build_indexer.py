@@ -11,7 +11,6 @@ import argparse
 from azure.identity import DefaultAzureCredential
 from azure.core.credentials import AzureKeyCredential
 from azure.mgmt.search import SearchManagementClient
-from azure.mgmt.storage import StorageManagementClient
 from azure.search.documents.indexes import SearchIndexerClient
 from azure.search.documents.indexes.models import (
     SearchIndexerDataSourceConnection
@@ -98,35 +97,39 @@ def _create_or_update_skillset(skillset: dict,
 
 
 def _get_storage_conn_string(
-    credential: DefaultAzureCredential,
     subscription_id: str,
     storage_account_name: str,
     resource_group_name: str,
 ) -> str:
-    storage_client = StorageManagementClient(
-        credential=credential, subscription_id=subscription_id
-    )
-    keys = storage_client.storage_accounts.list_keys(
-        resource_group_name, storage_account_name
-    )
-    conn_string = (
-        "DefaultEndpointsProtocol=https;AccountName={storage_account_name};"
-        + "AccountKey={key};"
-        + "EndpointSuffix=core.windows.net"
-    ).format(storage_account_name=storage_account_name, key=keys.keys[0].value)
+    conn_string = f"ResourceId=/subscriptions/{subscription_id}" \
+        f"/resourceGroups/{resource_group_name}/providers/Microsoft.Storage" \
+        f"/storageAccounts/{storage_account_name};"
 
     return conn_string
 
 
+def _get_identity_resource(
+    subscription_id: str,
+    resource_group_name: str,
+    managed_identity_name: str
+) -> str:
+    resource_string = f"/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}" \
+        f"/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{managed_identity_name}"
+
+    return resource_string
+
+
 def _generate_data_source_connection(
-    connection_name: str, file_name: str, conn_string: str, container: str
+    connection_name: str, file_name: str, conn_string: str, user_identity_resource: str, container: str
 ):
+    print(user_identity_resource)
     with open(file_name) as data_source_file:
         data_source_def = data_source_file.read()
 
     data_source_def = data_source_def.replace("{conn_string}", conn_string)
     data_source_def = data_source_def.replace("{container_name}", container)
     data_source_def = data_source_def.replace("{name}", connection_name)
+    data_source_def = data_source_def.replace("{user_identity_resource}", user_identity_resource)
     data_source_connection = SearchIndexerDataSourceConnection.deserialize(
         data_source_def, APPLICATION_JSON_CONTENT_TYPE
     )
@@ -246,7 +249,6 @@ def main():
     )
 
     conn_string = _get_storage_conn_string(
-        credential,
         sub_config["subscription_id"],
         sub_config["storage_account_name"],
         sub_config["resource_group_name"],
@@ -267,6 +269,11 @@ def main():
         generate_data_source_name(),
         file_name=acs_config["acs_document_data_source"],
         conn_string=conn_string,
+        user_identity_resource=_get_identity_resource(
+            sub_config["subscription_id"],
+            sub_config["resource_group_name"],
+            sub_config["managed_identity_name"],
+        ),
         container=storage_container,
     )
     search_indexer_client.create_or_update_data_source_connection(
