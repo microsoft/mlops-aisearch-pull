@@ -13,5 +13,5 @@ python-dotenv==1.0.0
 tenacity==8.2.3
 tiktoken==0.5.1
 numexpr==2.8.7
-azure-search-documents==11.4.0b8
+azure-search-documents==11.6.0b5
 pypdf==4.0.1
