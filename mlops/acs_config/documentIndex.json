@@ -77,7 +77,6 @@
       "indexAnalyzer": null,
       "searchAnalyzer": null,
       "analyzer": null,
-      "normalizer": null,
       "dimensions": null,
       "vectorSearchProfile": null,
       "synonymMaps": []
