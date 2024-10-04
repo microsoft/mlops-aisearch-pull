@@ -6,6 +6,7 @@ These functions are going to be a part of smoke testing step in DevOps
 """
 import requests
 import json
+import time
 
 
 def read_json_from_file(file_path):
@@ -49,6 +50,7 @@ def test_chunker(url: str, headers: dict):
                 raise SystemExit("Chunk test failed")
         else:
             print(f"The request failed, and it will be resubmitted for {retry} times.")
+            time.sleep(5)
 
     print("Chunk Request failed with status code:", response.status_code)
     print("Response:", response.text)
