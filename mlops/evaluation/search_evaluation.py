@@ -62,7 +62,7 @@ def main(index_name: str, semantic_config: str, data_path: str):
     evaluators_config = {
         "default": {
             "column_mapping": {
-                "search_result": "${outputs.search_result}",
+                "search_result": "${target.search_result}",
                 "ground_truth": "${data.sources}",
             }
         }
