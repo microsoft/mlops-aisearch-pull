@@ -10,6 +10,7 @@ from mlops.common.naming_utils import (generate_index_name,
                                        )
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.web import WebSiteManagementClient
+from azure.mgmt.search import SearchManagementClient
 from azure.core.exceptions import ResourceNotFoundError
 
 
@@ -38,12 +39,11 @@ def delete_function_app_slot(config: MLOpsConfig):
         print(f"Slot '{slot_name}' does not exist. No action needed.")
 
 
-def delete_indexer_entity(config: MLOpsConfig, entity_name: str, entity_type: str):
+def delete_indexer_entity(config: MLOpsConfig, entity_name: str, entity_type: str, admin_api_key: str):
     """Delete indexer entity."""
     # Get the variables
     endpoint = config.acs_config["acs_api_base"]
     api_version = config.acs_config["acs_api_version"]
-    admin_api_key = config.acs_config["acs_api_key"]
 
     # Construct the request URL
     url = f"{endpoint}/{entity_type}/{entity_name}?api-version={api_version}"
@@ -67,10 +67,23 @@ def delete_indexer_entity(config: MLOpsConfig, entity_name: str, entity_type: st
 
 def delete_indexer_entities(config: MLOpsConfig):
     """Delete indexer entities when the PR is merged."""
-    delete_indexer_entity(config, generate_index_name(), "indexes")
-    delete_indexer_entity(config, generate_skillset_name(), "skillsets")
-    delete_indexer_entity(config, generate_data_source_name(), "datasources")
-    delete_indexer_entity(config, generate_indexer_name(), "indexers")
+
+    sub_config = config.sub_config
+    acs_config = config.acs_config
+
+    search_management_client = SearchManagementClient(
+        credential=DefaultAzureCredential(), subscription_id=sub_config["subscription_id"]
+    )
+
+    search_admin_key = search_management_client.admin_keys.get(
+        resource_group_name=sub_config["resource_group_name"],
+        search_service_name=acs_config["acs_service_name"],
+    ).primary_key
+    
+    delete_indexer_entity(config, generate_index_name(), "indexes", search_admin_key)
+    delete_indexer_entity(config, generate_skillset_name(), "skillsets", search_admin_key)
+    delete_indexer_entity(config, generate_data_source_name(), "datasources", search_admin_key)
+    delete_indexer_entity(config, generate_indexer_name(), "indexers", search_admin_key)
 
 
 def main():

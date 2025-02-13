@@ -31,6 +31,7 @@ MANAGEMENT_SCOPE_URL = "https://management.azure.com/.default"
 
 def _create_or_update_search_index(
     aoai_config: dict,
+    user_identity_resource: str,
     search_service_name: str,
     index_name: str,
     file_name: str,
@@ -58,7 +59,7 @@ def _create_or_update_search_index(
         "{openai_embedding_deployment_name}",
         aoai_config["aoai_embedding_model_deployment"],
     )
-    index_def = index_def.replace("{openai_api_key}", aoai_config["aoai_api_key"])
+    index_def = index_def.replace("{user_identity_resource}", user_identity_resource)
     index_def = index_def.replace("{openai_embedding_model}", aoai_config["aoai_embedding_model_deployment"])
 
     response = requests.put(
@@ -239,6 +240,11 @@ def main():
     # Create the full document index
     _create_or_update_search_index(
         aoai_config,
+        user_identity_resource=_get_identity_resource(
+            sub_config["subscription_id"],
+            sub_config["resource_group_name"],
+            sub_config["managed_identity_name"],
+        ),
         search_service_name=acs_config["acs_service_name"],
         index_name=index_name,
         file_name=acs_config["acs_document_index_file"],

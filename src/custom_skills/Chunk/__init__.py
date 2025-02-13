@@ -4,8 +4,8 @@ import logging
 import json
 import jsonschema
 from azure.identity import DefaultAzureCredential
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
 
 from azure.storage.blob import BlobServiceClient
 

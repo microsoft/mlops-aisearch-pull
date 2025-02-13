@@ -4,6 +4,7 @@ import logging
 import json
 import jsonschema
 import openai
+from azure.identity import DefaultAzureCredential
 from openai import AzureOpenAI
 from tenacity import (
     retry,
@@ -26,12 +27,19 @@ def function_vector_embed(req: func.HttpRequest) -> func.HttpResponse:
     except jsonschema.exceptions.ValidationError as e:
         return func.HttpResponse("Invalid request: {0}".format(e), status_code=400)
 
+    managed_identity_client_id = os.environ.get("MANAGED_IDENTITY_CLIENT_ID")
+
+    credential = DefaultAzureCredential(managed_identity_client_id=managed_identity_client_id)
+    aoai_token = credential.get_token("https://cognitiveservices.azure.com").token
+
+    os.environ["OPENAI_API_TYPE"] = "azure_ad"
+
     values = []
     for value in request["values"]:
         record_id = value["recordId"]
 
         chunk = value["data"]["chunk"]
-        embedding = _generate_embedding(chunk["page_content"])
+        embedding = _generate_embedding(chunk["page_content"], aoai_token)
 
         values.append(
             {
@@ -71,18 +79,20 @@ def _log_attempt_number(retry_state):
 @retry(retry=retry_if_exception_type(openai.RateLimitError),
        wait=wait_random_exponential(min=1, max=60),
        stop=stop_after_attempt(10), after=_log_attempt_number)
-def _generate_embedding(text):
+def _generate_embedding(text, aoai_token):
     """
     Generate embeddings for text.
 
     Args:
         text: a block of text
+        aoai_token: token for user defined managed identity to interact with Open AI
 
     Returns:
         An object containing an 'contentVector' field
     """
+
     openai_client = AzureOpenAI(
-        api_key=os.environ.get("AZURE_OPENAI_API_KEY"),
+        api_key=aoai_token,
         api_version=os.environ.get("AZURE_OPENAI_API_VERSION"),
         azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT"),
     )

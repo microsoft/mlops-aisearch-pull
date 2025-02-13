@@ -2,7 +2,6 @@
 
 from typing import Dict, List
 
-from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from azure.search.documents.models import (
     QueryType,
@@ -20,7 +19,7 @@ class SearchEvaluationTarget(EvaluationTarget):
     fields_to_select: List[str] = ["filename", "page_number"]
 
     def __init__(
-        self, index_name: str, semantic_config: str, endpoint: str, key: str
+        self, index_name: str, semantic_config: str, endpoint: str, credentials
     ) -> None:
         """
         Instantiate a `SearchEvaluationTarget` object.
@@ -31,8 +30,7 @@ class SearchEvaluationTarget(EvaluationTarget):
             endpoint (str): Azure AI Search endpoint
             key (str): Azure AI Search key
         """
-        credential = AzureKeyCredential(key)
-        self.search_client = SearchClient(endpoint, index_name, credential=credential)
+        self.search_client = SearchClient(endpoint, index_name, credential=credentials)
         self.semantic_config = semantic_config
 
     def __select_fields(self, dictionary: Dict, fields: List[str] = None) -> Dict:
