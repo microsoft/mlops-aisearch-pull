@@ -31,7 +31,6 @@ MANAGEMENT_SCOPE_URL = "https://management.azure.com/.default"
 
 def _create_or_update_search_index(
     aoai_config: dict,
-    user_identity_resource: str,
     search_service_name: str,
     index_name: str,
     file_name: str,
@@ -59,7 +58,6 @@ def _create_or_update_search_index(
         "{openai_embedding_deployment_name}",
         aoai_config["aoai_embedding_model_deployment"],
     )
-    index_def = index_def.replace("{user_identity_resource}", user_identity_resource)
     index_def = index_def.replace("{openai_embedding_model}", aoai_config["aoai_embedding_model_deployment"])
 
     response = requests.put(
@@ -119,16 +117,14 @@ def _get_identity_resource(
 
 
 def _generate_data_source_connection(
-    connection_name: str, file_name: str, conn_string: str, user_identity_resource: str, container: str
+    connection_name: str, file_name: str, conn_string: str, container: str
 ):
-    print(user_identity_resource)
     with open(file_name) as data_source_file:
         data_source_def = data_source_file.read()
 
     data_source_def = data_source_def.replace("{conn_string}", conn_string)
     data_source_def = data_source_def.replace("{container_name}", container)
     data_source_def = data_source_def.replace("{name}", connection_name)
-    data_source_def = data_source_def.replace("{user_identity_resource}", user_identity_resource)
     data_source_connection = SearchIndexerDataSourceConnection.deserialize(
         data_source_def, APPLICATION_JSON_CONTENT_TYPE
     )
@@ -240,11 +236,6 @@ def main():
     # Create the full document index
     _create_or_update_search_index(
         aoai_config,
-        user_identity_resource=_get_identity_resource(
-            sub_config["subscription_id"],
-            sub_config["resource_group_name"],
-            sub_config["managed_identity_name"],
-        ),
         search_service_name=acs_config["acs_service_name"],
         index_name=index_name,
         file_name=acs_config["acs_document_index_file"],
@@ -273,11 +264,6 @@ def main():
         generate_data_source_name(),
         file_name=acs_config["acs_document_data_source"],
         conn_string=conn_string,
-        user_identity_resource=_get_identity_resource(
-            sub_config["subscription_id"],
-            sub_config["resource_group_name"],
-            sub_config["managed_identity_name"],
-        ),
         container=storage_container,
     )
     search_indexer_client.create_or_update_data_source_connection(

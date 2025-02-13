@@ -156,10 +156,6 @@
         "azureOpenAIParameters": {
           "resourceUri": "{openai_api_endpoint}",
           "deploymentId": "{openai_embedding_model}",
-          "authIdentity": {
-            "@odata.type": "#Microsoft.Azure.Search.DataUserAssignedIdentity",
-            "userAssignedIdentity": "{user_identity_resource}"
-           },
           "modelName": "text-embedding-ada-002"
         }
       }
