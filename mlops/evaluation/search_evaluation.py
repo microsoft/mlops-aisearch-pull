@@ -3,6 +3,7 @@
 import os
 
 import argparse
+from azure.identity import DefaultAzureCredential
 from dotenv import load_dotenv
 from azure.ai.evaluation import evaluate
 from src.evaluation.evaluators.search.reciprocal_rank import ReciprocalRankEvaluator
@@ -29,18 +30,16 @@ def main(index_name: str, semantic_config: str, data_path: str):
     project_name = os.environ.get("AI_STUDIO_PROJECT_NAME")
     azure_search_service_name = os.environ.get("ACS_SERVICE_NAME")
     azure_search_endpoint = f"https://{azure_search_service_name}.search.windows.net"
-    azure_search_key = os.environ.get("ACS_API_KEY")
 
     print(f"Running evaluation for index: {index_name}")
     print(f"Azure Search Endpoint {azure_search_endpoint}")
     print(f"Project Name {project_name}")
-    # print(f"Azure Search Key {azure_search_key}")
 
     target = SearchEvaluationTarget(
         index_name,
         semantic_config,
         azure_search_endpoint,
-        azure_search_key,
+        DefaultAzureCredential()
     )
 
     # Define a dictionary of evaluators and their aliases

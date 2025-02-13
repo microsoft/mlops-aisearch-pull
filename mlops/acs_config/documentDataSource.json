@@ -12,9 +12,5 @@
   },
   "dataChangeDetectionPolicy": null,
   "dataDeletionDetectionPolicy": null,
-  "encryptionKey": null,
-  "identity": {
-    "@odata.type": "#Microsoft.Azure.Search.DataUserAssignedIdentity",
-    "userAssignedIdentity": "{user_identity_resource}"
-  }
+  "encryptionKey": null
 }

@@ -38,12 +38,11 @@ def delete_function_app_slot(config: MLOpsConfig):
         print(f"Slot '{slot_name}' does not exist. No action needed.")
 
 
-def delete_indexer_entity(config: MLOpsConfig, entity_name: str, entity_type: str):
+def delete_indexer_entity(config: MLOpsConfig, entity_name: str, entity_type: str, bearer_token: str):
     """Delete indexer entity."""
     # Get the variables
     endpoint = config.acs_config["acs_api_base"]
     api_version = config.acs_config["acs_api_version"]
-    admin_api_key = config.acs_config["acs_api_key"]
 
     # Construct the request URL
     url = f"{endpoint}/{entity_type}/{entity_name}?api-version={api_version}"
@@ -51,7 +50,7 @@ def delete_indexer_entity(config: MLOpsConfig, entity_name: str, entity_type: st
     # Set the headers
     headers = {
         "Content-Type": "application/json",
-        "api-key": admin_api_key
+        "Authorization": f"Bearer {bearer_token}"
     }
 
     # Make the DELETE request
@@ -67,10 +66,16 @@ def delete_indexer_entity(config: MLOpsConfig, entity_name: str, entity_type: st
 
 def delete_indexer_entities(config: MLOpsConfig):
     """Delete indexer entities when the PR is merged."""
-    delete_indexer_entity(config, generate_index_name(), "indexes")
-    delete_indexer_entity(config, generate_skillset_name(), "skillsets")
-    delete_indexer_entity(config, generate_data_source_name(), "datasources")
-    delete_indexer_entity(config, generate_indexer_name(), "indexers")
+    credential = DefaultAzureCredential()
+    aisearch_scope = "https://search.azure.com/.default"
+
+    # Get the token
+    bearer_token = credential.get_token(aisearch_scope).token
+
+    delete_indexer_entity(config, generate_index_name(), "indexes", bearer_token)
+    delete_indexer_entity(config, generate_skillset_name(), "skillsets", bearer_token)
+    delete_indexer_entity(config, generate_data_source_name(), "datasources", bearer_token)
+    delete_indexer_entity(config, generate_indexer_name(), "indexers", bearer_token)
 
 
 def main():
