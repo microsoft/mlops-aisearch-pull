@@ -67,7 +67,6 @@ def delete_indexer_entity(config: MLOpsConfig, entity_name: str, entity_type: st
 
 def delete_indexer_entities(config: MLOpsConfig):
     """Delete indexer entities when the PR is merged."""
-
     sub_config = config.sub_config
     acs_config = config.acs_config
 
@@ -79,7 +78,7 @@ def delete_indexer_entities(config: MLOpsConfig):
         resource_group_name=sub_config["resource_group_name"],
         search_service_name=acs_config["acs_service_name"],
     ).primary_key
-    
+
     delete_indexer_entity(config, generate_index_name(), "indexes", search_admin_key)
     delete_indexer_entity(config, generate_skillset_name(), "skillsets", search_admin_key)
     delete_indexer_entity(config, generate_data_source_name(), "datasources", search_admin_key)

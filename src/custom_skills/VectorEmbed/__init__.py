@@ -90,7 +90,6 @@ def _generate_embedding(text, aoai_token):
     Returns:
         An object containing an 'contentVector' field
     """
-
     openai_client = AzureOpenAI(
         api_key=aoai_token,
         api_version=os.environ.get("AZURE_OPENAI_API_VERSION"),
