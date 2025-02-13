@@ -9,8 +9,6 @@ import time
 import argparse
 
 from azure.identity import DefaultAzureCredential
-from azure.core.credentials import AzureKeyCredential
-from azure.mgmt.search import SearchManagementClient
 from azure.search.documents.indexes import SearchIndexerClient
 from azure.search.documents.indexes.models import SearchIndexerDataSourceConnection
 from ..common.config_utils import MLOpsConfig
@@ -34,7 +32,7 @@ def _create_or_update_search_index(
     search_service_name: str,
     index_name: str,
     file_name: str,
-    search_admin_key: str,
+    bearer_token: str,
     api_version: str,
 ) -> None:
 
@@ -48,7 +46,7 @@ def _create_or_update_search_index(
         "Content-Type": APPLICATION_JSON_CONTENT_TYPE,
         "Accept": APPLICATION_JSON_CONTENT_TYPE,
         "Prefer": "true",
-        "api-key": search_admin_key,
+        "Authorization": f"Bearer {bearer_token}"
     }
     with open(file_name) as index_file:
         index_def = index_file.read()
@@ -71,7 +69,7 @@ def _create_or_update_search_index(
 def _create_or_update_skillset(skillset: dict,
                                skillset_name: str,
                                search_service_name: str,
-                               search_admin_key: str,
+                               bearer_token: str,
                                api_version: str) -> None:
     # Using the rest API because the SDK doesn't support indexProjections
     skillset_url = (
@@ -82,7 +80,7 @@ def _create_or_update_skillset(skillset: dict,
         "Content-Type": APPLICATION_JSON_CONTENT_TYPE,
         "Accept": APPLICATION_JSON_CONTENT_TYPE,
         "Prefer": "true",
-        "api-key": search_admin_key,
+        "Authorization": f"Bearer {bearer_token}"
     }
 
     response = requests.put(
@@ -224,14 +222,10 @@ def main():
     skillset_name = generate_skillset_name()
     datasource_name = generate_data_source_name()
 
-    search_management_client = SearchManagementClient(
-        credential=credential, subscription_id=sub_config["subscription_id"]
-    )
+    aisearch_scope = "https://search.azure.com/.default"
 
-    search_admin_key = search_management_client.admin_keys.get(
-        resource_group_name=sub_config["resource_group_name"],
-        search_service_name=acs_config["acs_service_name"],
-    ).primary_key
+    # Get the token
+    bearer_token = credential.get_token(aisearch_scope).token
 
     # Create the full document index
     _create_or_update_search_index(
@@ -239,7 +233,7 @@ def main():
         search_service_name=acs_config["acs_service_name"],
         index_name=index_name,
         file_name=acs_config["acs_document_index_file"],
-        search_admin_key=search_admin_key,
+        bearer_token=bearer_token,
         api_version=acs_config["acs_api_version"],
     )
 
@@ -249,9 +243,8 @@ def main():
         sub_config["resource_group_name"],
     )
 
-    key_credential = AzureKeyCredential(search_admin_key)
     search_indexer_client = SearchIndexerClient(
-        acs_config["acs_api_base"], key_credential
+        acs_config["acs_api_base"], credential
     )
 
     # getting data_pr section from the config (pr is a default environment)
@@ -293,7 +286,7 @@ def main():
         document_skillset,
         skillset_name,
         search_service_name=acs_config["acs_service_name"],
-        search_admin_key=search_admin_key,
+        bearer_token=bearer_token,
         api_version=acs_config["acs_api_version"]
     )
     # Create the full document Indexer
