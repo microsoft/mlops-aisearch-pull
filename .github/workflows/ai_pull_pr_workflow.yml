@@ -3,8 +3,7 @@ name: PR Workflow for AI Search Components
 
 on:
   pull_request:
-    branches:
-      - 'development'
+    branches: [development]
   workflow_call:
 
 jobs:
