@@ -16,6 +16,7 @@ env:
     MANAGED_IDENTITY_CLIENT_ID: ${{ vars.MANAGED_IDENTITY_CLIENT_ID }}
     MANAGED_IDENTITY_NAME: ${{ vars.MANAGED_IDENTITY_NAME }}
     MANAGED_IDENTITY_TENANT_ID: ${{ vars.MANAGED_IDENTITY_TENANT_ID }}
+    PYTHON_VERSION: "3.11"
 
 permissions:
   id-token: write
@@ -34,7 +35,7 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-            python-version: "3.11"
+            python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Load Python Dependencies
         shell: bash
