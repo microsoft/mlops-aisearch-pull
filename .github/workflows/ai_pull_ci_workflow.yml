@@ -34,6 +34,9 @@ jobs:
         with:
             script_parameter: |
                 python -u -m mlops.deployment_scripts.deploy_azure_functions --ignore_slot
+            client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
+            tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID}}
+            subscription-id: ${{ env.SUBSCRIPTION_ID }}
 
       - name: Validate Azure Functions Deployment
         uses: ./.github/actions/execute_shell_code
@@ -42,6 +45,9 @@ jobs:
         with:
             script_parameter: |
                 python -u -m mlops.deployment_scripts.run_functions --ignore_slot
+            client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
+            tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID}}
+            subscription-id: ${{ env.SUBSCRIPTION_ID }}
 
       - name: Deploy Indexer
         uses: ./.github/actions/execute_shell_code
@@ -50,6 +56,9 @@ jobs:
         with:
             script_parameter: |
                 python -u -m mlops.deployment_scripts.build_indexer --ignore_slot
+                client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
+            tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID}}
+            subscription-id: ${{ env.SUBSCRIPTION_ID }}
 
       - name: Get merged branch name
         id: get_branch_name
@@ -66,3 +75,6 @@ jobs:
         with:
             script_parameter: |
                 python -u -m mlops.deployment_scripts.cleanup_pr
+            client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
+            tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID}}
+            subscription-id: ${{ env.SUBSCRIPTION_ID }}
