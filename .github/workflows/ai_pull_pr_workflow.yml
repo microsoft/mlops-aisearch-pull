@@ -5,6 +5,16 @@ on:
   pull_request:
     branches: [development]
   workflow_call:
+    secrets:
+      subscription-id:
+        description: "the subscription ID in Azure."
+        required: true
+      client-id:
+        description: "the client ID of the service principal used to authenticate with Azure."
+        required: true
+      tenant-id:
+        description: "the tenant ID of the service principal used to authenticate with Azure."
+        required: true
 
 permissions:
   id-token: write

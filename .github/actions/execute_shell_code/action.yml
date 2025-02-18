@@ -3,8 +3,14 @@ name: execute_shell_code
 description: execute a shell script given in the inputs
 
 inputs:
-  azure_credentials:
-    description: "Azure credentials"
+  client-id: 
+    description: "client id of service principal used to authenticate with azure"
+    required: true
+  tenant-id: 
+    description: "tenant id of service principal used to authenticate with azure"
+    required: true
+  subscription-id:
+    description: "subscription id of service principal used to authenticate with azure"
     required: true
   script_parameter:
     description: "Parameters to execute code"
@@ -17,10 +23,9 @@ runs:
     - name: Azure login
       uses: azure/login@v2
       with:
-        #creds: ${{ inputs.azure_credentials }}
-        client-id: ${{ secrets.MANAGED_IDENTITY_CLIENT_ID }}
-        tenant-id: ${{ secrets.MANAGED_IDENTITY_TENANT_ID }}
-        subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
+        client-id: ${{ inputs.MANAGED_IDENTITY_CLIENT_ID }}
+        tenant-id: ${{ inputs.MANAGED_IDENTITY_TENANT_ID }}
+        subscription-id: ${{ inputs.SUBSCRIPTION_ID }}
 
     - name: Checkout
       uses: actions/checkout@v1
