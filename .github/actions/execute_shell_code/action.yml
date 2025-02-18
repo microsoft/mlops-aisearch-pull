@@ -3,21 +3,29 @@ name: execute_shell_code
 description: execute a shell script given in the inputs
 
 inputs:
-  azure_credentials:
-    description: "Azure credentials"
-    required: true
   script_parameter:
     description: "Parameters to execute code"
     required: true
     default: "python --version"
+  client-id:
+    description: "Parameters to execute code"
+    required: true
+  tenant-id:
+    description: "Parameters to execute code"
+    required: true
+  subscription-id:
+    description: "Parameters to execute code"
+    required: true
 
 runs:
   using: composite
   steps:
     - name: Azure login
-      uses: azure/login@v1
+      uses: azure/login@v2
       with:
-        creds: ${{ inputs.azure_credentials }}
+        client-id: ${{ inputs.client-id }}
+        tenant-id: ${{ inputs.tenant-id }}
+        subscription-id: ${{ inputs.subscription-id }}
 
     - name: Checkout
       uses: actions/checkout@v1
