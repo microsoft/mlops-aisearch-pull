@@ -35,6 +35,9 @@ jobs:
         with:
             script_parameter: |
                 python -u -m mlops.deployment_scripts.deploy_azure_functions
+            client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
+            tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID}}
+            subscription-id: ${{ env.SUBSCRIPTION_ID }}
 
       - name: Validate Azure Functions Deployment
         uses: ./.github/actions/execute_shell_code
