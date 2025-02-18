@@ -4,10 +4,6 @@ name: CI Workflow for AI Search Components
 on:
   workflow_dispatch:
   workflow_call:
-    inputs:
-      versionSpec:
-        description: "The Python version to use in the environment."
-        default: "3.11"
   push:
     branches:
       - 'development'
@@ -41,7 +37,7 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-            python-version: ${{ inputs.versionSpec }}
+            python-version: "3.11"
 
       - name: Load Python Dependencies
         shell: bash

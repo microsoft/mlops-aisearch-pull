@@ -5,10 +5,6 @@ on:
   pull_request:
     branches: [development]
   workflow_call:
-    inputs:
-      versionSpec:
-        description: "The Python version to use in the environment."
-        default: "3.11"
 
 env:
     SUBSCRIPTION_ID: ${{ vars.SUBSCRIPTION_ID }}
@@ -38,7 +34,7 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-            python-version: ${{ inputs.versionSpec }}
+            python-version: "3.11"
 
       - name: Load Python Dependencies
         shell: bash
