@@ -45,7 +45,10 @@ jobs:
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
         with:
-            azure_credentials: ${{ secrets.azure_credentials }}
+            # azure_credentials: ${{ secrets.azure_credentials }}
+            client-id: ${{ secrets.MANAGED_IDENTITY_CLIENT_ID }}
+            tenant-id: ${{ secrets.MANAGED_IDENTITY_TENANT_ID }}
+            subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
             script_parameter: |
                 python -u -m mlops.deployment_scripts.run_functions
 
@@ -54,7 +57,10 @@ jobs:
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
         with:
-            azure_credentials: ${{ secrets.azure_credentials }}
+            # azure_credentials: ${{ secrets.azure_credentials }}
+            client-id: ${{ secrets.MANAGED_IDENTITY_CLIENT_ID }}
+            tenant-id: ${{ secrets.MANAGED_IDENTITY_TENANT_ID }}
+            subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
             script_parameter: |
                 python -u -m mlops.deployment_scripts.build_indexer
   run_search_evaluation:
@@ -83,6 +89,10 @@ jobs:
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
         with:
-            azure_credentials: ${{ secrets.azure_credentials }}
+            # azure_credentials: ${{ secrets.azure_credentials }}            
+            client-id: ${{ secrets.MANAGED_IDENTITY_CLIENT_ID }}
+            tenant-id: ${{ secrets.MANAGED_IDENTITY_TENANT_ID }}
+            subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
+
             script_parameter: |
                 python -u -m mlops.evaluation.search_evaluation --gt_path "./mlops/evaluation/data/search_evaluation_data.jsonl" --semantic_config my-semantic-config
