@@ -6,6 +6,18 @@ on:
     branches: [development]
   workflow_call:
 
+env:
+    SUBSCRIPTION_ID: ${{ vars.SUBSCRIPTION_ID }}
+    RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
+    STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
+    ACS_SERVICE_NAME: ${{ vars.ACS_SERVICE_NAME }}
+    AOAI_BASE_ENDPOINT: ${{ vars.AOAI_BASE_ENDPOINT }}
+    AI_STUDIO_PROJECT_NAME: ${{ vars.AI_STUDIO_PROJECT_NAME }}
+    MANAGED_IDENTITY_CLIENT_ID: ${{ vars.MANAGED_IDENTITY_CLIENT_ID }}
+    MANAGED_IDENTITY_NAME: ${{ vars.MANAGED_IDENTITY_NAME }}
+    MANAGED_IDENTITY_TENANT_ID: ${{ vars.MANAGED_IDENTITY_TENANT_ID }}
+    PYTHON_VERSION: "3.11"
+
 permissions:
   id-token: write
   contents: read
@@ -20,46 +32,46 @@ jobs:
     steps:
       - name: Checkout Actions
         uses: actions/checkout@v1
-      - name: Export Secrets
-        uses: oNaiPs/secrets-to-env-action@v1
-        with:
-          secrets: ${{ toJSON(secrets) }}
-          convert: upper
-      - name: Configure Job Agent
-        uses: ./.github/actions/configure_job_agent
 
-      - name: Execute Azure Functions Deployment
-        uses: ./.github/actions/execute_shell_code
-        env:
-            BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-python@v4
         with:
-            script_parameter: |
-                python -u -m mlops.deployment_scripts.deploy_azure_functions
+            python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Load Python Dependencies
+        shell: bash
+        run: |
+            set -e # fail on error
+            python -m pip install --upgrade pip
+            python -m pip install --upgrade -r requirements.txt
+            az version
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
             client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
             tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID}}
             subscription-id: ${{ env.SUBSCRIPTION_ID }}
 
-      - name: Validate Azure Functions Deployment
-        uses: ./.github/actions/execute_shell_code
+      - name: Execute Azure Functions Deployment
+        shell: bash
+        run: |
+            python -u -m mlops.deployment_scripts.deploy_azure_functions
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
-        with:
-            script_parameter: |
-                python -u -m mlops.deployment_scripts.run_functions
-            client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
-            tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID}}
-            subscription-id: ${{ env.SUBSCRIPTION_ID }}                
+
+      - name: Validate Azure Functions Deployment
+        shell: bash
+        run: |
+            python -u -m mlops.deployment_scripts.run_functions
+        env:
+            BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}             
 
       - name: Deploy Indexer
-        uses: ./.github/actions/execute_shell_code
+        shell: bash
+        run: |
+            python -u -m mlops.deployment_scripts.build_indexer
         env:
-            BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
-        with:
-            script_parameter: |
-                python -u -m mlops.deployment_scripts.build_indexer
-            client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
-            tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID}}
-            subscription-id: ${{ env.SUBSCRIPTION_ID }}                
+            BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}              
 
   run_search_evaluation:
     name: Run Search Evaluation
@@ -68,30 +80,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Export Secrets
-        uses: oNaiPs/secrets-to-env-action@v1
-        with:
-          secrets: ${{ toJSON(secrets) }}
-          convert: upper
 
       - name: Load Python Dependencies
         shell: bash
         run: |
           set -e
           python -m pip install --upgrade pip
-          python -m pip install --upgrade -r .github/requirements/search_evaluation_requirements.txt
+          python -m pip install --upgrade -r requirements.txt
 
-      - name: Execute search evaluation
-        uses: ./.github/actions/execute_shell_code
-        env:
-            BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
+      - name: Azure login
+        uses: azure/login@v2
         with:
-            script_parameter: |
-                python -u -m mlops.evaluation.search_evaluation --gt_path "./mlops/evaluation/data/search_evaluation_data.jsonl" --semantic_config my-semantic-config
             client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
             tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID}}
             subscription-id: ${{ env.SUBSCRIPTION_ID }}
+
+      - name: Execute search evaluation
+        shell: bash
+        run: |
+            python -u -m mlops.evaluation.search_evaluation --gt_path "./mlops/evaluation/data/search_evaluation_data.jsonl" --semantic_config my-semantic-config
+        env:
+            BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
+                

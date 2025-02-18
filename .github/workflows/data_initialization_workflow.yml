@@ -6,7 +6,16 @@ on:
   workflow_call:
 
 env:
-  PYTHON_VERSION: "3.11"
+    SUBSCRIPTION_ID: ${{ vars.SUBSCRIPTION_ID }}
+    RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
+    STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
+    MANAGED_IDENTITY_CLIENT_ID: ${{ vars.MANAGED_IDENTITY_CLIENT_ID }}
+    MANAGED_IDENTITY_TENANT_ID: ${{ vars.MANAGED_IDENTITY_TENANT_ID }}
+    PYTHON_VERSION: "3.11"
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   upload-data:
@@ -24,26 +33,22 @@ jobs:
         run: |
           set -e
           python -m pip install --upgrade pip
-          python -m pip install --upgrade -r .github/requirements/data_initialization_requirements.txt
+          python -m pip install --upgrade -r requirements.txt
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+            client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
+            tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID}}
+            subscription-id: ${{ env.SUBSCRIPTION_ID }}
 
       - name: Upload toy data to the toy dataset
-        uses: ./.github/actions/execute_shell_code
-        env:
-          SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
-          RESOURCE_GROUP_NAME: ${{ secrets.resource_group_name }}
-          STORAGE_ACCOUNT_NAME: ${{ secrets.storage_account_name }}
-        with:
-          azure_credentials: ${{ secrets.azure_credentials }}
-          script_parameter: |
+        shell: bash
+        run: |
             python -u -m mlops.deployment_scripts.upload_data
 
       - name: Upload full data to the full dataset
-        uses: ./.github/actions/execute_shell_code
-        env:
-          SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
-          RESOURCE_GROUP_NAME: ${{ secrets.resource_group_name }}
-          STORAGE_ACCOUNT_NAME: ${{ secrets.storage_account_name }}
-        with:
-          azure_credentials: ${{ secrets.azure_credentials }}
-          script_parameter: |
+        shell: bash
+        run: |
             python -u -m mlops.deployment_scripts.upload_data --stage dev
+            
