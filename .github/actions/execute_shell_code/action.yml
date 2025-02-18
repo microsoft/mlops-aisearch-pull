@@ -7,16 +7,6 @@ inputs:
     description: "Parameters to execute code"
     required: true
     default: "python --version"
-secrets:
-  client-id: 
-    description: "client id of service principal used to authenticate with azure"
-    required: true
-  tenant-id: 
-    description: "tenant id of service principal used to authenticate with azure"
-    required: true
-  subscription-id:
-    description: "subscription id of service principal used to authenticate with azure"
-    required: true
 
 runs:
   using: composite
@@ -24,9 +14,9 @@ runs:
     - name: Azure login
       uses: azure/login@v2
       with:
-        client-id: ${{ secrets.client-id }}
-        tenant-id: ${{ secrets.tenant-id }}
-        subscription-id: ${{ secrets.subscription-id }}
+        client-id: ${{ secrets.MANAGED_IDENTITY_CLIENT_ID }}
+        tenant-id: ${{ secrets.MANAGED_IDENTITY_TENANT_ID }}
+        subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
     - name: Checkout
       uses: actions/checkout@v1
