@@ -18,9 +18,9 @@ runs:
     - name: Azure login
       uses: azure/login@v2
       with:
-        client-id: ${{ secrets.client-id }}
-        tenant-id: ${{ secrets.tenant-id }}
-        subscription-id: ${{ secrets.subscription-id }}
+        client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
+        tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID }}
+        subscription-id: ${{ env.SUBSCRIPTION_ID }}
 
     - name: Checkout
       uses: actions/checkout@v1

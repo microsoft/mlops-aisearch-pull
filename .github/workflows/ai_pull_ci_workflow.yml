@@ -29,7 +29,6 @@ jobs:
 
       - name: Execute Azure Functions Deployment
         uses: ./.github/actions/execute_shell_code
-        secrets: inherit
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
         with:
@@ -38,7 +37,6 @@ jobs:
 
       - name: Validate Azure Functions Deployment
         uses: ./.github/actions/execute_shell_code
-        secrets: inherit
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
         with:
@@ -47,7 +45,6 @@ jobs:
 
       - name: Deploy Indexer
         uses: ./.github/actions/execute_shell_code
-        secrets: inherit
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
         with:
@@ -64,7 +61,6 @@ jobs:
 
       - name: Cleanup PR Branch
         uses: ./.github/actions/execute_shell_code
-        secrets: inherit
         env:
             BUILD_SOURCEBRANCHNAME: ${{ steps.get_branch_name.outputs.sourcebranch }}
         with:
