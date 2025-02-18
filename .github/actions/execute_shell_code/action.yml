@@ -7,6 +7,10 @@ inputs:
     description: "Parameters to execute code"
     required: true
     default: "python --version"
+secrets:
+    client-id: ${{ secrets.MANAGED_IDENTITY_CLIENT_ID }}
+    tenant-id: ${{ secrets.MANAGED_IDENTITY_TENANT_ID }}
+    subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
 runs:
   using: composite
@@ -14,9 +18,9 @@ runs:
     - name: Azure login
       uses: azure/login@v2
       with:
-        client-id: ${{ secrets.MANAGED_IDENTITY_CLIENT_ID }}
-        tenant-id: ${{ secrets.MANAGED_IDENTITY_TENANT_ID }}
-        subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
+        client-id: ${{ secrets.client-id }}
+        tenant-id: ${{ secrets.tenant-id }}
+        subscription-id: ${{ secrets.subscription-id }}
 
     - name: Checkout
       uses: actions/checkout@v1

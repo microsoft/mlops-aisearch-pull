@@ -39,21 +39,21 @@ jobs:
 
       - name: Validate Azure Functions Deployment
         uses: ./.github/actions/execute_shell_code
-        secrets: inherit
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
         with:
             script_parameter: |
                 python -u -m mlops.deployment_scripts.run_functions
+            secrets: inherit
 
       - name: Deploy Indexer
         uses: ./.github/actions/execute_shell_code
-        secrets: inherit
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
         with:
             script_parameter: |
                 python -u -m mlops.deployment_scripts.build_indexer
+            secrets: inherit
 
   run_search_evaluation:
     name: Run Search Evaluation
@@ -81,9 +81,9 @@ jobs:
 
       - name: Execute search evaluation
         uses: ./.github/actions/execute_shell_code
-        secrets: inherit
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
         with:
             script_parameter: |
                 python -u -m mlops.evaluation.search_evaluation --gt_path "./mlops/evaluation/data/search_evaluation_data.jsonl" --semantic_config my-semantic-config
+            secrets: inherit
