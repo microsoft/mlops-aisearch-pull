@@ -30,12 +30,12 @@ jobs:
 
       - name: Execute Azure Functions Deployment
         uses: ./.github/actions/execute_shell_code
-        secrets: inherit
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
         with:
             script_parameter: |
                 python -u -m mlops.deployment_scripts.deploy_azure_functions
+            secrets: inherit
 
       - name: Validate Azure Functions Deployment
         uses: ./.github/actions/execute_shell_code
