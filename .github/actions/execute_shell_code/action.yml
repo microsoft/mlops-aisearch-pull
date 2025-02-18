@@ -3,6 +3,11 @@ name: execute_shell_code
 description: execute a shell script given in the inputs
 
 inputs:
+  script_parameter:
+    description: "Parameters to execute code"
+    required: true
+    default: "python --version"
+secrets:
   client-id: 
     description: "client id of service principal used to authenticate with azure"
     required: true
@@ -12,10 +17,6 @@ inputs:
   subscription-id:
     description: "subscription id of service principal used to authenticate with azure"
     required: true
-  script_parameter:
-    description: "Parameters to execute code"
-    required: true
-    default: "python --version"
 
 runs:
   using: composite
@@ -23,9 +24,9 @@ runs:
     - name: Azure login
       uses: azure/login@v2
       with:
-        client-id: ${{ inputs.MANAGED_IDENTITY_CLIENT_ID }}
-        tenant-id: ${{ inputs.MANAGED_IDENTITY_TENANT_ID }}
-        subscription-id: ${{ inputs.SUBSCRIPTION_ID }}
+        client-id: ${{ secrets.client-id }}
+        tenant-id: ${{ secrets.tenant-id }}
+        subscription-id: ${{ secrets.subscription-id }}
 
     - name: Checkout
       uses: actions/checkout@v1
