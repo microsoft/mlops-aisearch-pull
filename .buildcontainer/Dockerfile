@@ -4,7 +4,7 @@ ARG USERNAME=vscode
 
 USER root
 
-RUN apt-get update -y && apt-get install -y sudo wget gnupg software-properties-common curl bash && \
+RUN apt-get update -y && apt-get install -y sudo wget gnupg software-properties-common curl bash git && \
     # Download and install Miniconda
     wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
     bash /tmp/miniconda.sh -b -p /opt/miniconda && \

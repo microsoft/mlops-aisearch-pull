@@ -6,7 +6,8 @@ on:
       - 'development'
     paths:
       - '.github/workflows/build_devops_container.yml' 
-      - 'requirements.txt' 
+      - 'requirements.txt'
+      - '.buildcontainer/Dockerfile'
 
 env:
     IMAGE_NAME: devops_container_image
