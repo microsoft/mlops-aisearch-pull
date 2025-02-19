@@ -18,21 +18,13 @@ env:
     MANAGED_IDENTITY_CLIENT_ID: ${{ vars.MANAGED_IDENTITY_CLIENT_ID }}
     MANAGED_IDENTITY_NAME: ${{ vars.MANAGED_IDENTITY_NAME }}
     MANAGED_IDENTITY_TENANT_ID: ${{ vars.MANAGED_IDENTITY_TENANT_ID }}
-    PYTHON_VERSION: "3.11"
 
 permissions:
   id-token: write
   contents: read
 jobs:
-  build-validation:
-    name: Build Validation
-    uses: ./.github/workflows/build_validation_workflow.yml
-    secrets:
-      ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
-      ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
-
-  deploy-azure-functions:
-    name: Azure Functions Deployment
+  deploy-and-evaluate:
+    name: Deployment and Evaluation
     runs-on: ubuntu-latest
     container:
         image: aipullacr.azurecr.io/devops_container_image:latest
@@ -40,7 +32,6 @@ jobs:
         credentials:
             username: ${{ secrets.ACR_USERNAME }}
             password: ${{ secrets.ACR_PASSWORD }}
-    needs: build-validation
     steps:
       - name: Checkout Actions
         uses: actions/checkout@v1
@@ -70,6 +61,13 @@ jobs:
         shell: bash
         run: |
             python -u -m mlops.deployment_scripts.build_indexer --ignore_slot
+        env:
+            BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
+        
+      - name: Execute search evaluation
+        shell: bash
+        run: |
+            python -u -m mlops.evaluation.search_evaluation --gt_path "./mlops/evaluation/data/search_evaluation_data.jsonl" --semantic_config my-semantic-config
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
 

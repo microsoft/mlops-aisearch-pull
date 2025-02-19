@@ -9,9 +9,6 @@ on:
       ACR_PASSWORD:
         required: true
 
-env:
-  PYTHON_VERSION: "3.11"
-
 jobs:
   run-unit-tests:
     runs-on: ubuntu-latest

@@ -16,7 +16,6 @@ env:
     MANAGED_IDENTITY_CLIENT_ID: ${{ vars.MANAGED_IDENTITY_CLIENT_ID }}
     MANAGED_IDENTITY_NAME: ${{ vars.MANAGED_IDENTITY_NAME }}
     MANAGED_IDENTITY_TENANT_ID: ${{ vars.MANAGED_IDENTITY_TENANT_ID }}
-    PYTHON_VERSION: "3.11"
 
 permissions:
   id-token: write
@@ -29,8 +28,8 @@ jobs:
       ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
       ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
 
-  deploy-azure-functions:
-    name: Azure Functions Deployment
+  deploy-and-evaluate:
+    name: Deployment and Evaluation
     runs-on: ubuntu-latest
     container:
         image: aipullacr.azurecr.io/devops_container_image:latest
@@ -42,13 +41,6 @@ jobs:
     steps:
       - name: Checkout Actions
         uses: actions/checkout@v1
-
-      - name: Check Azure CLI Availability
-        run: |
-          echo "Current PATH: $PATH"
-          which az
-          ls -l $(which az) || echo "az not found in the expected directory"
-          az --version
 
       - name: Azure login
         uses: azure/login@v2
@@ -77,27 +69,6 @@ jobs:
             python -u -m mlops.deployment_scripts.build_indexer
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}              
-
-  run_search_evaluation:
-    name: Run Search Evaluation
-    runs-on: ubuntu-latest
-    container:
-        image: aipullacr.azurecr.io/devops_container_image:latest
-        options: --user root
-        credentials:
-            username: ${{ secrets.ACR_USERNAME }}
-            password: ${{ secrets.ACR_PASSWORD }}
-    needs: deploy-azure-functions
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-            client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
-            tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID}}
-            subscription-id: ${{ env.SUBSCRIPTION_ID }}
 
       - name: Execute search evaluation
         shell: bash
