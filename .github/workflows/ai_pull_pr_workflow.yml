@@ -28,6 +28,9 @@ jobs:
   deploy-azure-functions:
     name: Azure Functions Deployment
     runs-on: ubuntu-latest
+    container:
+        image: aipullacr.azurecr.io/devops_container_image:latest
+        options: --user vscode
     needs: build-validation
     steps:
       - name: Checkout Actions
