@@ -18,35 +18,23 @@ env:
     MANAGED_IDENTITY_CLIENT_ID: ${{ vars.MANAGED_IDENTITY_CLIENT_ID }}
     MANAGED_IDENTITY_NAME: ${{ vars.MANAGED_IDENTITY_NAME }}
     MANAGED_IDENTITY_TENANT_ID: ${{ vars.MANAGED_IDENTITY_TENANT_ID }}
-    PYTHON_VERSION: "3.11"
 
 permissions:
   id-token: write
   contents: read
 jobs:
-  build-validation:
-    name: Build Validation
-    uses: ./.github/workflows/build_validation_workflow.yml
-
-  deploy-azure-functions:
-    name: Azure Functions Deployment
+  deploy-and-evaluate:
+    name: Deployment and Evaluation
     runs-on: ubuntu-latest
-    needs: build-validation
+    container:
+        image: aipullacr.azurecr.io/devops_container_image:latest
+        options: --user root
+        credentials:
+            username: ${{ secrets.ACR_USERNAME }}
+            password: ${{ secrets.ACR_PASSWORD }}
     steps:
       - name: Checkout Actions
         uses: actions/checkout@v1
-
-      - uses: actions/setup-python@v4
-        with:
-            python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Load Python Dependencies
-        shell: bash
-        run: |
-            set -e # fail on error
-            python -m pip install --upgrade pip
-            python -m pip install --upgrade -r requirements.txt
-            az version
 
       - name: Azure login
         uses: azure/login@v2
@@ -73,6 +61,13 @@ jobs:
         shell: bash
         run: |
             python -u -m mlops.deployment_scripts.build_indexer --ignore_slot
+        env:
+            BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
+        
+      - name: Execute search evaluation
+        shell: bash
+        run: |
+            python -u -m mlops.evaluation.search_evaluation --gt_path "./mlops/evaluation/data/search_evaluation_data.jsonl" --semantic_config my-semantic-config
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
 
