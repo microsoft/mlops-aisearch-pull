@@ -14,8 +14,8 @@ jobs:
         image: aipullacr.azurecr.io/devops_container_image:latest
         options: --user root
         credentials:
-            username: ${{ secrets.ACR_USERNAME }}
-            password: ${{ secrets.ACR_PASSWORD }}
+            username: ${{ env.ACR_USERNAME }}
+            password: ${{ env.ACR_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v1
