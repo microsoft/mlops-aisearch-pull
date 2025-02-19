@@ -16,8 +16,6 @@ env:
     MANAGED_IDENTITY_CLIENT_ID: ${{ vars.MANAGED_IDENTITY_CLIENT_ID }}
     MANAGED_IDENTITY_NAME: ${{ vars.MANAGED_IDENTITY_NAME }}
     MANAGED_IDENTITY_TENANT_ID: ${{ vars.MANAGED_IDENTITY_TENANT_ID }}
-    ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
-    ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
     PYTHON_VERSION: "3.11"
 
 permissions:
@@ -32,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
         image: aipullacr.azurecr.io/devops_container_image:latest
-        options: --user vscode
+        options: --user root
         credentials:
             username: ${{ secrets.ACR_USERNAME }}
             password: ${{ secrets.ACR_PASSWORD }}
@@ -40,6 +38,13 @@ jobs:
     steps:
       - name: Checkout Actions
         uses: actions/checkout@v1
+
+      - name: Check Azure CLI Availability
+        run: |
+          echo "Current PATH: $PATH"
+          which az
+          ls -l $(which az) || echo "az not found in the expected directory"
+          az --version
 
       - name: Azure login
         uses: azure/login@v2
