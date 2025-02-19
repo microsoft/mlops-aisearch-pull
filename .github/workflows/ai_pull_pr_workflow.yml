@@ -31,22 +31,13 @@ jobs:
     container:
         image: aipullacr.azurecr.io/devops_container_image:latest
         options: --user vscode
+        credentials:
+            username: ${{ secrets.ACR_USERNAME }}
+            password: ${{ secrets.ACR_PASSWORD }}
     needs: build-validation
     steps:
       - name: Checkout Actions
         uses: actions/checkout@v1
-
-      - uses: actions/setup-python@v4
-        with:
-            python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Load Python Dependencies
-        shell: bash
-        run: |
-            set -e # fail on error
-            python -m pip install --upgrade pip
-            python -m pip install --upgrade -r requirements.txt
-            az version
 
       - name: Azure login
         uses: azure/login@v2
