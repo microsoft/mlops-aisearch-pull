@@ -25,12 +25,9 @@ jobs:
   build-validation:
     name: Build Validation
     uses: ./.github/workflows/build_validation_workflow.yml
-    container:
-        image: aipullacr.azurecr.io/devops_container_image:latest
-        options: --user root
-        credentials:
-            username: ${{ secrets.ACR_USERNAME }}
-            password: ${{ secrets.ACR_PASSWORD }}
+    secrets:
+      ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+      ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
 
   deploy-azure-functions:
     name: Azure Functions Deployment
