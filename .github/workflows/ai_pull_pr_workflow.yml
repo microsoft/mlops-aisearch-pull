@@ -101,11 +101,11 @@ jobs:
           metrics_table = "## Search Evaluation Results\n\n"
           metrics_table += "| Metric | Value |\n"
           metrics_table += "| ------ | ----- |\n"
-          while IFS = read -r key && IFS= read -r value <&3; do
+          while IFS = read -r key && IFS = read -r value <&3; do
             metrics_table += "| $key | $value |\n"
           done < <(echo "$metric_keys") 3< <(echo "$metric_values")
 
-          echo metrics_table
+          echo "$metrics_table"
 
           curl -s -H "Authorization: token $GITHUB_TOKEN" \
               -H "Accept: application/vnd.github.v3+json" \
