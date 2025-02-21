@@ -101,16 +101,17 @@ jobs:
           metrics_table="## Search Evaluation Results\n\n"
           metrics_table="${metrics_table}| Metric | Value |\n"
           metrics_table="${metrics_table}| ------ | ----- |\n"
-          while IFS= read -r key && read -r value <&3; do
-            metrics_table=$"${metrics_table}| $key | $value |\n"
-          done < <(echo "$metric_keys") 3< <(echo "$metric_values")
+          for key in $metric_keys; do
+            value=$(echo "$metrics" | jq -r --arg key "$key" '.[$key]')
+            metrics_table="${metrics_table}| $key | $value |\n"
+          done
 
           echo "$metrics_table"
 
           curl -s -H "Authorization: token $GITHUB_TOKEN" \
               -H "Accept: application/vnd.github.v3+json" \
               --data "$(jq -nc --arg body "$metrics_table" '{body: $body}')" \
-              "https://api.github.com/repos/{{github.repository}}/issues/{{ github.event.number }}/comments"
+              "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
 
       - name: Remove results directory
         run: |
