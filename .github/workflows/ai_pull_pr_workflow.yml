@@ -94,6 +94,7 @@ jobs:
           latest_results_file=$(ls -t results/ | head -n 1)
           results=$(cat "results/${latest_results_file}")
 
+          metrics=$(echo "$results" | jq -r '.metrics')
           metric_keys=$(echo "$metrics" | jq -r 'keys | @tsv')
           metric_values=$(echo "$metrics" | jq -r 'values | @tsv')
 
