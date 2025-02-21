@@ -84,31 +84,30 @@ jobs:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
 
       - name: Post PR comment with results of evaluation
-        uses: actions/github-script@v7
-        with:
-            github-token: ${{ secrets.GITHUB_TOKEN }}
-            script: |
-                const fs = require('fs');
-                const { execSync } = require('child_process');
-                const latestResultsFileName = execSync('ls -t results/ | head -n 1').toString().trim();
-                const results = JSON.parse(fs.readFileSync(`results/${latestResultsFileName}`, 'utf8'));
-                
-                const metrics = results.metrics;
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ! command -v jq &> /dev/null; then
+            sudo apt-get update && sudo apt-get install -y jq
+          fi
+ 
+          latest_results_file=$(ls -t results/ | head -n 1)
+          results=$(cat "results/${latest_results_file}")
 
-                let metrics_table = `## Search Evaluation Results\n\n`;
-                const metricKeys = Object.keys(metrics);
-                const metricValues = Object.values(metrics);
+          metric_keys=$(echo "$metrics" | jq -r 'keys | @tsv')
+          metric_values=$(echo "$metrics" | jq -r 'values | @tsv')
 
-                metrics_table += `| ${metricKeys.join(' | ')} |\n`;
-                metrics_table += `| ${metricKeys.map(() => '---').join(' | ')} |\n`;
-                metrics_table += `| ${metricValues.join(' | ')} |\n`;
-                
-                octokit.rest.issues.createComment({
-                  issue_number: context.issue.number,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: metrics_table
-                });
+          metrics_table="## Search Evaluation Results\n\n"
+          metrics_table+="| $(echo "$metric_keys" | tr '\t' ' | ') |\n"
+          metrics_table+="| $(echo "$metric_keys" | tr '\t' ' | ' | sed 's/[^|]*/---/g') |\n"
+          metrics_table+="| $(echo "$metric_values" | tr '\t' ' | ') |\n"
+
+          echo metrics_table
+
+          curl -s -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              --data "$(jq -nc --arg body "$metrics_table" '{body: $body}')" \
+              "https://api.github.com/repos/{{github.repository}}/issues/{{ github.event.number }}/comments"
 
       - name: Remove results directory
         run: |
