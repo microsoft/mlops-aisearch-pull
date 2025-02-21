@@ -98,10 +98,12 @@ jobs:
           metric_keys=$(echo "$metrics" | jq -r 'keys[]')
           metric_values=$(echo "$metrics" | jq -r 'values[]')
 
-          metrics_table="## Search Evaluation Results\n\n"
-          metrics_table+="| $(echo "$metric_keys" | tr ' ' ' | ') |\n"
-          metrics_table+="| --- |\n"
-          metrics_table+="| $(echo "$metric_values" | tr ' ' ' | ') |\n"
+            metrics_table = "## Search Evaluation Results\n\n"
+            metrics_table += "| Metric | Value |\n"
+            metrics_table += "| ------ | ----- |\n"
+            while IFS = read -r key && IFS= read -r value <&3; do
+              metrics_table += "| $key | $value |\n"
+            done < <(echo "$metric_keys") 3< <(echo "$metric_values")
 
           echo metrics_table
 
