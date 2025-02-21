@@ -99,15 +99,13 @@ jobs:
           metric_keys=$(echo "$metrics" | jq -r 'keys[]')
           metric_values=$(echo "$metrics" | jq -r 'values[]')
 
-          metrics_table="## Search Evaluation Results\n\n"
-          metrics_table="${metrics_table}| Metric | Value |\n"
-          metrics_table="${metrics_table}| ------ | ----- |\n"
+          metrics_table="## Search Evaluation Results\\n\\n"
+          metrics_table="${metrics_table}| Metric | Value |\\n"
+          metrics_table="${metrics_table}| ------ | ----- |\\n"
           for key in $metric_keys; do
             value=$(echo "$metrics" | jq -r --arg key "$key" '.[$key]')
-            metrics_table="${metrics_table}| $key | $value |\n"
+            metrics_table="${metrics_table}| $key | $value |\\n"
           done
-
-          echo "$metrics_table"
 
           curl -s -H "Authorization: token $GITHUB_TOKEN" \
               -H "Accept: application/vnd.github.v3+json" \
