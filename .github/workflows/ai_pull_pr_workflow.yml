@@ -94,14 +94,14 @@ jobs:
           latest_results_file=$(ls -t results/ | head -n 1)
           results=$(cat "results/${latest_results_file}")
 
-            metrics=$(echo "$results" | jq -r '.metrics')
-            metric_keys=$(echo "$metrics" | jq -r 'keys[]')
-            metric_values=$(echo "$metrics" | jq -r 'values[]')
+          metrics=$(echo "$results" | jq -r '.metrics')
+          metric_keys=$(echo "$metrics" | jq -r 'keys[]')
+          metric_values=$(echo "$metrics" | jq -r 'values[]')
 
           metrics_table="## Search Evaluation Results\n\n"
-          metrics_table+="| $(echo "$metric_keys" | tr '\t' ' | ') |\n"
-          metrics_table+="| $(echo "$metric_keys" | tr '\t' ' | ' | sed 's/[^|]*/---/g') |\n"
-          metrics_table+="| $(echo "$metric_values" | tr '\t' ' | ') |\n"
+          metrics_table+="| $(echo "$metric_keys" | tr ' ' ' | ') |\n"
+          metrics_table+="| --- |\n"
+          metrics_table+="| $(echo "$metric_values" | tr ' ' ' | ') |\n"
 
           echo metrics_table
 
