@@ -92,21 +92,17 @@ jobs:
                 const { execSync } = require('child_process');
                 const latestResultsFileName = execSync('ls -t results/ | head -n 1').toString().trim();
                 const results = JSON.parse(fs.readFileSync(`results/${latestResultsFileName}`, 'utf8'));
-                const metrics = results.metrics;
+                const metrics = results.body.metrics;
 
                 let metrics_table = `## Search Evaluation Results\n\n`;
-                metrics_table += `| Metric | Value |\n`;
-                metrics_table += `| --- | --- |\n`;
-                for (const [key, value] of Object.entries(metrics)) {
-                  metrics_table += `| ${key} | ${value} |\n`;
-                }
+                const metricKeys = Object.keys(metrics);
+                const metricValues = Object.values(metrics);
 
-                github.issues.createComment({
-                    issue_number: context.issue.number,
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    body: results
-                });
+                metrics_table += `| ${metricKeys.join(' | ')} |\n`;
+                metrics_table += `| ${metricKeys.map(() => '---').join(' | ')} |\n`;
+                metrics_table += `| ${metricValues.join(' | ')} |\n`;
+
+                console.log(metrics_table);
 
       - name: Remove results directory
         run: |
