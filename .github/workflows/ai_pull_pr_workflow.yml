@@ -77,8 +77,27 @@ jobs:
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
 
-      - name: Print results of search evaluation
-        shell: bash
-        run: |
-            ls -t results/ | head -n 1 | xargs -I {} cat results/{}
-                
+      - name: Post PR comment with results of evaluation
+        uses: actions/github-script@v3
+        with:
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            script: |
+                const fs = require('fs');
+                const { execSync } = require('child_process');
+                const latestResultsFileName = execSync('ls -t results/ | head -n 1').toString().trim();
+                const results = JSON.parse(fs.readFileSync(`results/${latestResultsFileName}`, 'utf8'));
+                const metrics = results.metrics;
+
+                let results = `## Search Evaluation Results\n\n`;
+                results += `| Metric | Value |\n`;
+                results += `| --- | --- |\n`;
+                for (const [key, value] of Object.entries(metrics)) {
+                  results += `| ${key} | ${value} |\n`;
+                }
+
+                github.issues.createComment({
+                    issue_number: context.issue.number,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    body: results
+                });
