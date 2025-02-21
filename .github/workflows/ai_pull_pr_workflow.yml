@@ -94,11 +94,11 @@ jobs:
                 const results = JSON.parse(fs.readFileSync(`results/${latestResultsFileName}`, 'utf8'));
                 const metrics = results.metrics;
 
-                let results = `## Search Evaluation Results\n\n`;
-                results += `| Metric | Value |\n`;
-                results += `| --- | --- |\n`;
+                let metrics_table = `## Search Evaluation Results\n\n`;
+                metrics_table += `| Metric | Value |\n`;
+                metrics_table += `| --- | --- |\n`;
                 for (const [key, value] of Object.entries(metrics)) {
-                  results += `| ${key} | ${value} |\n`;
+                  metrics_table += `| ${key} | ${value} |\n`;
                 }
 
                 github.issues.createComment({
