@@ -70,6 +70,12 @@ jobs:
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}              
 
+      - name: Create results directory
+        run: |
+          if [ ! -d "results" ]; then
+            mkdir results
+          fi
+
       - name: Execute search evaluation
         shell: bash
         run: |
@@ -101,3 +107,10 @@ jobs:
                     repo: context.repo.repo,
                     body: results
                 });
+
+      - name: Remove results directory
+        run: |
+          if [ -d "results" ]; then
+            rm -rf results
+          fi
+
