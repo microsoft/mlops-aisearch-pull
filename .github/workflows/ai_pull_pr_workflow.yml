@@ -95,8 +95,6 @@ jobs:
                 
                 const metrics = results.metrics;
 
-                console.log(metrics)
-
                 let metrics_table = `## Search Evaluation Results\n\n`;
                 const metricKeys = Object.keys(metrics);
                 const metricValues = Object.values(metrics);
@@ -105,7 +103,14 @@ jobs:
                 metrics_table += `| ${metricKeys.map(() => '---').join(' | ')} |\n`;
                 metrics_table += `| ${metricValues.join(' | ')} |\n`;
 
-                console.log(metrics_table);
+                const context = github.context;
+                const issue_number = context.payload.pull_request.number;
+
+                await github.rest.issues.createComment({
+                  ...context.repo,
+                  issue_number,
+                  body: metrics_table
+                });
 
       - name: Remove results directory
         run: |
