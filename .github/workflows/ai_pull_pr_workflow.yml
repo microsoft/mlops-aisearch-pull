@@ -91,14 +91,11 @@ jobs:
                 const fs = require('fs');
                 const { execSync } = require('child_process');
                 const latestResultsFileName = execSync('ls -t results/ | head -n 1').toString().trim();
-                
-                console.log(latestResultsFileName);
-                
                 const results = JSON.parse(fs.readFileSync(`results/${latestResultsFileName}`, 'utf8'));
                 
-                console.log(results)
-                
-                const metrics = results.body.metrics;
+                const metrics = results.metrics;
+
+                console.log(metrics)
 
                 let metrics_table = `## Search Evaluation Results\n\n`;
                 const metricKeys = Object.keys(metrics);
