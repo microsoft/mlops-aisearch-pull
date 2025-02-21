@@ -76,4 +76,9 @@ jobs:
             python -u -m mlops.evaluation.search_evaluation --gt_path "./mlops/evaluation/data/search_evaluation_data.jsonl" --semantic_config my-semantic-config
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
+
+      - name: Print results of search evaluation
+        shell: bash
+        run: |
+            ls -t results/ | head -n 1 | xargs -I {} cat results/{}
                 

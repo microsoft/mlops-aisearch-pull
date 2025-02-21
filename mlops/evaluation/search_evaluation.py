@@ -78,7 +78,8 @@ def main(index_name: str, semantic_config: str, data_path: str):
             "subscription_id": subscription_id,
             "resource_group_name": resource_group,
             "project_name": project_name,
-        }
+        },
+        output_path=f"./results/{experiment_name}.json",
     )
     print(results["studio_url"])
 
