@@ -67,6 +67,11 @@ def main(index_name: str, semantic_config: str, data_path: str):
         }
     }
 
+    # Create results directory if it does not exist
+    results_dir = "./results"
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+
     # Run evaluations
     results = evaluate(
         evaluation_name=experiment_name,

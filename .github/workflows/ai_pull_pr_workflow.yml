@@ -71,12 +71,6 @@ jobs:
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}              
 
-      - name: Create results directory
-        run: |
-          if [ ! -d "results" ]; then
-            mkdir results
-          fi
-
       - name: Execute search evaluation
         shell: bash
         run: |
