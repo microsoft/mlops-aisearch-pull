@@ -99,25 +99,23 @@ jobs:
           metric_keys=$(echo "$metrics" | jq -r 'keys[]')
           metric_values=$(echo "$metrics" | jq -r 'values[]')
 
-          metrics_table="## Search Evaluation Results
-          
-          "
-          metrics_table="${metrics_table}| Metric | Value |
-          "
-          metrics_table="${metrics_table}| ------ | ----- |
-          "
+          metrics_table="## Search Evaluation Results \n \n"
+          metrics_table="${metrics_table}| Metric | Value |\n"
+          metrics_table="${metrics_table}| ------ | ----- |\n"
           for key in $metric_keys; do
             value=$(echo "$metrics" | jq -r --arg key "$key" '.[$key]')
-            metrics_table="${metrics_table}| $key | $value |
-            "
+            metrics_table="${metrics_table}| $key | $value |\n"
           done
 
-          metrics_table=$(echo "$metrics_table" | jq -sR .)
+          formatted_table=$(echo -e "$metrics_table")
+          echo "$formatted_table"
 
+          # Use the captured output in the curl command
           curl -s -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github.v3+json" \
-            --data "$(jq -nc --arg body "$metrics_table" '{body: $body}')" \
-            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
+              -H "Accept: application/vnd.github.v3+json" \
+              --data "$(jq -nc --arg body "$formatted_table" '{body: $body}')" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
+              
 
       - name: Remove results directory
         run: |
