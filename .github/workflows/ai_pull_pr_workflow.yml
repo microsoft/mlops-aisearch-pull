@@ -107,8 +107,7 @@ jobs:
             metrics_table="${metrics_table}| $key | $value |\n"
           done
 
-          formatted_table=$(echo -e "$metrics_table")
-          echo "$formatted_table"
+          formatted_table=$(echo "$metrics_table")
 
           # Use the captured output in the curl command
           curl -s -H "Authorization: token $GITHUB_TOKEN" \
