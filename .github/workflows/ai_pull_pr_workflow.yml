@@ -20,6 +20,7 @@ env:
 permissions:
   id-token: write
   contents: read
+  pull-requests: write
 jobs:
   build-validation:
     name: Build Validation
@@ -76,4 +77,42 @@ jobs:
             python -u -m mlops.evaluation.search_evaluation --gt_path "./mlops/evaluation/data/search_evaluation_data.jsonl" --semantic_config my-semantic-config
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
-                
+
+      - name: Post PR comment with results of evaluation
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ! command -v jq &> /dev/null; then
+            sudo apt-get update && sudo apt-get install -y jq
+          fi
+ 
+          latest_results_file=$(ls -t results/ | head -n 1)
+          results=$(cat "results/${latest_results_file}")
+
+          metrics=$(echo "$results" | jq -r '.metrics')
+          metric_keys=$(echo "$metrics" | jq -r 'keys[]')
+          metric_values=$(echo "$metrics" | jq -r 'values[]')
+
+          metrics_table="## Search Evaluation Results \n \n"
+          metrics_table="${metrics_table}| Metric | Value |\n"
+          metrics_table="${metrics_table}| ------ | ----- |\n"
+          for key in $metric_keys; do
+            value=$(echo "$metrics" | jq -r --arg key "$key" '.[$key]')
+            metrics_table="${metrics_table}| $key | $value |\n"
+          done
+
+          formatted_table=$(echo "$metrics_table")
+
+          # Use the captured output in the curl command
+          curl -s -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              --data "$(jq -nc --arg body "$formatted_table" '{body: $body}')" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/comments"
+              
+
+      - name: Remove results directory
+        run: |
+          if [ -d "results" ]; then
+            rm -rf results
+          fi
+

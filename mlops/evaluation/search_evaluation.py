@@ -67,6 +67,11 @@ def main(index_name: str, semantic_config: str, data_path: str):
         }
     }
 
+    # Create results directory if it does not exist
+    results_dir = "./results"
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+
     # Run evaluations
     results = evaluate(
         evaluation_name=experiment_name,
@@ -78,7 +83,8 @@ def main(index_name: str, semantic_config: str, data_path: str):
             "subscription_id": subscription_id,
             "resource_group_name": resource_group,
             "project_name": project_name,
-        }
+        },
+        output_path=f"{results_dir}/{experiment_name}.json",
     )
     print(results["studio_url"])
 
