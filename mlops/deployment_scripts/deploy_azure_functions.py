@@ -75,6 +75,7 @@ def _wait_for_functions_ready(
     params = {"api-version": FUNCTION_API_VERSION}
     headers = {
         "Content-Type": APPLICATION_JSON_CONTENT_TYPE,
+        "User-Agent": "acce1e78-98c3-42d1-b5fd-a5c2c365fbfe/1.0",
         "Accept": APPLICATION_JSON_CONTENT_TYPE,
         "Authorization": "Bearer {access_token}".format(access_token=access_token),
     }
