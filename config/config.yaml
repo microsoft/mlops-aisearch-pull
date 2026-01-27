@@ -15,7 +15,7 @@ aoai_config:
 
 functions_config:
   function_names: ["Chunk", "Vector_Embed"]
-  function_app_name: aiskills-pull
+  function_app_name: ${FUNCTION_APP_NAME}
 
 # Azure Cognitive Service config
 acs_config:

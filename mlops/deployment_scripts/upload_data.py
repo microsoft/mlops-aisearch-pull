@@ -6,6 +6,7 @@ We assume that this code will be executed just once to prepare a blob container 
 
 from pathlib import Path
 import argparse
+import os
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 from mlops.common.config_utils import MLOpsConfig
@@ -37,10 +38,10 @@ def _upload_ops_files(
         # construct blob name from file path
 
         # everything rather than local_folder
-        file_subpath = str(file).split(f"{local_folder}/")[1]
+        file_subpath = file.relative_to(local_folder)
 
         # generate a unique name of the file
-        file_name = file_subpath.replace("/", "_")
+        file_name = str(file_subpath).replace(os.sep, "_")
 
         try:
             print(f"Ready to copy: {str(file)} to {file_name}.")
