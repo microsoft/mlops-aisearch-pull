@@ -4,10 +4,11 @@ import requests
 import shutil
 import time
 import argparse
+import subprocess
 
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.web import WebSiteManagementClient
-from azure.mgmt.web.v2023_01_01.models import Site
+from azure.mgmt.web.models import Site
 from mlops.common.config_utils import MLOpsConfig
 from mlops.common.naming_utils import generate_slot_name, generate_index_name
 from mlops.common.function_utils import (
@@ -17,10 +18,6 @@ from mlops.common.function_utils import (
 # Define the path to the Azure function directory
 APPLICATION_JSON_CONTENT_TYPE = "application/json"
 FUNCTION_API_VERSION = "2022-03-01"
-DEPLOYMENT_APP_URL = "https://{function_app_name}.scm.azurewebsites.net/api/zipdeploy"
-DEPLOYMENT_APP_URL_WITH_SLOT = (
-    "https://{function_app_name}-{slot}.scm.azurewebsites.net/api/zipdeploy"
-)
 MANAGEMENT_FUNCTION_URL = (
     "https://management.azure.com/subscriptions/{subscription_id}"
     "/resourceGroups/{resource_group}"
@@ -127,7 +124,6 @@ def _wait_for_functions_ready(
 
 def _deploy_functions(
     credential: DefaultAzureCredential,
-    deployment_url: str,
     subscription_id: str,
     resource_group_name: str,
     func_name: str,
@@ -137,12 +133,6 @@ def _deploy_functions(
         credential=credential, subscription_id=subscription_id
     )
 
-    # Generate access token header
-    access_token = credential.get_token(MANAGEMENT_SCOPE_URL).token
-    headers = {
-        "Content-Type": "application/zip",
-        "Authorization": "Bearer {access_token}".format(access_token=access_token),
-    }
     # Create a zip file of the Custom Skills directory
     zip_filename = shutil.make_archive(
         base_name="__customskills",
@@ -150,41 +140,34 @@ def _deploy_functions(
         root_dir=CUSTOM_SKILLS_DIR,
     )
 
-    # Define the payload for the REST API call
-    with open(zip_filename, "rb") as f:
-        payload = f.read()
-
     try:
-        # Send a POST request to the Azure function app to deploy the zip file
-        requests.post(deployment_url, headers=headers, data=payload, timeout=60)
+        print(f"Deploying {zip_filename} to {func_name}...")
+        subprocess.run(
+            [
+                "az",
+                "functionapp",
+                "deployment",
+                "source",
+                "config-zip",
+                "-g",
+                resource_group_name,
+                "-n",
+                func_name,
+                "--src",
+                zip_filename,
+                "--build-remote",
+                "true",
+            ],
+            check=True,
+            shell=True,
+        )
+    except subprocess.CalledProcessError as e:
+        print(f"Error deploying function app: {e}")
+        raise
     except requests.exceptions.RequestException:
         print(
             "Request has been sent, but no response yet. Checking deployment status in the next step."
         )
-
-    print("Looking for an active deployment.")
-    # look at existing app for a location
-    deployment_slots = app_mgmt_client.web_apps.list_deployments(
-        resource_group_name, func_name
-    )
-
-    current_slot = deployment_slots.next()
-    id = current_slot.id.split("/")[-1]
-
-    print(f"Deployment id: {id}")
-    status = current_slot.status
-
-    # get_deployment_slot returns 4 in the case of success and 1 for in-progress deployment.
-    while status != 4:
-        current_slot = app_mgmt_client.web_apps.get_deployment(
-            resource_group_name, func_name, id
-        )
-        status = current_slot.status
-        if status == 1:
-            print("Deployment is in progress")
-        elif status != 4:
-            raise SystemExit(f"Unknown deployment status {status}")
-        time.sleep(10)
 
     print("Updating Application settings.")
 
@@ -205,7 +188,6 @@ def _deploy_functions(
 
 def _deploy_functions_withslot(
     credential: DefaultAzureCredential,
-    deployment_url: str,
     subscription_id: str,
     resource_group_name: str,
     func_name: str,
@@ -216,12 +198,6 @@ def _deploy_functions_withslot(
         credential=credential, subscription_id=subscription_id
     )
 
-    # Generate access token header
-    access_token = credential.get_token(MANAGEMENT_SCOPE_URL).token
-    headers = {
-        "Content-Type": "application/zip",
-        "Authorization": "Bearer {access_token}".format(access_token=access_token),
-    }
     print(f"slot name is {slot_name}")
     # Create a zip file of the Custom Skills directory
     zip_filename = shutil.make_archive(
@@ -230,41 +206,36 @@ def _deploy_functions_withslot(
         root_dir=CUSTOM_SKILLS_DIR,
     )
 
-    # Define the payload for the REST API call
-    with open(zip_filename, "rb") as f:
-        payload = f.read()
-
     try:
-        # Send a POST request to the Azure function app to deploy the zip file
-        requests.post(deployment_url, headers=headers, data=payload, timeout=60)
+        print(f"Deploying {zip_filename} to {func_name} with slot {slot_name}...")
+        subprocess.run(
+            [
+                "az",
+                "functionapp",
+                "deployment",
+                "source",
+                "config-zip",
+                "-g",
+                resource_group_name,
+                "-n",
+                func_name,
+                "--src",
+                zip_filename,
+                "--build-remote",
+                "true",
+                "--slot",
+                slot_name,
+            ],
+            check=True,
+            shell=True,
+        )
+    except subprocess.CalledProcessError as e:
+        print(f"Error deploying function app: {e}")
+        raise
     except requests.exceptions.RequestException:
         print(
             "Request has been sent, but no response yet. Checking deployment status in the next step."
         )
-        # raise SystemExit(e)
-
-    print("Looking for an active deployment.")
-    # look at existing app for a location
-    deployment_slots = app_mgmt_client.web_apps.list_deployments_slot(
-        resource_group_name, func_name, slot_name
-    )
-    current_slot = deployment_slots.next()
-    id = current_slot.id.split("/")[-1]
-
-    print(f"Deployment id: {id}")
-    status = current_slot.status
-
-    # get_deployment_slot returns 4 in the case of success and 1 for in-progress deployment.
-    while status != 4:
-        current_slot = app_mgmt_client.web_apps.get_deployment_slot(
-            resource_group_name, func_name, id, slot_name
-        )
-        status = current_slot.status
-        if status == 1:
-            print("Deployment is in progress")
-        elif status != 4:
-            raise SystemExit(f"Unknown deployment status {status}")
-        time.sleep(10)
 
     print("Updating Application settings.")
     existing_app_settings = app_mgmt_client.web_apps.list_application_settings_slot(
@@ -314,23 +285,15 @@ def main():
 
     app_settings = get_app_settings(config, generate_index_name())
     # deploying or updating the slot
-    if slot_name is None:
-        deployment_url = DEPLOYMENT_APP_URL.format(function_app_name=function_app_name)
-    else:
+    if slot_name is not None:
         print("Creating a deployment slot.")
         _create_or_update_deployment_slot(
             credential, subscription_id, resource_group, function_app_name, slot_name
         )
-        deployment_url = DEPLOYMENT_APP_URL_WITH_SLOT.format(
-            function_app_name=function_app_name, slot=slot_name
-        )
-
-    print(f"Deploying to: {deployment_url}")
 
     if slot_name is None:
         _deploy_functions(
             credential,
-            deployment_url,
             subscription_id,
             resource_group,
             function_app_name,
@@ -339,7 +302,6 @@ def main():
     else:
         _deploy_functions_withslot(
             credential,
-            deployment_url,
             subscription_id,
             resource_group,
             function_app_name,
