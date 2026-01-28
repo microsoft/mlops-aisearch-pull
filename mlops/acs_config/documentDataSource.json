@@ -6,6 +6,10 @@
   "credentials": {
     "connectionString": "{connection_string}"
   },
+  "identity": {
+    "@odata.type": "#Microsoft.Azure.Search.DataUserAssignedIdentity",
+    "userAssignedIdentity": "{identity_connection_string}"
+  },
   "container": {
     "name": "{container_name}",
     "query": null

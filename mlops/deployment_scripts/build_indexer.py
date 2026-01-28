@@ -34,6 +34,7 @@ def _create_or_update_search_index(
     file_name: str,
     bearer_token: str,
     api_version: str,
+    identity_resource_id: str,
 ) -> None:
 
     # Use the REST API, there is a bug in the Search SDK that prevents creating the Vector field correctly
@@ -57,6 +58,7 @@ def _create_or_update_search_index(
         aoai_config["aoai_embedding_model_deployment"],
     )
     index_def = index_def.replace("{openai_embedding_model}", aoai_config["aoai_embedding_model_deployment"])
+    index_def = index_def.replace("{identity_connection_string}", identity_resource_id)
 
     response = requests.put(
         url=index_url, data=index_def, params=params, headers=headers
@@ -108,21 +110,22 @@ def _get_identity_resource(
     resource_group_name: str,
     managed_identity_name: str
 ) -> str:
-    resource_string = f"/subscriptions/{subscription_id}/resourcegroups/{resource_group_name}" \
+    resource_string = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}" \
         f"/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{managed_identity_name}"
 
     return resource_string
 
 
 def _generate_data_source_connection(
-    connection_name: str, file_name: str, conn_string: str, container: str
+    connection_name: str, file_name: str, conn_string: str, identity_conn_string: str, container: str
 ):
     with open(file_name) as data_source_file:
         data_source_def = data_source_file.read()
 
-    data_source_def = data_source_def.replace("{conn_string}", conn_string)
+    data_source_def = data_source_def.replace("{connection_string}", conn_string)
     data_source_def = data_source_def.replace("{container_name}", container)
     data_source_def = data_source_def.replace("{name}", connection_name)
+    data_source_def = data_source_def.replace("{identity_connection_string}", identity_conn_string)
     data_source_connection = SearchIndexerDataSourceConnection.deserialize(
         data_source_def, APPLICATION_JSON_CONTENT_TYPE
     )
@@ -227,7 +230,19 @@ def main():
     # Get the token
     bearer_token = credential.get_token(aisearch_scope).token
 
-    # Create the full document index
+    conn_string = _get_storage_conn_string(
+        sub_config["subscription_id"],
+        sub_config["storage_account_name"],
+        sub_config["resource_group_name"],
+    )
+
+    identity_string = _get_identity_resource(
+        sub_config["subscription_id"],
+        sub_config["resource_group_name"],
+        sub_config["managed_identity_name"]
+    )
+
+        # Create the full document index
     _create_or_update_search_index(
         aoai_config,
         search_service_name=acs_config["acs_service_name"],
@@ -235,12 +250,7 @@ def main():
         file_name=acs_config["acs_document_index_file"],
         bearer_token=bearer_token,
         api_version=acs_config["acs_api_version"],
-    )
-
-    conn_string = _get_storage_conn_string(
-        sub_config["subscription_id"],
-        sub_config["storage_account_name"],
-        sub_config["resource_group_name"],
+        identity_resource_id=identity_string
     )
 
     search_indexer_client = SearchIndexerClient(
@@ -257,6 +267,7 @@ def main():
         generate_data_source_name(),
         file_name=acs_config["acs_document_data_source"],
         conn_string=conn_string,
+        identity_conn_string=identity_string,
         container=storage_container,
     )
     search_indexer_client.create_or_update_data_source_connection(
