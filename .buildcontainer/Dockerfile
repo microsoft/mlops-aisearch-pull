@@ -5,7 +5,7 @@ ARG USERNAME=vscode
 USER root
 
 # Install Azure CLI
-RUN curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash && \
+RUN pip install azure-cli && \
     az config set extension.use_dynamic_install=yes_without_prompt
 
 # Setup User
