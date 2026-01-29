@@ -174,7 +174,7 @@ Some variables and secrets should be provided to execute the github workflows (p
 - storage_account_name
 - acs_service_name
 - aoai_base_endpoint
-- ai_studio_project_name
+- ai_foundry_project_uri
 
 ## Related Projects
 
