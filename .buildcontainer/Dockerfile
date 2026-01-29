@@ -30,7 +30,8 @@ RUN sudo apt-get update && sudo apt-get install -y gnupg software-properties-com
 COPY requirements.txt .
 
 # Create Conda environment and install Python dependencies
-RUN conda create -n llm-env python=3.12 pip=23.2 -q -y && \
+RUN conda create -n llm-env python=3.12 -q -y && \
+    conda run -n llm-env pip install --upgrade pip && \
     conda run -n llm-env pip install -r requirements.txt && \
     conda clean -a -y && \
     conda run -n llm-env pip list
