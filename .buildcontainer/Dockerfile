@@ -29,11 +29,17 @@ RUN sudo apt-get update && sudo apt-get install -y gnupg software-properties-com
 
 COPY requirements.txt .
 
-# Create Conda environment and install Python dependencies
-RUN conda create -n llm-env python=3.12 -q -y && \
-    conda run -n llm-env pip install --upgrade pip && \
-    conda run -n llm-env pip install -r requirements.txt && \
-    conda clean -a -y && \
+# Create Conda environment
+RUN conda create -n llm-env python=3.12 -q -y
+
+# Upgrade pip and build tools
+RUN conda run -n llm-env pip install --upgrade pip setuptools wheel
+
+# Install dependencies
+RUN conda run -n llm-env pip install -r requirements.txt
+
+# Cleanup and list
+RUN conda clean -a -y && \
     conda run -n llm-env pip list
 
 RUN echo "conda activate llm-env" >> /home/$USERNAME/.bashrc
