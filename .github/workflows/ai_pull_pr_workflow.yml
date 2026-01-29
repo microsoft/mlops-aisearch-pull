@@ -16,6 +16,7 @@ env:
     MANAGED_IDENTITY_CLIENT_ID: ${{ vars.MANAGED_IDENTITY_CLIENT_ID }}
     MANAGED_IDENTITY_NAME: ${{ vars.MANAGED_IDENTITY_NAME }}
     MANAGED_IDENTITY_TENANT_ID: ${{ vars.MANAGED_IDENTITY_TENANT_ID }}
+    FEDERATED_CLIENT_ID: ${{ vars.FEDERATED_CLIENT_ID }}
 
 permissions:
   id-token: write
@@ -46,28 +47,28 @@ jobs:
       - name: Azure login
         uses: azure/login@v2
         with:
-            client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
+            client-id: ${{ env.FEDERATED_CLIENT_ID }}
             tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID}}
             subscription-id: ${{ env.SUBSCRIPTION_ID }}
 
       - name: Execute Azure Functions Deployment
         shell: bash
         run: |
-            python -u -m mlops.deployment_scripts.deploy_azure_functions
+            python -u -m mlops.deployment_scripts.deploy_azure_functions --ignore_slot
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}
 
       - name: Validate Azure Functions Deployment
         shell: bash
         run: |
-            python -u -m mlops.deployment_scripts.run_functions
+            python -u -m mlops.deployment_scripts.run_functions --ignore_slot
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}             
 
       - name: Deploy Indexer
         shell: bash
         run: |
-            python -u -m mlops.deployment_scripts.build_indexer
+            python -u -m mlops.deployment_scripts.build_indexer --ignore_slot
         env:
             BUILD_SOURCEBRANCHNAME: ${{ github.head_ref || github.ref_name }}              
 
