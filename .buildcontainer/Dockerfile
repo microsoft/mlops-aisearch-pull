@@ -5,7 +5,8 @@ ARG USERNAME=vscode
 USER root
 
 # Install dependencies (Base image has git, curl, jq, sudo)
-RUN apt-get update && apt-get install -y build-essential software-properties-common
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive && \
+    apt-get install -y build-essential software-properties-common gnupg
 
 # Install Azure CLI
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash && \
