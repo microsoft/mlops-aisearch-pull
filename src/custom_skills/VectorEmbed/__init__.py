@@ -3,14 +3,12 @@ import os
 import logging
 import json
 import jsonschema
-import openai
 from azure.identity import DefaultAzureCredential
 from openai import AzureOpenAI
 from tenacity import (
     retry,
     stop_after_attempt,
-    wait_random_exponential,
-    retry_if_exception_type
+    wait_random_exponential
 )
 
 REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.json")
@@ -76,9 +74,7 @@ def _log_attempt_number(retry_state):
     print(f"Rate Limit Exceeded! Retry Attempt #: {retry_state.attempt_number} | Chunk: {row}")
 
 
-@retry(retry=retry_if_exception_type(openai.RateLimitError),
-       wait=wait_random_exponential(min=1, max=60),
-       stop=stop_after_attempt(10), after=_log_attempt_number)
+@retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(10), after=_log_attempt_number)
 def _generate_embedding(text, aoai_token):
     """
     Generate embeddings for text.
