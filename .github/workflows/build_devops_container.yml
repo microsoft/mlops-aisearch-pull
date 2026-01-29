@@ -35,6 +35,7 @@ jobs:
       - name: Azure login
         uses: azure/login@v2
         with:
+            auth-type: IDENTITY
             client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
             tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID}}
             subscription-id: ${{ env.SUBSCRIPTION_ID }}
