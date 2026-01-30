@@ -10,7 +10,7 @@ on:
       - '.buildcontainer/Dockerfile'
 
 env:
-    IMAGE_NAME: devops_container_image
+    IMAGE_NAME: ${{ vars.IMAGE_NAME }}
     SUBSCRIPTION_ID: ${{ vars.SUBSCRIPTION_ID }}
     RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
     FEDERATED_CLIENT_ID: ${{ vars.FEDERATED_CLIENT_ID }}
