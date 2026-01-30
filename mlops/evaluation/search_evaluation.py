@@ -25,8 +25,6 @@ def main(index_name: str, semantic_config: str, data_path: str):
     """
     experiment_name = generate_experiment_name(index_name)
 
-    subscription_id = os.environ.get("SUBSCRIPTION_ID")
-    resource_group = os.environ.get("RESOURCE_GROUP_NAME")
     project_name = os.environ.get("AI_FOUNDRY_PROJECT_URI")
     azure_search_service_name = os.environ.get("ACS_SERVICE_NAME")
     azure_search_endpoint = f"https://{azure_search_service_name}.search.windows.net"

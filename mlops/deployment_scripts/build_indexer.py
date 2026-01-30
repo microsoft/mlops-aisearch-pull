@@ -242,7 +242,7 @@ def main():
         sub_config["managed_identity_name"]
     )
 
-        # Create the full document index
+    # Create the full document index
     _create_or_update_search_index(
         aoai_config,
         search_service_name=acs_config["acs_service_name"],
