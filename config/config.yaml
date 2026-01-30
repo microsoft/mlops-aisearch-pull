@@ -6,6 +6,8 @@ sub_config:
   managed_identity_client_id: ${MANAGED_IDENTITY_CLIENT_ID}
   managed_identity_name: ${MANAGED_IDENTITY_NAME}
 
+enable_telemetry: true
+
 # Azure OpenAI configuration.
 aoai_config:
   aoai_api_base: ${AOAI_BASE_ENDPOINT}

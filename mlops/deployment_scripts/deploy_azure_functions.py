@@ -5,6 +5,7 @@ import shutil
 import time
 import argparse
 import subprocess
+import os
 
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.web import WebSiteManagementClient
@@ -72,10 +73,15 @@ def _wait_for_functions_ready(
     params = {"api-version": FUNCTION_API_VERSION}
     headers = {
         "Content-Type": APPLICATION_JSON_CONTENT_TYPE,
-        "User-Agent": "acce1e78-98c3-42d1-b5fd-a5c2c365fbfe/1.0",
         "Accept": APPLICATION_JSON_CONTENT_TYPE,
         "Authorization": "Bearer {access_token}".format(access_token=access_token),
     }
+
+    # TELEMETRY CODE BEGINS
+    # Can be removed or disabled in config.yaml file
+    if os.getenv("ENABLE_TELEMETRY", "false").lower() == "true":
+        headers["User-Agent"] = "acce1e78-98c3-42d1-b5fd-a5c2c365fbfe/1.0"
+    # TELEMETRY CODE ENDS
 
     for function_name in function_names:
         if slot is None:
@@ -274,6 +280,10 @@ def main():
 
     # functions_config contains a section with function settings
     function_app_name = config.functions_config["function_app_name"]
+
+    # TELEMETRY SETTING
+    if config.has_key("enable_telemetry") and config.enable_telemetry:
+        os.environ["ENABLE_TELEMETRY"] = "true"
 
     credential = DefaultAzureCredential()
 
