@@ -25,7 +25,7 @@ class MLOpsConfig:
     def __getattr__(self, __name: str) -> Any:
         """Get values for top level keys in configuration."""
         return self._raw_config[__name]
-    
+
     def has_key(self, key_name: str) -> bool:
         """Check if the configuration has a given top level key."""
         return key_name in self._raw_config
