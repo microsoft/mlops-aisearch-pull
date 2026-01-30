@@ -24,20 +24,43 @@ permissions:
   contents: read
   pull-requests: write
 jobs:
+  get-acr-token:
+    name: Get ACR Token
+    runs-on: ubuntu-latest
+    outputs:
+      acr_token: ${{ steps.get_token.outputs.acr_token }}
+    steps:
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+            client-id: ${{ vars.FEDERATED_CLIENT_ID }}
+            tenant-id: ${{ vars.MANAGED_IDENTITY_TENANT_ID}}
+            subscription-id: ${{ vars.SUBSCRIPTION_ID }}
+            
+      - name: Get ACR Access Token
+        id: get_token
+        run: |
+          TOKEN=$(az acr login --name ${{ vars.ACR_CONTAINER_REGISTRY }} --expose-token --output tsv --query accessToken)
+          echo "::add-mask::$TOKEN"
+          echo "acr_token=$TOKEN" >> $GITHUB_OUTPUT
+
   build-validation:
     name: Build Validation
+    needs: get-acr-token
     uses: ./.github/workflows/build_validation_workflow.yml
+    secrets:
+      ACR_TOKEN: ${{ needs.get-acr-token.outputs.acr_token }}
 
   deploy-and-evaluate:
     name: Deployment and Evaluation
     runs-on: ubuntu-latest
+    needs: [get-acr-token, build-validation]
     container:
         image: ${{ vars.ACR_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.IMAGE_NAME }}:latest
         options: --user root
         credentials:
-            username: ${{ secrets.ACR_USERNAME }}
-            password: ${{ secrets.ACR_PASSWORD }}
-    needs: build-validation
+            username: 00000000-0000-0000-0000-000000000000
+            password: ${{ needs.get-acr-token.outputs.acr_token }}
     steps:
       - name: Checkout Actions
         uses: actions/checkout@v1
