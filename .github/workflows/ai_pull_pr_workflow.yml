@@ -35,7 +35,7 @@ jobs:
     name: Deployment and Evaluation
     runs-on: ubuntu-latest
     container:
-        image: aipullacr.azurecr.io/devops_container_image:latest
+        image: ${{ vars.ACR_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.IMAGE_NAME }}:latest
         options: --user root
         credentials:
             username: ${{ secrets.ACR_USERNAME }}
