@@ -36,8 +36,8 @@ jobs:
         image:  ${{ vars.ACR_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.IMAGE_NAME }}:latest
         options: --user root
         credentials:
-            username: 00000000-0000-0000-0000-000000000000
-            password: ${{ needs.get-acr-token.outputs.acr_token }}
+            username: '00000000-0000-0000-0000-000000000000'
+            password: '${{ needs.get-acr-token.outputs.acr_token }}'
     steps:
       - name: Checkout
         uses: actions/checkout@v1
