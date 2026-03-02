@@ -81,7 +81,7 @@ The repository illustrates how to operate in a keyless environment without stori
 
 This template uses **two separate identity client IDs** for different purposes:
 
-- **`FEDERATED_CLIENT_ID`** — the Client ID of a **Microsoft Entra application** (service principal) registered in Azure AD. It is used exclusively by GitHub Actions to authenticate with Azure via OIDC. GitHub exchanges an OIDC token for a short-lived Azure access token using this identity, so no credentials are stored in GitHub secrets.
+- **`FEDERATED_CLIENT_ID`** — the Client ID of a **user-assigned managed identity or a Microsoft Entra application** configured in Azure AD. It is used exclusively by GitHub Actions to authenticate with Azure via OIDC. GitHub exchanges an OIDC token for a short-lived Azure access token using this identity, so no credentials are stored in GitHub secrets. Both a managed identity and a service principal (app registration) are supported for this purpose.
 - **`MANAGED_IDENTITY_CLIENT_ID`** — the Client ID of a **user-assigned managed identity** that is attached to the Azure Function App and AI Search service. Code running inside the function app uses this identity to access Azure resources (Blob Storage, Azure OpenAI) without storing any keys.
 
 These two identities serve different trust boundaries: one is for GitHub's CI/CD pipeline, and the other is for the deployed Azure services. In simpler setups it is possible to use a single identity for both purposes, provided the identity has all the required role assignments (Contributor access for deployment, plus resource-level roles for storage and OpenAI). Using separate identities is the recommended approach for least-privilege security.
@@ -187,7 +187,9 @@ The PR and CI workflows (and the build validation workflow) run all job steps **
 
 The container image is defined in `.buildcontainer/Dockerfile` and is built and pushed to ACR automatically by the `build_devops_container.yml` workflow whenever `requirements.txt` or the Dockerfile changes. The `ACR_CONTAINER_REGISTRY` and `IMAGE_NAME` repository variables control which image is used at runtime.
 
-**Self-hosted runners**: If you run these workflows on self-hosted machines rather than GitHub-hosted runners, the runner machine must have Docker installed and network access to the ACR. Make sure the runner can authenticate with the registry — the `ACR_USERNAME` and `ACR_PASSWORD` secrets are passed through to the container runtime for this purpose. If your self-hosted runner already has a managed identity or another credential mechanism to access the ACR, you can adapt the workflow to use `az acr login` instead of username/password credentials.
+Running jobs inside a container provides an important isolation benefit: without containerization, a workflow running on a self-hosted VM could inadvertently pick up environment variables, Python packages, or other libraries left over from a previous workflow run, leading to hard-to-debug inconsistencies. The container guarantees a clean, reproducible environment on every run.
+
+**Self-hosted runners**: If you run these workflows on self-hosted machines rather than GitHub-hosted runners, the runner machine must have Docker installed and network access to the ACR. Make sure the runner can authenticate with the registry — the `ACR_USERNAME` and `ACR_PASSWORD` secrets are passed through to the container runtime for this purpose.
 
 Some variables and secrets should be provided to execute the github workflows. The following **repository variables** (`vars.*`) are required:
 
