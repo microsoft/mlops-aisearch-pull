@@ -105,8 +105,8 @@ The deployment scripts and github workflows use the git branch name to create a 
 
 ### Configuration
 
-- Create an `.env` file based on `.env.sample` and populate the appropriate values.
-- Modify `config/config.yaml` to meet any changes that have been made within the project.
+- Create an `.env` file based on `.env.sample` and populate the appropriate values. The `AI_FOUNDRY_PROJECT_URI` value should follow the format `https://<ai_foundry_name>.services.ai.azure.com/api/projects/<project_name>`.
+- Modify `config/config.yaml` to meet any changes that have been made within the project. The `function_app_name` is read from the `FUNCTION_APP_NAME` environment variable. To disable anonymous telemetry, remove the `enable_telemetry` key from `config/config.yaml`.
 
 ### Upload test data
 
@@ -122,6 +122,12 @@ The following deployment script will deploy the custom skillset functions to a f
 
 ```sh
 python -m mlops.deployment_scripts.deploy_azure_functions
+```
+
+To deploy directly to the main function app without using a deployment slot (as in CI builds), use the `--ignore_slot` flag:
+
+```sh
+python -m mlops.deployment_scripts.deploy_azure_functions --ignore_slot
 ```
 
 To test the two skillset functions after they are deployed, run the following script:
@@ -142,7 +148,7 @@ python -m mlops.deployment_scripts.build_indexer
 
 ### Perform Search Evaluation
 
-This will perform search evaluation and upload the result to the AI Studio project specified. For more information about evaluation, see the [search evaluation readme](/mlops/evaluation/readme.md).
+This will perform search evaluation and upload the result to the Azure AI Foundry project specified by `AI_FOUNDRY_PROJECT_URI`. For more information about evaluation, see the [search evaluation readme](/mlops/evaluation/readme.md).
 
 ```sh
 python -m mlops.evaluation.search_evaluation --gt_path "./mlops/evaluation/data/search_evaluation_data.jsonl" --semantic_config my-semantic-config
@@ -160,21 +166,32 @@ python -m mlops.deployment_scripts.cleanup_pr
 
 This project contains github workflows for PR validation and Continuous Integration (CI).
 
-The PR workflow executes quality checks using flake8 and unit tests. It then deploys the skillset functions to a deployment slot of the function app.  Once the functions are deployed and tested, an indexer is deployed and all of the test data is ingested from blob storage.  Search evaluation is run and uploaded to an AI Studio project.
+The PR workflow executes quality checks using flake8 and unit tests. It then deploys the skillset functions to a deployment slot of the function app.  Once the functions are deployed and tested, an indexer is deployed and all of the test data is ingested from blob storage.  Search evaluation is run, the results are uploaded to an Azure AI Foundry project, and a summary comment is posted on the pull request.
 
 The CI workflow executes a similar workflow to the PR workflow, but the skillset functions are deployed to the main function app, not a deployment slot.
 
 In order for the cleanup step of the CI Workflow to work correctly, the development branch from a pull request must not be deleted until the cleanup step has run.
 
-Some variables and secrets should be provided to execute the github workflows (primarily the same ones used in the `.env` file for local execution).
+Some variables and secrets should be provided to execute the github workflows. The following **repository variables** (`vars.*`) are required:
 
-- azure_credentials
-- subscription_id
-- resource_group_name
-- storage_account_name
-- acs_service_name
-- aoai_base_endpoint
-- ai_foundry_project_uri
+- `SUBSCRIPTION_ID`
+- `RESOURCE_GROUP_NAME`
+- `STORAGE_ACCOUNT_NAME`
+- `ACS_SERVICE_NAME`
+- `AOAI_BASE_ENDPOINT`
+- `AI_FOUNDRY_PROJECT_URI`
+- `MANAGED_IDENTITY_CLIENT_ID`
+- `MANAGED_IDENTITY_NAME`
+- `MANAGED_IDENTITY_TENANT_ID`
+- `FEDERATED_CLIENT_ID` — client ID of the Microsoft Entra application used by GitHub Actions to authenticate with Azure via OIDC (see [federated identity setup](./docs/federated_identity_openid_connect.md))
+- `FUNCTION_APP_NAME` — name of the Azure Function App used for custom skills deployment
+- `ACR_CONTAINER_REGISTRY` — Azure Container Registry name (without `.azurecr.io`) that hosts the DevOps container image
+- `IMAGE_NAME` — name of the container image used in the workflows
+
+The following **repository secrets** (`secrets.*`) are also required:
+
+- `ACR_USERNAME` — username for authenticating with the Azure Container Registry
+- `ACR_PASSWORD` — password for authenticating with the Azure Container Registry
 
 ## Contributing
 
