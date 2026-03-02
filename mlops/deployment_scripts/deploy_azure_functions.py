@@ -165,7 +165,6 @@ def _deploy_functions(
                 "true",
             ],
             check=True,
-            shell=True,
         )
     except subprocess.CalledProcessError as e:
         print(f"Error deploying function app: {e}")
@@ -233,7 +232,6 @@ def _deploy_functions_withslot(
                 slot_name,
             ],
             check=True,
-            shell=True,
         )
     except subprocess.CalledProcessError as e:
         print(f"Error deploying function app: {e}")
