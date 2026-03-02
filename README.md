@@ -51,6 +51,8 @@ The deployment of **custom skills** poses a unique challenge in data processing 
  
 Each deployment contains functions that we are using in the indexing process, and we can reference the functions using the slot name in the skillset itself. The deploy_azure_functions.py file contains all needed methods to demonstrate a way to deploy Azure Functions from code.
 
+> **Note on deployment slots**: Deployment slots are only available on **Standard, Premium, and Dedicated App Service plans** — they are not supported on Consumption or Flex Consumption plans. For this reason, the current CI workflows use `--ignore_slot` to deploy directly to the main function app. The code still supports slot-based deployments (the default when `--ignore_slot` is omitted), and engineers who are on a supported plan can take advantage of slots for parallel experimentation. If slots are not available on your plan, each engineer working in parallel should use their **own dedicated Azure Function App** to avoid overwriting each other's deployments during active experiments.
+
 Once all associated APIs, skillsets, indexes, data sources, and indexers are deployed, the SDK can be used to wait until the indexing process is completed. At that point, evaluation can begin.
 
 To illustrate the evaluation process, we utilize the Azure AI Evaluation SDK. This tool allows for the execution of complex evaluations either locally or through serverless computing in AI Foundry. Additionally, evaluation results can be published to AI Foundry. The **search_evaluation.py** script provides guidance on setting up the evaluation process using various custom evaluators. It also includes instructions on querying AI Search for data and details on publishing evaluation results to AI Foundry. The following image demonstrates several evaluation results, and it’s possible to note that branch names have been utilized there as well.
@@ -76,6 +78,13 @@ The repository illustrates how to operate in a keyless environment without stori
 -	**GitHub Actions**: Azure supports OpenID Connect (OIDC) Federated Credentials that can be associated with a user managed identity in Azure and a repository action in GitHub. Thanks to that you can have an entity with needed credentials that GitHub can use with no keys. The following [document](./docs/federated_identity_openid_connect.md) demonstrates how to setup this kind of credentials.
 -	**Azure Functions**: We are using Azure Functions to get access to resources like Azure Blob and Azure OpenAI. Rather than storing keys in the application settings for Azure Functions we utilize user-assigned managed identity. You can find more details visiting this [link](./docs/durable_azurefunction_deployment.md).
 -	**AI Search**: index and data source entities should have access to data (Azure Blob in our case) and Azure OpenAI for data processing. In this template we demonstrate how to use system assigned managed identity avoid storing keys directly. More details can be found [here](./docs/ai_search_system_identity.md).
+
+This template uses **two separate identity client IDs** for different purposes:
+
+- **`FEDERATED_CLIENT_ID`** — the Client ID of a **Microsoft Entra application** (service principal) registered in Azure AD. It is used exclusively by GitHub Actions to authenticate with Azure via OIDC. GitHub exchanges an OIDC token for a short-lived Azure access token using this identity, so no credentials are stored in GitHub secrets.
+- **`MANAGED_IDENTITY_CLIENT_ID`** — the Client ID of a **user-assigned managed identity** that is attached to the Azure Function App and AI Search service. Code running inside the function app uses this identity to access Azure resources (Blob Storage, Azure OpenAI) without storing any keys.
+
+These two identities serve different trust boundaries: one is for GitHub's CI/CD pipeline, and the other is for the deployed Azure services. In simpler setups it is possible to use a single identity for both purposes, provided the identity has all the required role assignments (Contributor access for deployment, plus resource-level roles for storage and OpenAI). Using separate identities is the recommended approach for least-privilege security.
 
 In addition to providing documentation on the use of managed identities, it is important to note that Azure AI Search may require additional configurations to enable interaction with managed identities. To achieve this, navigate to the **Keys** tab and ensure that either **Role-based access control** or **Both** is selected.
 
@@ -171,6 +180,14 @@ The PR workflow executes quality checks using flake8 and unit tests. It then dep
 The CI workflow executes a similar workflow to the PR workflow, but the skillset functions are deployed to the main function app, not a deployment slot.
 
 In order for the cleanup step of the CI Workflow to work correctly, the development branch from a pull request must not be deleted until the cleanup step has run.
+
+### Container-based Workflow Execution
+
+The PR and CI workflows (and the build validation workflow) run all job steps **inside a Docker container** pulled from an Azure Container Registry (ACR). This container image is pre-built with all Python dependencies, the Azure CLI, and any other tools required by the scripts, ensuring a consistent and fast execution environment.
+
+The container image is defined in `.buildcontainer/Dockerfile` and is built and pushed to ACR automatically by the `build_devops_container.yml` workflow whenever `requirements.txt` or the Dockerfile changes. The `ACR_CONTAINER_REGISTRY` and `IMAGE_NAME` repository variables control which image is used at runtime.
+
+**Self-hosted runners**: If you run these workflows on self-hosted machines rather than GitHub-hosted runners, the runner machine must have Docker installed and network access to the ACR. Make sure the runner can authenticate with the registry — the `ACR_USERNAME` and `ACR_PASSWORD` secrets are passed through to the container runtime for this purpose. If your self-hosted runner already has a managed identity or another credential mechanism to access the ACR, you can adapt the workflow to use `az acr login` instead of username/password credentials.
 
 Some variables and secrets should be provided to execute the github workflows. The following **repository variables** (`vars.*`) are required:
 
