@@ -170,10 +170,6 @@ def _deploy_functions(
     except subprocess.CalledProcessError as e:
         print(f"Error deploying function app: {e}")
         raise
-    except requests.exceptions.RequestException:
-        print(
-            "Request has been sent, but no response yet. Checking deployment status in the next step."
-        )
 
     print("Updating Application settings.")
 
@@ -238,10 +234,6 @@ def _deploy_functions_withslot(
     except subprocess.CalledProcessError as e:
         print(f"Error deploying function app: {e}")
         raise
-    except requests.exceptions.RequestException:
-        print(
-            "Request has been sent, but no response yet. Checking deployment status in the next step."
-        )
 
     print("Updating Application settings.")
     existing_app_settings = app_mgmt_client.web_apps.list_application_settings_slot(
