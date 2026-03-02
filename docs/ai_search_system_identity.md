@@ -10,6 +10,16 @@ After the system generates the identity, roles can be assigned to it. For this e
 
 ![Roles](./images/ai_identity_2.png)
  
-This concludes the instructions, and you may now proceed with building indexers and indexes without keys. For Azure OpenAI components, the key can be removed without requiring any other modifications. In the case of storage, it is necessary to modify the connection string using the following format:
+This concludes the instructions, and you may now proceed with building indexers and indexes without keys. For Azure OpenAI components, the key can be removed without requiring any other modifications. In the case of storage, the data source uses a user-assigned managed identity to access blob storage instead of a connection string key. The `documentDataSource.json` configuration sets both the connection string (using the `ResourceId` format below) and an explicit identity reference:
 
-```ResourceId=/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Storage/storageAccounts/{storage_account_name}```
+```
+ResourceId=/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Storage/storageAccounts/{storage_account_name}
+```
+
+The user-assigned managed identity is specified by its full Azure resource ID in the format:
+
+```
+/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{managed_identity_name}
+```
+
+This identity resource ID is automatically populated from the `MANAGED_IDENTITY_NAME` environment variable during deployment by `build_indexer.py`.
