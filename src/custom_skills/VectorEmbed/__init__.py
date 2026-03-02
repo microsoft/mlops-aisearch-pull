@@ -14,7 +14,9 @@ from tenacity import (
 )
 
 REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.json")
-TRANSIENT_OPENAI_ERRORS = (openai.RateLimitError, openai.APIConnectionError, openai.APITimeoutError, openai.InternalServerError)
+TRANSIENT_OPENAI_ERRORS = (
+    openai.RateLimitError, openai.APIConnectionError, openai.APITimeoutError, openai.InternalServerError
+)
 
 
 def function_vector_embed(req: func.HttpRequest) -> func.HttpResponse:
