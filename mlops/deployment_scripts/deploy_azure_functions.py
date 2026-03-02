@@ -166,6 +166,11 @@ def _deploy_functions(
             ],
             check=True,
         )
+    except FileNotFoundError:
+        print(
+            "Error: 'az' CLI not found. Please install the Azure CLI and ensure it is on your PATH."
+        )
+        raise
     except subprocess.CalledProcessError as e:
         print(f"Error deploying function app: {e}")
         raise
@@ -229,6 +234,11 @@ def _deploy_functions_withslot(
             ],
             check=True,
         )
+    except FileNotFoundError:
+        print(
+            "Error: 'az' CLI not found. Please install the Azure CLI and ensure it is on your PATH."
+        )
+        raise
     except subprocess.CalledProcessError as e:
         print(f"Error deploying function app: {e}")
         raise
