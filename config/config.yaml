@@ -6,6 +6,8 @@ sub_config:
   managed_identity_client_id: ${MANAGED_IDENTITY_CLIENT_ID}
   managed_identity_name: ${MANAGED_IDENTITY_NAME}
 
+enable_telemetry: true
+
 # Azure OpenAI configuration.
 aoai_config:
   aoai_api_base: ${AOAI_BASE_ENDPOINT}
@@ -15,7 +17,7 @@ aoai_config:
 
 functions_config:
   function_names: ["Chunk", "Vector_Embed"]
-  function_app_name: aiskills-pull
+  function_app_name: ${FUNCTION_APP_NAME}
 
 # Azure Cognitive Service config
 acs_config:

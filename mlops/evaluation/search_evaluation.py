@@ -25,9 +25,7 @@ def main(index_name: str, semantic_config: str, data_path: str):
     """
     experiment_name = generate_experiment_name(index_name)
 
-    subscription_id = os.environ.get("SUBSCRIPTION_ID")
-    resource_group = os.environ.get("RESOURCE_GROUP_NAME")
-    project_name = os.environ.get("AI_STUDIO_PROJECT_NAME")
+    project_name = os.environ.get("AI_FOUNDRY_PROJECT_URI")
     azure_search_service_name = os.environ.get("ACS_SERVICE_NAME")
     azure_search_endpoint = f"https://{azure_search_service_name}.search.windows.net"
 
@@ -68,7 +66,7 @@ def main(index_name: str, semantic_config: str, data_path: str):
     }
 
     # Create results directory if it does not exist
-    results_dir = "./results"
+    results_dir = os.path.join(os.getcwd(), "results")
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
 
@@ -79,12 +77,8 @@ def main(index_name: str, semantic_config: str, data_path: str):
         target=target,
         evaluators=evaluators,
         evaluator_config=evaluators_config,
-        azure_ai_project={
-            "subscription_id": subscription_id,
-            "resource_group_name": resource_group,
-            "project_name": project_name,
-        },
-        output_path=f"{results_dir}/{experiment_name}.json",
+        azure_ai_project=project_name,
+        output_path=os.path.join(results_dir, f"{experiment_name}.json"),
     )
     print(results["studio_url"])
 

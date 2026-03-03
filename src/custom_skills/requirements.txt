@@ -2,17 +2,17 @@
 # The Python Worker is managed by Azure Functions platform
 # Manually managing azure-functions-worker may cause unexpected issues
 
-azure-core==1.29.5
-azure-functions==1.17.0
-azure-identity==1.16.1
-azure-storage-blob==12.19.0
-jsonschema==4.19.2
-openai
-python-dotenv==1.0.0
-tenacity==8.2.3
-tiktoken==0.5.1
-numexpr==2.8.7
-azure-search-documents==11.6.0b5
-langchain-text-splitters
-langchain_community
-pypdf
+azure-core==1.38.2
+azure-functions==1.24.0
+azure-identity==1.25.2
+azure-storage-blob==12.28.0
+jsonschema==4.10.3
+openai==2.24.0
+python-dotenv==1.2.2
+tenacity==9.1.4
+tiktoken==0.12.0
+numexpr==2.14.1
+azure-search-documents==11.6.0
+langchain-text-splitters==1.1.1
+langchain_community==0.4.1
+pypdf==6.7.5

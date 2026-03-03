@@ -14,6 +14,9 @@ from tenacity import (
 )
 
 REQUEST_SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "request_schema.json")
+TRANSIENT_OPENAI_ERRORS = (
+    openai.RateLimitError, openai.APIConnectionError, openai.APITimeoutError, openai.InternalServerError
+)
 
 
 def function_vector_embed(req: func.HttpRequest) -> func.HttpResponse:
@@ -73,12 +76,11 @@ def _get_request_schema():
 def _log_attempt_number(retry_state):
     """Log retry attempt."""
     row = retry_state.args[0]
-    print(f"Rate Limit Exceeded! Retry Attempt #: {retry_state.attempt_number} | Chunk: {row}")
+    print(f"Transient error encountered. Retry Attempt #: {retry_state.attempt_number} | Chunk: {row}")
 
 
-@retry(retry=retry_if_exception_type(openai.RateLimitError),
-       wait=wait_random_exponential(min=1, max=60),
-       stop=stop_after_attempt(10), after=_log_attempt_number)
+@retry(retry=retry_if_exception_type(TRANSIENT_OPENAI_ERRORS),
+       wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(10), after=_log_attempt_number)
 def _generate_embedding(text, aoai_token):
     """
     Generate embeddings for text.

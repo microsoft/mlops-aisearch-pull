@@ -51,6 +51,8 @@ The deployment of **custom skills** poses a unique challenge in data processing 
  
 Each deployment contains functions that we are using in the indexing process, and we can reference the functions using the slot name in the skillset itself. The deploy_azure_functions.py file contains all needed methods to demonstrate a way to deploy Azure Functions from code.
 
+> **Note on deployment slots**: Deployment slots are only available on **Standard, Premium, and Dedicated App Service plans** — they are not supported on Consumption or Flex Consumption plans. For this reason, the current CI workflows use `--ignore_slot` to deploy directly to the main function app. The code still supports slot-based deployments (the default when `--ignore_slot` is omitted), and engineers who are on a supported plan can take advantage of slots for parallel experimentation. If slots are not available on your plan, each engineer working in parallel should use their **own dedicated Azure Function App** to avoid overwriting each other's deployments during active experiments.
+
 Once all associated APIs, skillsets, indexes, data sources, and indexers are deployed, the SDK can be used to wait until the indexing process is completed. At that point, evaluation can begin.
 
 To illustrate the evaluation process, we utilize the Azure AI Evaluation SDK. This tool allows for the execution of complex evaluations either locally or through serverless computing in AI Foundry. Additionally, evaluation results can be published to AI Foundry. The **search_evaluation.py** script provides guidance on setting up the evaluation process using various custom evaluators. It also includes instructions on querying AI Search for data and details on publishing evaluation results to AI Foundry. The following image demonstrates several evaluation results, and it’s possible to note that branch names have been utilized there as well.
@@ -76,6 +78,13 @@ The repository illustrates how to operate in a keyless environment without stori
 -	**GitHub Actions**: Azure supports OpenID Connect (OIDC) Federated Credentials that can be associated with a user managed identity in Azure and a repository action in GitHub. Thanks to that you can have an entity with needed credentials that GitHub can use with no keys. The following [document](./docs/federated_identity_openid_connect.md) demonstrates how to setup this kind of credentials.
 -	**Azure Functions**: We are using Azure Functions to get access to resources like Azure Blob and Azure OpenAI. Rather than storing keys in the application settings for Azure Functions we utilize user-assigned managed identity. You can find more details visiting this [link](./docs/durable_azurefunction_deployment.md).
 -	**AI Search**: index and data source entities should have access to data (Azure Blob in our case) and Azure OpenAI for data processing. In this template we demonstrate how to use system assigned managed identity avoid storing keys directly. More details can be found [here](./docs/ai_search_system_identity.md).
+
+This template uses **two separate identity client IDs** for different purposes:
+
+- **`FEDERATED_CLIENT_ID`** — the Client ID of a **user-assigned managed identity or a Microsoft Entra application** configured in Azure AD. It is used exclusively by GitHub Actions to authenticate with Azure via OIDC. GitHub exchanges an OIDC token for a short-lived Azure access token using this identity, so no credentials are stored in GitHub secrets. Both a managed identity and a service principal (app registration) are supported for this purpose.
+- **`MANAGED_IDENTITY_CLIENT_ID`** — the Client ID of a **user-assigned managed identity** that is attached to the Azure Function App and AI Search service. Code running inside the function app uses this identity to access Azure resources (Blob Storage, Azure OpenAI) without storing any keys.
+
+These two identities serve different trust boundaries: one is for GitHub's CI/CD pipeline, and the other is for the deployed Azure services. In simpler setups it is possible to use a single identity for both purposes, provided the identity has all the required role assignments (Contributor access for deployment, plus resource-level roles for storage and OpenAI). Using separate identities is the recommended approach for least-privilege security.
 
 In addition to providing documentation on the use of managed identities, it is important to note that Azure AI Search may require additional configurations to enable interaction with managed identities. To achieve this, navigate to the **Keys** tab and ensure that either **Role-based access control** or **Both** is selected.
 
@@ -105,8 +114,8 @@ The deployment scripts and github workflows use the git branch name to create a 
 
 ### Configuration
 
-- Create an `.env` file based on `.env.sample` and populate the appropriate values.
-- Modify `config/config.yaml` to meet any changes that have been made within the project.
+- Create an `.env` file based on `.env.sample` and populate the appropriate values. The `AI_FOUNDRY_PROJECT_URI` value should follow the format `https://<ai_foundry_name>.services.ai.azure.com/api/projects/<project_name>`.
+- Modify `config/config.yaml` to meet any changes that have been made within the project. The `function_app_name` is read from the `FUNCTION_APP_NAME` environment variable. To disable anonymous telemetry, remove the `enable_telemetry` key from `config/config.yaml`.
 
 ### Upload test data
 
@@ -122,6 +131,12 @@ The following deployment script will deploy the custom skillset functions to a f
 
 ```sh
 python -m mlops.deployment_scripts.deploy_azure_functions
+```
+
+To deploy directly to the main function app without using a deployment slot (as in CI builds), use the `--ignore_slot` flag:
+
+```sh
+python -m mlops.deployment_scripts.deploy_azure_functions --ignore_slot
 ```
 
 To test the two skillset functions after they are deployed, run the following script:
@@ -142,7 +157,7 @@ python -m mlops.deployment_scripts.build_indexer
 
 ### Perform Search Evaluation
 
-This will perform search evaluation and upload the result to the AI Studio project specified. For more information about evaluation, see the [search evaluation readme](/mlops/evaluation/readme.md).
+This will perform search evaluation and upload the result to the Azure AI Foundry project specified by `AI_FOUNDRY_PROJECT_URI`. For more information about evaluation, see the [search evaluation readme](/mlops/evaluation/readme.md).
 
 ```sh
 python -m mlops.evaluation.search_evaluation --gt_path "./mlops/evaluation/data/search_evaluation_data.jsonl" --semantic_config my-semantic-config
@@ -160,25 +175,42 @@ python -m mlops.deployment_scripts.cleanup_pr
 
 This project contains github workflows for PR validation and Continuous Integration (CI).
 
-The PR workflow executes quality checks using flake8 and unit tests. It then deploys the skillset functions to a deployment slot of the function app.  Once the functions are deployed and tested, an indexer is deployed and all of the test data is ingested from blob storage.  Search evaluation is run and uploaded to an AI Studio project.
+The PR workflow executes quality checks using flake8 and unit tests. It then deploys the skillset functions to a deployment slot of the function app.  Once the functions are deployed and tested, an indexer is deployed and all of the test data is ingested from blob storage.  Search evaluation is run, the results are uploaded to an Azure AI Foundry project, and a summary comment is posted on the pull request.
 
 The CI workflow executes a similar workflow to the PR workflow, but the skillset functions are deployed to the main function app, not a deployment slot.
 
 In order for the cleanup step of the CI Workflow to work correctly, the development branch from a pull request must not be deleted until the cleanup step has run.
 
-Some variables and secrets should be provided to execute the github workflows (primarily the same ones used in the `.env` file for local execution).
+### Container-based Workflow Execution
 
-- azure_credentials
-- subscription_id
-- resource_group_name
-- storage_account_name
-- acs_service_name
-- aoai_base_endpoint
-- ai_studio_project_name
+The PR and CI workflows (and the build validation workflow) run all job steps **inside a Docker container** pulled from an Azure Container Registry (ACR). This container image is pre-built with all Python dependencies, the Azure CLI, and any other tools required by the scripts, ensuring a consistent and fast execution environment.
 
-## Related Projects
+The container image is defined in `.buildcontainer/Dockerfile` and is built and pushed to ACR automatically by the `build_devops_container.yml` workflow whenever `requirements.txt` or the Dockerfile changes. The `ACR_CONTAINER_REGISTRY` and `IMAGE_NAME` repository variables control which image is used at runtime.
 
-- [mlops-promptflow-prompt](https://github.com/microsoft/mlops-promptflow-prompt) - This repository demonstrates how AI Fondry and Prompt flow can be utilized in the Machine Learning Development and Operations (MLOps) process for LLM-based applications (aka LLMOps). It has base examples for inference evaluation using Prompt flow. When combined with [mlops-aisearch-pull](/README.md) for search evaluation, a full end-to-end MLOPs workflow can be achieved.
+Running jobs inside a container provides an important isolation benefit: without containerization, a workflow running on a self-hosted VM could inadvertently pick up environment variables, Python packages, or other libraries left over from a previous workflow run, leading to hard-to-debug inconsistencies. The container guarantees a clean, reproducible environment on every run.
+
+**Self-hosted runners**: If you run these workflows on self-hosted machines rather than GitHub-hosted runners, the runner machine must have Docker installed and network access to the ACR. Make sure the runner can authenticate with the registry — the `ACR_USERNAME` and `ACR_PASSWORD` secrets are passed through to the container runtime for this purpose.
+
+Some variables and secrets should be provided to execute the github workflows. The following **repository variables** (`vars.*`) are required:
+
+- `SUBSCRIPTION_ID`
+- `RESOURCE_GROUP_NAME`
+- `STORAGE_ACCOUNT_NAME`
+- `ACS_SERVICE_NAME`
+- `AOAI_BASE_ENDPOINT`
+- `AI_FOUNDRY_PROJECT_URI`
+- `MANAGED_IDENTITY_CLIENT_ID`
+- `MANAGED_IDENTITY_NAME`
+- `MANAGED_IDENTITY_TENANT_ID`
+- `FEDERATED_CLIENT_ID` — client ID of the Microsoft Entra application used by GitHub Actions to authenticate with Azure via OIDC (see [federated identity setup](./docs/federated_identity_openid_connect.md))
+- `FUNCTION_APP_NAME` — name of the Azure Function App used for custom skills deployment
+- `ACR_CONTAINER_REGISTRY` — Azure Container Registry name (without `.azurecr.io`) that hosts the DevOps container image
+- `IMAGE_NAME` — name of the container image used in the workflows
+
+The following **repository secrets** (`secrets.*`) are also required:
+
+- `ACR_USERNAME` — username for authenticating with the Azure Container Registry
+- `ACR_PASSWORD` — password for authenticating with the Azure Container Registry
 
 ## Contributing
 
@@ -193,6 +225,12 @@ provided by the bot. You will only need to do this once across all repos using o
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+## Data Collection
+
+The software may collect information about you and your use of the software and send it to Microsoft. Microsoft may use this information to provide services and improve our products and services. You may turn off the telemetry as described below. There are also some features in the software that may enable you and Microsoft to collect data from users of your applications. If you use these features, you must comply with applicable law, including providing appropriate notices to users of your applications together with a copy of Microsoft’s privacy statement. Our privacy statement is located at [https://go.microsoft.com/fwlink/?LinkID=824704](https://go.microsoft.com/fwlink/?LinkID=824704). You can learn more about data collection and use in the help documentation and our privacy statement. Your use of the software operates as your consent to these practices.
+
+The enable_telemetry configuration in config/config.yaml enables anonymous telemetry that helps us justify ongoing investment in maintaining and improving this template. Keeping this enabled supports the project and future feature development. To opt out of this telemetry, simply remove enable_telemetry.
 
 ## Trademarks
 

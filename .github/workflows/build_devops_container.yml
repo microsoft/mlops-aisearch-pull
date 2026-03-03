@@ -6,13 +6,14 @@ on:
       - 'development'
     paths:
       - '.github/workflows/build_devops_container.yml' 
-      - 'requirements.txt' 
+      - 'requirements.txt'
+      - '.buildcontainer/Dockerfile'
 
 env:
-    IMAGE_NAME: devops_container_image
+    IMAGE_NAME: ${{ vars.IMAGE_NAME }}
     SUBSCRIPTION_ID: ${{ vars.SUBSCRIPTION_ID }}
     RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
-    MANAGED_IDENTITY_CLIENT_ID: ${{ vars.MANAGED_IDENTITY_CLIENT_ID }}
+    FEDERATED_CLIENT_ID: ${{ vars.FEDERATED_CLIENT_ID }}
     MANAGED_IDENTITY_TENANT_ID: ${{ vars.MANAGED_IDENTITY_TENANT_ID }}
     ACR_CONTAINER_REGISTRY: ${{ vars.ACR_CONTAINER_REGISTRY }}
 
@@ -34,7 +35,7 @@ jobs:
       - name: Azure login
         uses: azure/login@v2
         with:
-            client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
+            client-id: ${{ env.FEDERATED_CLIENT_ID }}
             tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID}}
             subscription-id: ${{ env.SUBSCRIPTION_ID }}
 

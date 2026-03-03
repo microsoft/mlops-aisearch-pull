@@ -40,11 +40,13 @@ The `Entity Type` is used to define the scope of the OIDC requests from GitHub W
 
 ### Step 3: Set GitHub Secrets/Variables
 
-Create GitHub secrets/variables to store Microsoft Entra application details or user-assigned managed identity for your GitHub secrets:
+Create GitHub **repository variables** (not secrets) to store Microsoft Entra application details used by the workflows:
 
-* AZURE_CLIENT_ID
-* AZURE_TENANT_ID
-* AZURE_SUBSCRIPTION_ID
+* `FEDERATED_CLIENT_ID` — the Client ID of the Microsoft Entra application registered in Step 1
+* `MANAGED_IDENTITY_TENANT_ID` — the Directory (tenant) ID of the Microsoft Entra application
+* `SUBSCRIPTION_ID` — the Azure subscription ID
+
+> **Note**: These are stored as repository **variables** (`vars.*`) in GitHub, not as secrets, because they are not sensitive credentials. The actual sensitive values (like container registry passwords) are stored as secrets.
 
 
 ## Workflow
@@ -56,27 +58,31 @@ To setup a GitHub workflow we need to implement the following steps:
 1. Set GitHub workflows permissions so that the token can work with Azure subscription. The workflow requires `id-token: write` and `contents: read` permissions. The `id-token: write` permission allows the workflow to request an OIDC token from GitHub's OIDC provider.
 2. The azure/login@v2 action retrieves the OIDC token and exchanges it with Azure Active Directory (Azure AD) to obtain an access token. Azure AD verifies the OIDC token and issues an access token if the token is valid and the federated identity credential configuration matches.
 
-```
+```yaml
 name: CI Platform Python Workflow
 
 on:
-    push:
+  push:
     branches:
-        - 'main'
+      - 'development'
+
+env:
+  FEDERATED_CLIENT_ID: ${{ vars.FEDERATED_CLIENT_ID }}
+  MANAGED_IDENTITY_TENANT_ID: ${{ vars.MANAGED_IDENTITY_TENANT_ID }}
+  SUBSCRIPTION_ID: ${{ vars.SUBSCRIPTION_ID }}
 
 permissions:
-    id-token: write
-    contents: read
+  id-token: write
+  contents: read
 
 jobs:
-    build-and-deploy-python:
+  build-and-deploy-python:
     runs-on: ubuntu-latest
     steps:
-        - name: Azure login
+      - name: Azure login
         uses: azure/login@v2
         with:
-            client-id: ${{ secrets.AZURE_CLIENT_ID }}
-            tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-            subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
+          client-id: ${{ env.FEDERATED_CLIENT_ID }}
+          tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID }}
+          subscription-id: ${{ env.SUBSCRIPTION_ID }}
 ```

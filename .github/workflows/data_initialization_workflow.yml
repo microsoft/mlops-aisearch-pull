@@ -9,7 +9,7 @@ env:
     SUBSCRIPTION_ID: ${{ vars.SUBSCRIPTION_ID }}
     RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
     STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
-    MANAGED_IDENTITY_CLIENT_ID: ${{ vars.MANAGED_IDENTITY_CLIENT_ID }}
+    FEDERATED_CLIENT_ID: ${{ vars.FEDERATED_CLIENT_ID }}
     MANAGED_IDENTITY_TENANT_ID: ${{ vars.MANAGED_IDENTITY_TENANT_ID }}
 
 permissions:
@@ -20,7 +20,7 @@ jobs:
   upload-data:
     runs-on: ubuntu-latest
     container:
-        image: aipullacr.azurecr.io/devops_container_image:latest
+        image:  ${{ vars.ACR_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.IMAGE_NAME }}:latest
         options: --user root
         credentials:
             username: ${{ secrets.ACR_USERNAME }}
@@ -32,7 +32,7 @@ jobs:
       - name: Azure login
         uses: azure/login@v2
         with:
-            client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
+            client-id: ${{ env.FEDERATED_CLIENT_ID }}
             tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID}}
             subscription-id: ${{ env.SUBSCRIPTION_ID }}
 

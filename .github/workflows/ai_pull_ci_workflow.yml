@@ -14,10 +14,12 @@ env:
     STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
     ACS_SERVICE_NAME: ${{ vars.ACS_SERVICE_NAME }}
     AOAI_BASE_ENDPOINT: ${{ vars.AOAI_BASE_ENDPOINT }}
-    AI_STUDIO_PROJECT_NAME: ${{ vars.AI_STUDIO_PROJECT_NAME }}
+    AI_FOUNDRY_PROJECT_URI: ${{ vars.AI_FOUNDRY_PROJECT_URI }}
     MANAGED_IDENTITY_CLIENT_ID: ${{ vars.MANAGED_IDENTITY_CLIENT_ID }}
     MANAGED_IDENTITY_NAME: ${{ vars.MANAGED_IDENTITY_NAME }}
     MANAGED_IDENTITY_TENANT_ID: ${{ vars.MANAGED_IDENTITY_TENANT_ID }}
+    FEDERATED_CLIENT_ID: ${{ vars.FEDERATED_CLIENT_ID }}
+    FUNCTION_APP_NAME: ${{ vars.FUNCTION_APP_NAME }}
 
 permissions:
   id-token: write
@@ -27,7 +29,7 @@ jobs:
     name: Deployment and Evaluation
     runs-on: ubuntu-latest
     container:
-        image: aipullacr.azurecr.io/devops_container_image:latest
+        image:  ${{ vars.ACR_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.IMAGE_NAME }}:latest
         options: --user root
         credentials:
             username: ${{ secrets.ACR_USERNAME }}
@@ -39,7 +41,7 @@ jobs:
       - name: Azure login
         uses: azure/login@v2
         with:
-            client-id: ${{ env.MANAGED_IDENTITY_CLIENT_ID }}
+            client-id: ${{ env.FEDERATED_CLIENT_ID }}
             tenant-id: ${{ env.MANAGED_IDENTITY_TENANT_ID}}
             subscription-id: ${{ env.SUBSCRIPTION_ID }}
 
