@@ -1,13 +1,14 @@
 """Agent for chatting with documents indexed in Azure AI Search."""
 
 import asyncio
-import argparse
 
 from azure.identity import DefaultAzureCredential as SyncDefaultAzureCredential
 from azure.identity.aio import DefaultAzureCredential
 from azure.ai.projects import AIProjectClient as SyncAIProjectClient
 from azure.ai.projects.models import ConnectionType
 from azure.ai.agents.models import AzureAISearchTool, AzureAISearchQueryType
+from azure.ai.ml import MLClient
+from azure.ai.ml.entities import AzureAISearchConnection
 from semantic_kernel.agents import AzureAIAgent
 from semantic_kernel.agents import AzureAIAgentThread
 
@@ -24,42 +25,74 @@ AGENT_INSTRUCTIONS = (
 )
 
 
-def get_ai_search_connection_id(endpoint: str, acs_service_name: str) -> str:
+def _extract_project_name(endpoint: str) -> str:
     """
-    Retrieve the AI Foundry connection ID for the given Azure AI Search service.
+    Extract the AI Foundry project name from the project endpoint URL.
 
-    Lists all Azure AI Search connections in the AI Foundry project and returns
-    the ID of the connection whose target URL contains the specified service name.
-    Falls back to the default AI Search connection if no name match is found.
+    Args:
+        endpoint (str): URL in the form
+            ``https://<hub>.services.ai.azure.com/api/projects/<project>``.
+
+    Returns:
+        str: The project name (last path segment of the URL).
+    """
+    return endpoint.rstrip("/").split("/")[-1]
+
+
+def ensure_ai_search_connection_id(
+    endpoint: str,
+    acs_service_name: str,
+    subscription_id: str,
+    resource_group_name: str,
+) -> str:
+    """
+    Return the AI Foundry connection ID for the given Azure AI Search service,
+    creating the connection if it does not already exist.
+
+    First checks whether a connection whose target URL contains
+    ``acs_service_name`` is already registered in the project.  If no such
+    connection exists, one is created via the Azure AI ML management SDK using
+    AAD/managed-identity authentication (no API key required).
 
     Args:
         endpoint (str): The Azure AI Foundry project endpoint.
         acs_service_name (str): The Azure AI Search service name (e.g. 'my-search').
+        subscription_id (str): Azure subscription ID.
+        resource_group_name (str): Azure resource group name.
 
     Returns:
         str: The connection ID to use with the AI Search tool.
-
-    Raises:
-        ValueError: If no Azure AI Search connection is found in the project.
     """
     credential = SyncDefaultAzureCredential()
     client = SyncAIProjectClient(endpoint=endpoint, credential=credential)
     connections = list(client.connections.list(connection_type=ConnectionType.AZURE_AI_SEARCH))
-    if not connections:
-        raise ValueError(
-            "No Azure AI Search connection found in the AI Foundry project. "
-            "Please add a connection to your Azure AI Search service in AI Foundry."
-        )
-    # Prefer the connection whose target URL contains the configured service name
+
+    # Return the connection whose target URL matches the configured service name
     matched = next(
         (c for c in connections if acs_service_name.lower() in c.target.lower()),
         None,
     )
     if matched:
         return matched.id
-    # Fall back to the default connection, or the first available one
-    default_conn = next((c for c in connections if c.is_default), connections[0])
-    return default_conn.id
+
+    # No matching connection found — create one using the management SDK
+    print(
+        f"No AI Search connection found for '{acs_service_name}'. "
+        "Creating connection in AI Foundry..."
+    )
+    project_name = _extract_project_name(endpoint)
+    ml_client = MLClient(
+        credential=credential,
+        subscription_id=subscription_id,
+        resource_group_name=resource_group_name,
+        workspace_name=project_name,
+    )
+    new_connection = AzureAISearchConnection(
+        name=acs_service_name,
+        endpoint=f"https://{acs_service_name}.search.windows.net",
+    )
+    created = ml_client.connections.create_or_update(new_connection)
+    return created.id
 
 
 async def create_agent(
@@ -166,32 +199,25 @@ async def run_local_chat(
 
 def main():
     """Run the document chat agent locally using configuration from config.yaml."""
-    parser = argparse.ArgumentParser(
-        description="Run an interactive chat session with indexed documents."
-    )
-    parser.add_argument(
-        "--stage",
-        default="pr",
-        help="Stage to find parameters (pr, dev). Defaults to 'pr'.",
-    )
-    parser.add_argument(
-        "--model",
-        default=None,
-        help="Model deployment name. Overrides agent_config.agent_model_deployment in config.yaml.",
-    )
-    args = parser.parse_args()
-
-    config = MLOpsConfig(environment=args.stage)
+    config = MLOpsConfig()
     agent_config = config.agent_config
     acs_config = config.acs_config
+    sub_config = config.sub_config
 
     endpoint = agent_config["agent_endpoint"]
-    model = args.model or agent_config["agent_model_deployment"]
+    model = agent_config["agent_model_deployment"]
     acs_service_name = acs_config["acs_service_name"]
+    subscription_id = sub_config["subscription_id"]
+    resource_group_name = sub_config["resource_group_name"]
     index_name = generate_index_name()
 
     print(f"Looking up AI Search connection for service '{acs_service_name}'...")
-    connection_id = get_ai_search_connection_id(endpoint, acs_service_name)
+    connection_id = ensure_ai_search_connection_id(
+        endpoint=endpoint,
+        acs_service_name=acs_service_name,
+        subscription_id=subscription_id,
+        resource_group_name=resource_group_name,
+    )
 
     asyncio.run(
         run_local_chat(

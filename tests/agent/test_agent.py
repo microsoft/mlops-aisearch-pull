@@ -6,8 +6,30 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from azure.ai.projects.models import ConnectionType
 
 
-class TestGetAISearchConnectionId(unittest.TestCase):
-    """Tests for the get_ai_search_connection_id function."""
+class TestExtractProjectName(unittest.TestCase):
+    """Tests for the _extract_project_name helper."""
+
+    def test_extracts_last_path_segment(self):
+        """Test that the project name is parsed from the endpoint URL."""
+        from src.agent.agent import _extract_project_name
+
+        result = _extract_project_name(
+            "https://myhub.services.ai.azure.com/api/projects/myproject"
+        )
+        self.assertEqual(result, "myproject")
+
+    def test_handles_trailing_slash(self):
+        """Test that a trailing slash is ignored."""
+        from src.agent.agent import _extract_project_name
+
+        result = _extract_project_name(
+            "https://myhub.services.ai.azure.com/api/projects/myproject/"
+        )
+        self.assertEqual(result, "myproject")
+
+
+class TestEnsureAISearchConnectionId(unittest.TestCase):
+    """Tests for the ensure_ai_search_connection_id function."""
 
     @patch("src.agent.agent.SyncAIProjectClient")
     @patch("src.agent.agent.SyncDefaultAzureCredential")
@@ -15,25 +37,25 @@ class TestGetAISearchConnectionId(unittest.TestCase):
         self, mock_cred_cls, mock_client_cls
     ):
         """Test that the connection whose target contains acs_service_name is returned."""
-        from src.agent.agent import get_ai_search_connection_id
+        from src.agent.agent import ensure_ai_search_connection_id
 
         conn1 = MagicMock()
         conn1.id = "/connections/other-search"
         conn1.target = "https://other-search.search.windows.net"
-        conn1.is_default = False
 
         conn2 = MagicMock()
         conn2.id = "/connections/my-search"
         conn2.target = "https://my-search.search.windows.net"
-        conn2.is_default = False
 
         mock_client = MagicMock()
         mock_client.connections.list.return_value = [conn1, conn2]
         mock_client_cls.return_value = mock_client
 
-        result = get_ai_search_connection_id(
+        result = ensure_ai_search_connection_id(
             endpoint="https://test.services.ai.azure.com/api/projects/p",
             acs_service_name="my-search",
+            subscription_id="sub-123",
+            resource_group_name="rg-test",
         )
 
         self.assertEqual(result, "/connections/my-search")
@@ -41,50 +63,75 @@ class TestGetAISearchConnectionId(unittest.TestCase):
             connection_type=ConnectionType.AZURE_AI_SEARCH
         )
 
+    @patch("src.agent.agent.MLClient")
     @patch("src.agent.agent.SyncAIProjectClient")
     @patch("src.agent.agent.SyncDefaultAzureCredential")
-    def test_falls_back_to_default_when_no_name_match(
-        self, mock_cred_cls, mock_client_cls
+    def test_creates_connection_when_not_found(
+        self, mock_cred_cls, mock_client_cls, mock_ml_client_cls
     ):
-        """Test fallback to default connection when service name has no match."""
-        from src.agent.agent import get_ai_search_connection_id
-
-        conn1 = MagicMock()
-        conn1.id = "/connections/first"
-        conn1.target = "https://first.search.windows.net"
-        conn1.is_default = False
-
-        conn2 = MagicMock()
-        conn2.id = "/connections/default"
-        conn2.target = "https://default.search.windows.net"
-        conn2.is_default = True
-
-        mock_client = MagicMock()
-        mock_client.connections.list.return_value = [conn1, conn2]
-        mock_client_cls.return_value = mock_client
-
-        result = get_ai_search_connection_id(
-            endpoint="https://test.services.ai.azure.com/api/projects/p",
-            acs_service_name="no-match-here",
-        )
-
-        self.assertEqual(result, "/connections/default")
-
-    @patch("src.agent.agent.SyncAIProjectClient")
-    @patch("src.agent.agent.SyncDefaultAzureCredential")
-    def test_raises_when_no_connections_found(self, mock_cred_cls, mock_client_cls):
-        """Test that ValueError is raised when no AI Search connections exist."""
-        from src.agent.agent import get_ai_search_connection_id
+        """Test that a new connection is created when no matching connection exists."""
+        from src.agent.agent import ensure_ai_search_connection_id
 
         mock_client = MagicMock()
         mock_client.connections.list.return_value = []
         mock_client_cls.return_value = mock_client
 
-        with self.assertRaises(ValueError):
-            get_ai_search_connection_id(
-                endpoint="https://test.services.ai.azure.com/api/projects/p",
-                acs_service_name="my-search",
-            )
+        mock_ml_client = MagicMock()
+        created_conn = MagicMock()
+        created_conn.id = "/connections/my-search"
+        mock_ml_client.connections.create_or_update.return_value = created_conn
+        mock_ml_client_cls.return_value = mock_ml_client
+
+        result = ensure_ai_search_connection_id(
+            endpoint="https://test.services.ai.azure.com/api/projects/myproject",
+            acs_service_name="my-search",
+            subscription_id="sub-123",
+            resource_group_name="rg-test",
+        )
+
+        self.assertEqual(result, "/connections/my-search")
+        mock_ml_client_cls.assert_called_once()
+        call_kwargs = mock_ml_client_cls.call_args.kwargs
+        self.assertEqual(call_kwargs["subscription_id"], "sub-123")
+        self.assertEqual(call_kwargs["resource_group_name"], "rg-test")
+        self.assertEqual(call_kwargs["workspace_name"], "myproject")
+        mock_ml_client.connections.create_or_update.assert_called_once()
+        created_connection = mock_ml_client.connections.create_or_update.call_args.args[0]
+        self.assertEqual(created_connection.name, "my-search")
+        self.assertIn("my-search", created_connection.endpoint)
+
+    @patch("src.agent.agent.MLClient")
+    @patch("src.agent.agent.SyncAIProjectClient")
+    @patch("src.agent.agent.SyncDefaultAzureCredential")
+    def test_creates_connection_when_no_name_match(
+        self, mock_cred_cls, mock_client_cls, mock_ml_client_cls
+    ):
+        """Test that a new connection is created when connections exist but none match."""
+        from src.agent.agent import ensure_ai_search_connection_id
+
+        conn1 = MagicMock()
+        conn1.id = "/connections/other-search"
+        conn1.target = "https://other-search.search.windows.net"
+
+        mock_client = MagicMock()
+        mock_client.connections.list.return_value = [conn1]
+        mock_client_cls.return_value = mock_client
+
+        mock_ml_client = MagicMock()
+        created_conn = MagicMock()
+        created_conn.id = "/connections/my-search"
+        mock_ml_client.connections.create_or_update.return_value = created_conn
+        mock_ml_client_cls.return_value = mock_ml_client
+
+        result = ensure_ai_search_connection_id(
+            endpoint="https://test.services.ai.azure.com/api/projects/myproject",
+            acs_service_name="my-search",
+            subscription_id="sub-123",
+            resource_group_name="rg-test",
+        )
+
+        self.assertEqual(result, "/connections/my-search")
+        mock_ml_client.connections.create_or_update.assert_called_once()
 
 
 class TestCreateAgent(unittest.IsolatedAsyncioTestCase):
