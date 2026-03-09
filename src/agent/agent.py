@@ -45,9 +45,7 @@ def ensure_ai_search_connection_id(
     subscription_id: str,
     resource_group_name: str,
 ) -> str:
-    """
-    Return the AI Foundry connection ID for the given Azure AI Search service,
-    creating the connection if it does not already exist.
+    """Return the AI Foundry connection ID for the given Azure AI Search service.
 
     First checks whether a connection whose target URL contains
     ``acs_service_name`` is already registered in the project.  If no such
