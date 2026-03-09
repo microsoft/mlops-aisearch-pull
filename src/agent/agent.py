@@ -3,10 +3,16 @@
 import asyncio
 import argparse
 
+from azure.identity import DefaultAzureCredential as SyncDefaultAzureCredential
 from azure.identity.aio import DefaultAzureCredential
+from azure.ai.projects import AIProjectClient as SyncAIProjectClient
+from azure.ai.projects.models import ConnectionType
 from azure.ai.agents.models import AzureAISearchTool, AzureAISearchQueryType
-from semantic_kernel.agents import AzureAIAgent, AzureAIAgentSettings
+from semantic_kernel.agents import AzureAIAgent
 from semantic_kernel.agents import AzureAIAgentThread
+
+from mlops.common.config_utils import MLOpsConfig
+from mlops.common.naming_utils import generate_index_name
 
 
 AGENT_NAME = "DocumentChatAgent"
@@ -16,6 +22,44 @@ AGENT_INSTRUCTIONS = (
     "information and provide accurate, concise answers based on the indexed content. "
     "If the answer is not found in the indexed documents, say so clearly."
 )
+
+
+def get_ai_search_connection_id(endpoint: str, acs_service_name: str) -> str:
+    """
+    Retrieve the AI Foundry connection ID for the given Azure AI Search service.
+
+    Lists all Azure AI Search connections in the AI Foundry project and returns
+    the ID of the connection whose target URL contains the specified service name.
+    Falls back to the default AI Search connection if no name match is found.
+
+    Args:
+        endpoint (str): The Azure AI Foundry project endpoint.
+        acs_service_name (str): The Azure AI Search service name (e.g. 'my-search').
+
+    Returns:
+        str: The connection ID to use with the AI Search tool.
+
+    Raises:
+        ValueError: If no Azure AI Search connection is found in the project.
+    """
+    credential = SyncDefaultAzureCredential()
+    client = SyncAIProjectClient(endpoint=endpoint, credential=credential)
+    connections = list(client.connections.list(connection_type=ConnectionType.AZURE_AI_SEARCH))
+    if not connections:
+        raise ValueError(
+            "No Azure AI Search connection found in the AI Foundry project. "
+            "Please add a connection to your Azure AI Search service in AI Foundry."
+        )
+    # Prefer the connection whose target URL contains the configured service name
+    matched = next(
+        (c for c in connections if acs_service_name.lower() in c.target.lower()),
+        None,
+    )
+    if matched:
+        return matched.id
+    # Fall back to the default connection, or the first available one
+    default_conn = next((c for c in connections if c.is_default), connections[0])
+    return default_conn.id
 
 
 async def create_agent(
@@ -121,46 +165,38 @@ async def run_local_chat(
 
 
 def main():
-    """Run the document chat agent locally using command-line arguments or environment variables."""
+    """Run the document chat agent locally using configuration from config.yaml."""
     parser = argparse.ArgumentParser(
         description="Run an interactive chat session with indexed documents."
     )
     parser.add_argument(
-        "--connection-id",
-        required=True,
-        help="Azure AI Foundry connection ID for the Azure AI Search service.",
-    )
-    parser.add_argument(
-        "--index-name",
-        required=True,
-        help="Name of the Azure AI Search index to query.",
+        "--stage",
+        default="pr",
+        help="Stage to find parameters (pr, dev). Defaults to 'pr'.",
     )
     parser.add_argument(
         "--model",
         default=None,
-        help=(
-            "Model deployment name. Defaults to AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME "
-            "environment variable if not specified."
-        ),
-    )
-    parser.add_argument(
-        "--endpoint",
-        default=None,
-        help=(
-            "Azure AI Foundry project endpoint. Defaults to AZURE_AI_AGENT_ENDPOINT "
-            "environment variable if not specified."
-        ),
+        help="Model deployment name. Overrides agent_config.agent_model_deployment in config.yaml.",
     )
     args = parser.parse_args()
 
-    settings = AzureAIAgentSettings()
-    model = args.model or settings.model_deployment_name
-    endpoint = args.endpoint or settings.endpoint
+    config = MLOpsConfig(environment=args.stage)
+    agent_config = config.agent_config
+    acs_config = config.acs_config
+
+    endpoint = agent_config["agent_endpoint"]
+    model = args.model or agent_config["agent_model_deployment"]
+    acs_service_name = acs_config["acs_service_name"]
+    index_name = generate_index_name()
+
+    print(f"Looking up AI Search connection for service '{acs_service_name}'...")
+    connection_id = get_ai_search_connection_id(endpoint, acs_service_name)
 
     asyncio.run(
         run_local_chat(
-            ai_search_connection_id=args.connection_id,
-            ai_search_index_name=args.index_name,
+            ai_search_connection_id=connection_id,
+            ai_search_index_name=index_name,
             model_deployment_name=model,
             endpoint=endpoint,
         )
