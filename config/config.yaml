@@ -36,3 +36,10 @@ data_pr:
 data_dev:
     local_folder: data
     storage_container: fulldataset
+
+# Agent configuration
+agent_config:
+  agent_endpoint: ${AZURE_AI_AGENT_ENDPOINT}
+  agent_model_deployment: ${AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME}
+  ai_search_connection_id: ${AZURE_AI_SEARCH_CONNECTION_ID}
+  ai_search_index_name: ${AZURE_AI_SEARCH_INDEX_NAME}
