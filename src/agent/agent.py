@@ -1,7 +1,6 @@
 """Agent for chatting with documents indexed in Azure AI Search."""
 
 import asyncio
-from urllib.parse import urlparse
 
 from azure.identity import DefaultAzureCredential as SyncDefaultAzureCredential
 from azure.identity.aio import DefaultAzureCredential
@@ -10,7 +9,6 @@ from azure.ai.projects.models import ConnectionType
 from azure.ai.agents.models import AzureAISearchTool, AzureAISearchQueryType
 from azure.ai.ml import MLClient
 from azure.ai.ml.entities import AzureAISearchConnection
-from azure.core.exceptions import ResourceNotFoundError
 from semantic_kernel.agents import AzureAIAgent
 from semantic_kernel.agents import AzureAIAgentThread
 
@@ -39,14 +37,6 @@ def _extract_project_name(endpoint: str) -> str:
         str: The project name (last path segment of the URL).
     """
     return endpoint.rstrip("/").split("/")[-1]
-
-
-def _extract_hub_name(endpoint: str) -> str:
-    """Extract the AI Foundry hub name from the endpoint host."""
-    hostname = urlparse(endpoint).hostname
-    if not hostname:
-        return ""
-    return hostname.split(".")[0]
 
 
 def ensure_ai_search_connection_id(
@@ -88,33 +78,19 @@ def ensure_ai_search_connection_id(
         f"No AI Search connection found for '{acs_service_name}'. "
         "Creating connection in AI Foundry..."
     )
-    workspace_candidates = [_extract_project_name(endpoint), _extract_hub_name(endpoint)]
-    # Preserve order but remove duplicates when project and hub names are identical.
-    workspace_candidates = [name for name in dict.fromkeys(workspace_candidates) if name]
-    last_error = None
-    for workspace_name in workspace_candidates:
-        try:
-            ml_client = MLClient(
-                credential=credential,
-                subscription_id=subscription_id,
-                resource_group_name=resource_group_name,
-                workspace_name=workspace_name,
-            )
-            new_connection = AzureAISearchConnection(
-                name=acs_service_name,
-                endpoint=f"https://{acs_service_name}.search.windows.net",
-            )
-            created = ml_client.connections.create_or_update(new_connection)
-            return created.id
-        except ResourceNotFoundError as error:
-            last_error = error
-
-    assert last_error is not None
-    attempted_workspaces = ", ".join(workspace_candidates)
-    raise RuntimeError(
-        "Unable to create Azure AI Search connection. "
-        f"Attempted ML workspaces: {attempted_workspaces}."
-    ) from last_error
+    project_name = _extract_project_name(endpoint)
+    ml_client = MLClient(
+        credential=credential,
+        subscription_id=subscription_id,
+        resource_group_name=resource_group_name,
+        workspace_name=project_name,
+    )
+    new_connection = AzureAISearchConnection(
+        name=acs_service_name,
+        endpoint=f"https://{acs_service_name}.search.windows.net",
+    )
+    created = ml_client.connections.create_or_update(new_connection)
+    return created.id
 
 
 async def create_agent(
