@@ -7,8 +7,6 @@ from azure.identity.aio import DefaultAzureCredential
 from azure.ai.projects import AIProjectClient as SyncAIProjectClient
 from azure.ai.projects.models import ConnectionType
 from azure.ai.agents.models import AzureAISearchTool, AzureAISearchQueryType
-from azure.ai.ml import MLClient
-from azure.ai.ml.entities import AzureAISearchConnection
 from semantic_kernel.agents import AzureAIAgent
 from semantic_kernel.agents import AzureAIAgentThread
 
@@ -78,6 +76,8 @@ def ensure_ai_search_connection_id(
         f"No AI Search connection found for '{acs_service_name}'. "
         "Creating connection in AI Foundry..."
     )
+    from azure.ai.ml import MLClient  # noqa: PLC0415
+    from azure.ai.ml.entities import AzureAISearchConnection  # noqa: PLC0415
     project_name = _extract_project_name(endpoint)
     ml_client = MLClient(
         credential=credential,
