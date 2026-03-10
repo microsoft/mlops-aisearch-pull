@@ -36,3 +36,8 @@ data_pr:
 data_dev:
     local_folder: data
     storage_container: fulldataset
+
+# Agent configuration
+agent_config:
+  agent_endpoint: ${AI_FOUNDRY_PROJECT_URI}
+  agent_model_deployment: ${AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME}

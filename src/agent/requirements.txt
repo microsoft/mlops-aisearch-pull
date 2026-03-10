@@ -1,0 +1,6 @@
+semantic-kernel>=1.0.0
+azure-identity>=1.16.1
+azure-ai-projects>=1.0.0
+azure-ai-agents>=1.0.0
+azure-ai-ml>=1.0.0
+python-dotenv>=0.10.3
