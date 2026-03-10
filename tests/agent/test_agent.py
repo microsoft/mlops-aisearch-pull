@@ -63,7 +63,7 @@ class TestEnsureAISearchConnectionId(unittest.TestCase):
             connection_type=ConnectionType.AZURE_AI_SEARCH
         )
 
-    @patch("azure.ai.ml.MLClient")
+    @patch("src.agent.agent.MLClient")
     @patch("src.agent.agent.SyncAIProjectClient")
     @patch("src.agent.agent.SyncDefaultAzureCredential")
     def test_creates_connection_when_not_found(
@@ -100,7 +100,7 @@ class TestEnsureAISearchConnectionId(unittest.TestCase):
         self.assertEqual(created_connection.name, "my-search")
         self.assertIn("my-search", created_connection.endpoint)
 
-    @patch("azure.ai.ml.MLClient")
+    @patch("src.agent.agent.MLClient")
     @patch("src.agent.agent.SyncAIProjectClient")
     @patch("src.agent.agent.SyncDefaultAzureCredential")
     def test_creates_connection_when_no_name_match(
