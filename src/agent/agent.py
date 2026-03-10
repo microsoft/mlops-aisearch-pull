@@ -25,18 +25,24 @@ AGENT_INSTRUCTIONS = (
 )
 
 
-def _extract_project_name(endpoint: str) -> str:
-    """
-    Extract the AI Foundry project name from the project endpoint URL.
+def _extract_workspace_name(endpoint: str) -> str:
+    """Extract the AI Foundry workspace name from the project endpoint URL.
+
+    In Azure AI Foundry the ARM workspace resource is the Foundry resource
+    whose name appears as the hostname prefix (before
+    ``.services.ai.azure.com``), **not** the project name in the URL path.
 
     Args:
         endpoint (str): URL in the form
-            ``https://<hub>.services.ai.azure.com/api/projects/<project>``.
+            ``https://<foundry>.services.ai.azure.com/api/projects/<project>``.
 
     Returns:
-        str: The project name (last path segment of the URL).
+        str: The workspace / Foundry resource name.
     """
-    return endpoint.rstrip("/").split("/")[-1]
+    from urllib.parse import urlparse
+
+    hostname = urlparse(endpoint).hostname or ""
+    return hostname.split(".")[0]
 
 
 def ensure_ai_search_connection_id(
@@ -78,12 +84,12 @@ def ensure_ai_search_connection_id(
         f"No AI Search connection found for '{acs_service_name}'. "
         "Creating connection in AI Foundry..."
     )
-    project_name = _extract_project_name(endpoint)
+    workspace_name = _extract_workspace_name(endpoint)
     ml_client = MLClient(
         credential=credential,
         subscription_id=subscription_id,
         resource_group_name=resource_group_name,
-        workspace_name=project_name,
+        workspace_name=workspace_name,
     )
     new_connection = AzureAISearchConnection(
         name=acs_service_name,

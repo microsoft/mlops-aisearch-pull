@@ -6,26 +6,26 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from azure.ai.projects.models import ConnectionType
 
 
-class TestExtractProjectName(unittest.TestCase):
-    """Tests for the _extract_project_name helper."""
+class TestExtractWorkspaceName(unittest.TestCase):
+    """Tests for the _extract_workspace_name helper."""
 
-    def test_extracts_last_path_segment(self):
-        """Test that the project name is parsed from the endpoint URL."""
-        from src.agent.agent import _extract_project_name
+    def test_extracts_foundry_name_from_hostname(self):
+        """Test that the workspace name is parsed from the endpoint hostname."""
+        from src.agent.agent import _extract_workspace_name
 
-        result = _extract_project_name(
+        result = _extract_workspace_name(
             "https://myhub.services.ai.azure.com/api/projects/myproject"
         )
-        self.assertEqual(result, "myproject")
+        self.assertEqual(result, "myhub")
 
     def test_handles_trailing_slash(self):
         """Test that a trailing slash is ignored."""
-        from src.agent.agent import _extract_project_name
+        from src.agent.agent import _extract_workspace_name
 
-        result = _extract_project_name(
+        result = _extract_workspace_name(
             "https://myhub.services.ai.azure.com/api/projects/myproject/"
         )
-        self.assertEqual(result, "myproject")
+        self.assertEqual(result, "myhub")
 
 
 class TestEnsureAISearchConnectionId(unittest.TestCase):
@@ -94,7 +94,7 @@ class TestEnsureAISearchConnectionId(unittest.TestCase):
         call_kwargs = mock_ml_client_cls.call_args.kwargs
         self.assertEqual(call_kwargs["subscription_id"], "sub-123")
         self.assertEqual(call_kwargs["resource_group_name"], "rg-test")
-        self.assertEqual(call_kwargs["workspace_name"], "myproject")
+        self.assertEqual(call_kwargs["workspace_name"], "test")
         mock_ml_client.connections.create_or_update.assert_called_once()
         created_connection = mock_ml_client.connections.create_or_update.call_args.args[0]
         self.assertEqual(created_connection.name, "my-search")
