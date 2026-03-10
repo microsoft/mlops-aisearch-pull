@@ -3,6 +3,7 @@
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
+from azure.core.exceptions import ResourceNotFoundError
 from azure.ai.projects.models import ConnectionType
 
 
@@ -26,6 +27,31 @@ class TestExtractProjectName(unittest.TestCase):
             "https://myhub.services.ai.azure.com/api/projects/myproject/"
         )
         self.assertEqual(result, "myproject")
+
+
+class TestExtractHubName(unittest.TestCase):
+    """Tests for the _extract_hub_name helper."""
+
+    def test_extracts_hub_name_from_endpoint(self):
+        """Test that the hub name is parsed from endpoint hostname."""
+        from src.agent.agent import _extract_hub_name
+
+        result = _extract_hub_name(
+            "https://myhub.services.ai.azure.com/api/projects/myproject"
+        )
+        self.assertEqual(result, "myhub")
+
+    def test_returns_empty_hub_name_for_malformed_endpoint(self):
+        """Test malformed endpoint handling without host name."""
+        from src.agent.agent import _extract_hub_name
+
+        self.assertEqual(_extract_hub_name("not-a-url"), "")
+
+    def test_handles_non_foundry_hostname(self):
+        """Test generic hostname handling."""
+        from src.agent.agent import _extract_hub_name
+
+        self.assertEqual(_extract_hub_name("https://incomplete"), "incomplete")
 
 
 class TestEnsureAISearchConnectionId(unittest.TestCase):
@@ -132,6 +158,43 @@ class TestEnsureAISearchConnectionId(unittest.TestCase):
 
         self.assertEqual(result, "/connections/my-search")
         mock_ml_client.connections.create_or_update.assert_called_once()
+
+    @patch("src.agent.agent.MLClient")
+    @patch("src.agent.agent.SyncAIProjectClient")
+    @patch("src.agent.agent.SyncDefaultAzureCredential")
+    def test_retries_with_hub_name_when_project_workspace_not_found(
+        self, mock_cred_cls, mock_client_cls, mock_ml_client_cls
+    ):
+        """Test that creation retries with hub name if project workspace does not exist."""
+        from src.agent.agent import ensure_ai_search_connection_id
+
+        mock_client = MagicMock()
+        mock_client.connections.list.return_value = []
+        mock_client_cls.return_value = mock_client
+
+        project_ml_client = MagicMock()
+        project_ml_client.connections.create_or_update.side_effect = ResourceNotFoundError(
+            message="project workspace not found"
+        )
+        hub_ml_client = MagicMock()
+        created_conn = MagicMock()
+        created_conn.id = "/connections/my-search"
+        hub_ml_client.connections.create_or_update.return_value = created_conn
+        mock_ml_client_cls.side_effect = [project_ml_client, hub_ml_client]
+
+        result = ensure_ai_search_connection_id(
+            endpoint="https://myhub.services.ai.azure.com/api/projects/myproject",
+            acs_service_name="my-search",
+            subscription_id="sub-123",
+            resource_group_name="rg-test",
+        )
+
+        self.assertEqual(result, "/connections/my-search")
+        self.assertEqual(mock_ml_client_cls.call_count, 2)
+        first_call = mock_ml_client_cls.call_args_list[0].kwargs
+        second_call = mock_ml_client_cls.call_args_list[1].kwargs
+        self.assertEqual(first_call["workspace_name"], "myproject")
+        self.assertEqual(second_call["workspace_name"], "myhub")
 
 
 class TestCreateAgent(unittest.IsolatedAsyncioTestCase):
