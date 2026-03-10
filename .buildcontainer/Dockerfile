@@ -26,4 +26,8 @@ RUN echo "source /home/$USERNAME/llm-env/bin/activate" >> /home/$USERNAME/.bashr
 # Add venv to PATH
 ENV PATH="/home/$USERNAME/llm-env/bin:$PATH"
 
+# Print installed azure-search-documents version to verify it is present
+RUN /home/$USERNAME/llm-env/bin/python -c \
+    "import importlib.metadata; print('azure-search-documents version:', importlib.metadata.version('azure-search-documents'))"
+
 CMD ["python", "--version"]
