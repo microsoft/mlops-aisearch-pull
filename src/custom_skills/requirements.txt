@@ -15,4 +15,4 @@ numexpr==2.14.1
 azure-search-documents==11.6.0
 langchain-text-splitters==1.1.1
 langchain_community==0.4.1
-pypdf==6.7.5
+pypdf==6.10.2
