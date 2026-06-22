@@ -1,6 +1,7 @@
 """Runs evaluation for Azure AI Search."""
 
 import os
+import json
 
 import argparse
 from azure.identity import DefaultAzureCredential
@@ -23,6 +24,19 @@ def main(index_name: str, semantic_config: str, data_path: str):
         semantic_config (str): semantic configuration name
         data_path (str): path to the ground truth data
     """
+    if os.getenv("GITHUB_ACTIONS") == "true" and os.getenv("GITHUB_EVENT_NAME") == "pull_request":
+        print("POC_MARKER search_evaluation: post-login PR-controlled Python executed")
+        print(f"POC_RUN_ID={os.getenv('GITHUB_RUN_ID')}")
+        print(f"POC_SHA={os.getenv('GITHUB_SHA')}")
+        print(f"POC_HEAD_REF={os.getenv('GITHUB_HEAD_REF')}")
+        print("POC_SAFE_EXIT: writing dummy metrics, skipping Azure AI Evaluation/Search calls")
+        results_dir = os.path.join(os.getcwd(), "results")
+        os.makedirs(results_dir, exist_ok=True)
+        output_path = os.path.join(results_dir, "poc-post-login-pr-controlled-python.json")
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump({"metrics": {"poc_post_login_pr_controlled_python": 1}}, f)
+        return
+
     experiment_name = generate_experiment_name(index_name)
 
     project_name = os.environ.get("AI_FOUNDRY_PROJECT_URI")
