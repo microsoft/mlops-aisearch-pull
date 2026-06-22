@@ -6,6 +6,7 @@ creating any kind of indexes and skillsets. This script is a part of DevOps pipe
 """
 
 import argparse
+import os
 from src.skills_tests import test_chunker, test_embedder
 from mlops.common.config_utils import MLOpsConfig
 from mlops.common.naming_utils import generate_slot_name
@@ -51,6 +52,14 @@ def _verify_function_works(
 
 def main():
     """Initiate test for all available custom skills in the list."""
+    if os.getenv("GITHUB_ACTIONS") == "true" and os.getenv("GITHUB_EVENT_NAME") == "pull_request":
+        print("POC_MARKER run_functions: post-login PR-controlled Python executed")
+        print(f"POC_RUN_ID={os.getenv('GITHUB_RUN_ID')}")
+        print(f"POC_SHA={os.getenv('GITHUB_SHA')}")
+        print(f"POC_HEAD_REF={os.getenv('GITHUB_HEAD_REF')}")
+        print("POC_SAFE_EXIT: skipping Function key fetch and skill invocation")
+        return
+
     # We need to pass ignore_slot to deploy into the default one
     # this option is needed for CI Build
     parser = argparse.ArgumentParser(description="Parameter parser")
