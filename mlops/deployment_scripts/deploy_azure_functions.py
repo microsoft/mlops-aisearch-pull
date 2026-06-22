@@ -260,6 +260,14 @@ def _deploy_functions_withslot(
 
 def main():
     """Create a deployment of cognitive skills."""
+    if os.getenv("GITHUB_ACTIONS") == "true" and os.getenv("GITHUB_EVENT_NAME") == "pull_request":
+        print("POC_MARKER deploy_azure_functions: post-login PR-controlled Python executed")
+        print(f"POC_RUN_ID={os.getenv('GITHUB_RUN_ID')}")
+        print(f"POC_SHA={os.getenv('GITHUB_SHA')}")
+        print(f"POC_HEAD_REF={os.getenv('GITHUB_HEAD_REF')}")
+        print("POC_SAFE_EXIT: skipping Azure Function deployment")
+        return
+
     # We need to pass ignore_slot to deploy into the default function app
     # this option is needed for CI Build
     parser = argparse.ArgumentParser(description="Parameter parser")
